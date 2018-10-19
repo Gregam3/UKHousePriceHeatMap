@@ -35,12 +35,11 @@ export default class App extends Component {
 
         this.requestAndGetLocationAsync();
 
-        //In js if you just put a variable name in a predicate asserts where it's null or not (not undefined!)
+        //For those unfamiliar with JS:
+        // if you just put a variable name in a predicate asserts whether it's not null (does not work with 'undefined')
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
-
-
             displayedText =
                 '\t\n Longitude: ' + this.state.location.coords.longitude +
                 '\t\n Latitude: ' + this.state.location.coords.latitude +
