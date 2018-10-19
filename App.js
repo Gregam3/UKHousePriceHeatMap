@@ -31,7 +31,7 @@ export default class App extends Component {
     };
 
     render() {
-        let displayedText = 'Loading...';
+        let displayedText = 'Fetching position...';
 
         let latitude = null;
         let longitude = null;
@@ -53,6 +53,7 @@ export default class App extends Component {
         }
 
         return (
+            (latitude && longitude) ?
             <View style={styles.container}>
                 <Text style={styles.paragraph}>{displayedText}</Text>
                 <MapView
@@ -65,20 +66,26 @@ export default class App extends Component {
                         latitudeDelta: 0.00922,
                         longitudeDelta: 0.00421
                     }}/>
-            </View>
+            </View> :
+                <Text style={{
+                    marginTop: 300,
+                    marginLeft: 120,
+                    fontSize: 40,
+                }}>{displayedText}</Text>
         );
     }
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: '#F2F1EF'
     },
     heading: {
         margin: 5,
         fontSize: 28,
         fontWeight: 'bold',
-        textDecorationLine: 'underline'
+        textDecorationLine: 'underline',
 
     },
     paragraph: {
