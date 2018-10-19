@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions} from 'expo';
+import {Location, Permissions, MapView} from 'expo';
 
 // import Toast from 'react-native-smart-toast';
 
@@ -33,6 +33,9 @@ export default class App extends Component {
     render() {
         let displayedText = 'Loading...';
 
+        let latitude = null;
+        let longitude = null;
+
         this.requestAndGetLocationAsync();
 
         //For those unfamiliar with JS:
@@ -40,17 +43,28 @@ export default class App extends Component {
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
+            latitude = this.state.location.coords.latitude;
+            longitude = this.state.location.coords.longitude;
+
             displayedText =
                 '\t\n Longitude: ' + this.state.location.coords.longitude +
                 '\t\n Latitude: ' + this.state.location.coords.latitude +
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
-
         }
 
         return (
             <View style={styles.container}>
-                <Text style={styles.heading}> Co-ordinates </Text>
-                <Text style={[styles.paragraph, styles.blue]}>{displayedText}</Text>
+                <Text style={styles.paragraph}>{displayedText}</Text>
+                <MapView
+                    style={{ flex: 7 }}
+                    showsMyLocationButton={true}
+                    showsUserLocation={true}
+                    initialRegion={{
+                        longitude: longitude,
+                        latitude: latitude,
+                        latitudeDelta: 0.00922,
+                        longitudeDelta: 0.00421
+                    }}/>
             </View>
         );
     }
@@ -58,14 +72,11 @@ export default class App extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
+        flex: 1
     },
     heading: {
         margin: 5,
         fontSize: 28,
-        textAlign: 'center',
         fontWeight: 'bold',
         textDecorationLine: 'underline'
 
@@ -73,7 +84,7 @@ const styles = StyleSheet.create({
     paragraph: {
         margin: 5,
         fontSize: 18,
-        textAlign: 'center',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        flex:1
     },
 });
