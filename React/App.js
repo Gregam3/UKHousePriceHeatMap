@@ -5,7 +5,7 @@ import {Location, Permissions, MapView} from 'expo';
 // import Toast from 'react-native-smart-toast';
 
 /**
- * @author Greg Mitten
+ * @author Greg Mitten, Rikkey Paal
  * gregoryamitten@gmail.com
  */
 
@@ -69,7 +69,7 @@ export default class App extends Component {
         return (
             (latitude && longitude) ?
                 <View style={{
-                    marginTop: 20,
+                    marginTop: 0,
                     flex: 1,
                     backgroundColor: '#263c3f'
                 }}>
