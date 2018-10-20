@@ -90,21 +90,6 @@ export default class App extends Component {
     }
 }
 
-const styles = StyleSheet.create({
-    container: {},
-    heading: {
-        margin: 5,
-        fontSize: 28,
-        fontWeight: 'bold',
-        textDecorationLine: 'underline',
-
-    },
-    paragraph: {},
-    button: {
-        fontSize: 38
-    }
-});
-
 //Can easily be customised here https://mapstyle.withgoogle.com/, dump generated JSON in array
 const darkMapStyle = [
     {
