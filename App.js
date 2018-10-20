@@ -88,7 +88,7 @@ export default class App extends Component {
                 <Text style={{
                     marginTop: 300,
                     marginLeft: 120,
-                    fontSize: 40,
+                    fontSize: 38,
                 }}>{displayedText}</Text>
         );
     }
