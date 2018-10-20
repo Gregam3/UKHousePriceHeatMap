@@ -22,7 +22,7 @@ export default class App extends Component {
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
             this.setState({
-                errorMessage: 'Permission to access location was denied',
+                errorMessage: 'Location access must be granted.',
             });
         }
 
