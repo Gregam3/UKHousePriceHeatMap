@@ -30,7 +30,6 @@ export default class App extends Component {
             location = await Location.getCurrentPositionAsync();
         }
 
-
         //All "state" in react must be in {} I believe
         this.setState({location});
     };
@@ -88,7 +87,7 @@ export default class App extends Component {
                 <Text style={{
                     marginTop: 300,
                     marginLeft: 120,
-                    fontSize: 38,
+                    fontSize: 40,
                 }}>{displayedText}</Text>
         );
     }
