@@ -10,6 +10,7 @@ import {Location, Permissions, MapView} from 'expo';
  */
 
 export default class App extends Component {
+	
     state = {
         location: null,
         errorMessage: null
@@ -32,7 +33,13 @@ export default class App extends Component {
 
 
         //All "state" in react must be in {} I believe
-        this.setState({location});
+        if(location){
+			this.setState({location});
+		}else{
+			this.setState({
+				errorMessage: 'Location could not be determined.',
+			});
+		} 
     };
 
     render() {
@@ -55,7 +62,9 @@ export default class App extends Component {
                 '\t\n Longitude: ' + this.state.location.coords.longitude +
                 '\t\n Latitude: ' + this.state.location.coords.latitude +
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
-        }
+        }else{
+			 displayedText = 'Location could not be determined.';
+		}
 
         return (
             (latitude && longitude) ?
