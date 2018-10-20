@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Button} from 'react-native';
+import {Text, View} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
 // import Toast from 'react-native-smart-toast';
@@ -28,6 +28,14 @@ export default class App extends Component {
             });
         } else {
             location = await Location.getCurrentPositionAsync();
+
+            if (location) {
+                this.setState({location});
+            } else {
+                this.setState({
+                    errorMessage: 'Location could not be determined.',
+                });
+            }
         }
 
         //All "state" in react must be in {} I believe
@@ -36,6 +44,7 @@ export default class App extends Component {
 
     render() {
         let displayedText = 'Fetching position...';
+
 
         let latitude = null;
         let longitude = null;
@@ -51,8 +60,8 @@ export default class App extends Component {
             longitude = this.state.location.coords.longitude;
 
             displayedText =
-                '\t\n Longitude: ' + this.state.location.coords.longitude +
-                '\t\n Latitude: ' + this.state.location.coords.latitude +
+                '\t\n Longitude: ' + longitude +
+                '\t\n Latitude: ' + latitude +
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
         }
 
