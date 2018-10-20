@@ -12,21 +12,25 @@ import {Location, Permissions, MapView} from 'expo';
 export default class App extends Component {
     state = {
         location: null,
-        errorMessage: null,
-        useDarkTheme: true
+        errorMessage: null
     };
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
         //This lines generates the permission pop-up
+
+        let location;
+
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
             this.setState({
                 errorMessage: 'Location access must be granted.',
             });
+        } else {
+            location = await Location.getCurrentPositionAsync();
         }
 
-        let location = await Location.getCurrentPositionAsync();
+
         //All "state" in react must be in {} I believe
         this.setState({location});
     };
@@ -56,24 +60,24 @@ export default class App extends Component {
         return (
             (latitude && longitude) ?
                 <View style={{
-                    marginTop:20,
+                    marginTop: 20,
                     flex: 1,
-                    backgroundColor: (this.state.useDarkTheme) ? '#263c3f' : '#F2F1EF'
+                    backgroundColor: '#263c3f'
                 }}>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
+                    <View style={{flex: 2, flexDirection: 'row'}}>
                         <Text style={{
                             flex: 5,
                             fontSize: 18,
                             fontWeight: 'bold',
-                            color: (this.state.useDarkTheme) ? 'white' : 'black'
+                            color: 'white'
                         }}>{displayedText}</Text>
                     </View>
                     <MapView
-                        style={{flex: 7}}
+                        style={{flex: 11}}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle={(this.state.useDarkTheme) ? darkMapStyle : lightMapStyle}
+                        customMapStyle={darkMapStyle}
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
