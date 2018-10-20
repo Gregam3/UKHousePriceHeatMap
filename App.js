@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView} from 'expo';
+import {Location, Permissions, MapView, Components } from 'expo';
 
 // import Toast from 'react-native-smart-toast';
 
@@ -54,19 +54,21 @@ export default class App extends Component {
 
         return (
             (latitude && longitude) ?
-            <View style={styles.container}>
-                <Text style={styles.paragraph}>{displayedText}</Text>
-                <MapView
-                    style={{ flex: 7 }}
-                    showsMyLocationButton={true}
-                    showsUserLocation={true}
-                    initialRegion={{
-                        longitude: longitude,
-                        latitude: latitude,
-                        latitudeDelta: 0.00922,
-                        longitudeDelta: 0.00421
-                    }}/>
-            </View> :
+                <View style={styles.container}>
+                    <Text style={styles.paragraph}>{displayedText}</Text>
+                    <MapView
+                        style={{flex: 7}}
+                        showsMyLocationButton={true}
+                        showsUserLocation={true}
+                        provider={MapView.PROVIDER_GOOGLE}
+                        customMapStyle = {mapStyle}
+                        initialRegion={{
+                            longitude: longitude,
+                            latitude: latitude,
+                            latitudeDelta: 0.00922,
+                            longitudeDelta: 0.00421
+                        }}/>
+                </View> :
                 <Text style={{
                     marginTop: 300,
                     marginLeft: 120,
@@ -92,6 +94,168 @@ const styles = StyleSheet.create({
         margin: 5,
         fontSize: 18,
         fontWeight: 'bold',
-        flex:1
-    },
+        flex: 1
+    }
 });
+
+const mapStyle = [
+    {
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#242f3e"
+            }
+        ]
+    },
+    {
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#746855"
+            }
+        ]
+    },
+    {
+        "elementType": "labels.text.stroke",
+        "stylers": [
+            {
+                "color": "#242f3e"
+            }
+        ]
+    },
+    {
+        "featureType": "administrative.locality",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#d59563"
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#d59563"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#263c3f"
+            }
+        ]
+    },
+    {
+        "featureType": "poi.park",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#6b9a76"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#38414e"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#212a37"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#9ca5b3"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#746855"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "geometry.stroke",
+        "stylers": [
+            {
+                "color": "#1f2835"
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#f3d19c"
+            }
+        ]
+    },
+    {
+        "featureType": "transit",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#2f3948"
+            }
+        ]
+    },
+    {
+        "featureType": "transit.station",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#d59563"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "color": "#17263c"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#515c6d"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "labels.text.stroke",
+        "stylers": [
+            {
+                "color": "#17263c"
+            }
+        ]
+    }
+]
