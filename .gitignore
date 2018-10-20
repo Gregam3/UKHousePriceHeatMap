@@ -1,5 +1,5 @@
-node_modules/**/*
-.expo/*
+React/node_modules/**/*
+React/.expo/*
 npm-debug.*
 *.pdf
 *.idea
