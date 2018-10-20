@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView, Components } from 'expo';
+import {Text, View, StyleSheet, Button} from 'react-native';
+import {Location, Permissions, MapView} from 'expo';
 
 // import Toast from 'react-native-smart-toast';
 
@@ -13,6 +13,7 @@ export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
+        useDarkTheme: true
     };
 
     //Must be asynchronous as it has to wait for permissions to be accepted
@@ -29,6 +30,11 @@ export default class App extends Component {
         //All "state" in react must be in {} I believe
         this.setState({location});
     };
+
+    // swapTheme() {
+    //     this.state.useDarkTheme =
+    //     render();
+    // }
 
     render() {
         let displayedText = 'Fetching position...';
@@ -52,21 +58,39 @@ export default class App extends Component {
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
         }
 
+
         return (
             (latitude && longitude) ?
-                <View style={styles.container}>
-                    <Text style={styles.paragraph}>{displayedText}</Text>
+                <View style={{
+                    marginTop:20,
+                    flex: 1,
+                    backgroundColor: (this.state.useDarkTheme) ? '#263c3f' : '#F2F1EF'
+                }}>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                        <Text style={{
+                            flex: 5,
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            color: (this.state.useDarkTheme) ? 'white' : 'black'
+                        }}>{displayedText}</Text>
+                        {/*<Button*/}
+                            {/*onPress={this.swapTheme}*/}
+                            {/*title={"Swap to" + (this.state.useDarkTheme) ? "Light Mode" : "Dark Mode"}*/}
+                            {/*style={{*/}
+                            {/*}}*/}
+                        {/*/>*/}
+                    </View>
                     <MapView
                         style={{flex: 7}}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle = {mapStyle}
+                        customMapStyle={(this.state.useDarkTheme) ? darkMapStyle : lightMapStyle}
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
-                            latitudeDelta: 0.00922,
-                            longitudeDelta: 0.00421
+                            latitudeDelta: 0.0007,
+                            longitudeDelta: 0.0025
                         }}/>
                 </View> :
                 <Text style={{
@@ -79,10 +103,7 @@ export default class App extends Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F2F1EF'
-    },
+    container: {},
     heading: {
         margin: 5,
         fontSize: 28,
@@ -90,15 +111,14 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
 
     },
-    paragraph: {
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        flex: 1
+    paragraph: {},
+    button: {
+        fontSize: 38
     }
 });
 
-const mapStyle = [
+//Can easily be customised here https://mapstyle.withgoogle.com/, dump generated JSON in array
+const darkMapStyle = [
     {
         "elementType": "geometry",
         "stylers": [
@@ -258,4 +278,7 @@ const mapStyle = [
             }
         ]
     }
-]
+];
+
+//Empty style creates default style
+const lightMapStyle = [];
