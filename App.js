@@ -32,6 +32,10 @@ export default class App extends Component {
         this.setState({location});
     };
 
+    // swapTheme() {
+    //     this.state.useDarkTheme =
+    //     render();
+    // }
 
     render() {
         let displayedText = 'Fetching position...';
@@ -42,7 +46,7 @@ export default class App extends Component {
         this.requestAndGetLocationAsync();
 
         //For those unfamiliar with JS:
-        //if you just put a variable name in a predicate asserts whether it's not null (does not work with 'undefined')
+        // if you just put a variable name in a predicate asserts whether it's not null (does not work with 'undefined')
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
@@ -59,7 +63,7 @@ export default class App extends Component {
         return (
             (latitude && longitude) ?
                 <View style={{
-                    marginTop:5,
+                    marginTop:20,
                     flex: 1,
                     backgroundColor: '#263c3f'
                 }}>
@@ -70,6 +74,12 @@ export default class App extends Component {
                             fontWeight: 'bold',
                             color: 'white'
                         }}>{displayedText}</Text>
+                        {/*<Button*/}
+                            {/*onPress={this.swapTheme}*/}
+                            {/*title={"Swap to" + (this.state.useDarkTheme) ? "Light Mode" : "Dark Mode"}*/}
+                            {/*style={{*/}
+                            {/*}}*/}
+                        {/*/>*/}
                     </View>
                     <MapView
                         style={{flex: 7}}
@@ -92,6 +102,22 @@ export default class App extends Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    container: {},
+    heading: {
+        margin: 5,
+        fontSize: 28,
+        fontWeight: 'bold',
+        textDecorationLine: 'underline',
+
+    },
+    paragraph: {},
+    button: {
+        fontSize: 38
+    }
+});
+
 //Can easily be customised here https://mapstyle.withgoogle.com/, dump generated JSON in array
 const darkMapStyle = [
     {
