@@ -37,7 +37,7 @@ export default class App extends Component {
     // }
 
     render() {
-        let displayedText = 'Fetching position....';
+        let displayedText = 'Fetching position.....';
 
         let latitude = null;
         let longitude = null;
