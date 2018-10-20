@@ -31,11 +31,6 @@ export default class App extends Component {
         this.setState({location});
     };
 
-    // swapTheme() {
-    //     this.state.useDarkTheme =
-    //     render();
-    // }
-
     render() {
         let displayedText = 'Fetching position.....';
 
@@ -58,7 +53,6 @@ export default class App extends Component {
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
         }
 
-
         return (
             (latitude && longitude) ?
                 <View style={{
@@ -73,12 +67,6 @@ export default class App extends Component {
                             fontWeight: 'bold',
                             color: (this.state.useDarkTheme) ? 'white' : 'black'
                         }}>{displayedText}</Text>
-                        {/*<Button*/}
-                            {/*onPress={this.swapTheme}*/}
-                            {/*title={"Swap to" + (this.state.useDarkTheme) ? "Light Mode" : "Dark Mode"}*/}
-                            {/*style={{*/}
-                            {/*}}*/}
-                        {/*/>*/}
                     </View>
                     <MapView
                         style={{flex: 7}}
