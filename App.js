@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Button} from 'react-native';
+import {Text, View} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
 // import Toast from 'react-native-smart-toast';
@@ -12,28 +12,29 @@ import {Location, Permissions, MapView} from 'expo';
 export default class App extends Component {
     state = {
         location: null,
-        errorMessage: null,
-        useDarkTheme: true
+        errorMessage: null
     };
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
         //This lines generates the permission pop-up
+
+        let location = null;
+
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
-            this.setState({
-                errorMessage: 'Location access must be granted.',
-            });
+            this.setState({errorMessage: 'Location access must be granted.'});
+        } else {
+            this.setState({errorMessage: null});
+            location = await Location.getCurrentPositionAsync();
         }
-
-        let location = await Location.getCurrentPositionAsync();
         //All "state" in react must be in {} I believe
         this.setState({location});
     };
 
 
     render() {
-        let displayedText = 'Fetching position.....';
+        let displayedText = 'Fetching position...';
 
         let latitude = null;
         let longitude = null;
@@ -60,14 +61,14 @@ export default class App extends Component {
                 <View style={{
                     marginTop:5,
                     flex: 1,
-                    backgroundColor: (this.state.useDarkTheme) ? '#263c3f' : '#F2F1EF'
+                    backgroundColor: '#263c3f'
                 }}>
                     <View style={{flex: 1, flexDirection: 'row'}}>
                         <Text style={{
                             flex: 5,
                             fontSize: 18,
                             fontWeight: 'bold',
-                            color: (this.state.useDarkTheme) ? 'white' : 'black'
+                            color: 'white'
                         }}>{displayedText}</Text>
                     </View>
                     <MapView
@@ -75,7 +76,7 @@ export default class App extends Component {
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle={(this.state.useDarkTheme) ? darkMapStyle : lightMapStyle}
+                        customMapStyle={darkMapStyle}
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
