@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#242f3e"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,7 +22,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-	  "bundleIdentifier": "com.ase_group_1.react_compass"
+	  "bundleIdentifier": "com.asegroup1.reactcompass"
     },
 	"android": {
 		"package": "com.ase_group_1.react_compass"
