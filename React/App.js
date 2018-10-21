@@ -57,11 +57,11 @@ export default class App extends Component {
         return (
             (latitude && longitude) ?
                 <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-                    <View style={{flex: 2, flexDirection: 'row'}}>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
                         <Text style={styles.coordinatesText}>{displayedText}</Text>
                     </View>
                     <MapView
-                        style={{flex: 11}}
+                        style={{flex: 7}}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
