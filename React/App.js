@@ -77,7 +77,8 @@ export default class App extends Component {
                             flex: 5,
                             fontSize: 18,
                             fontWeight: 'bold',
-                            color: 'white'
+                            color: 'white',
+                            textAlign: 'center'
                         }}>{displayedText}</Text>
                     </View>
                     <MapView
@@ -89,8 +90,8 @@ export default class App extends Component {
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
-                            latitudeDelta: 0.0007,
-                            longitudeDelta: 0.0025
+                            latitudeDelta: 0.0006,
+                            longitudeDelta: 0.002
                         }}/>
                 </View> :
                 <Text style={{
