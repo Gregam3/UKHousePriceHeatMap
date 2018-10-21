@@ -5,7 +5,7 @@ import {Location, Permissions, MapView} from 'expo';
 // import Toast from 'react-native-smart-toast';
 
 /**
- * @author Greg Mitten
+ * @author Greg Mitten, Rikkey Paal
  * gregoryamitten@gmail.com
  */
 
@@ -39,7 +39,13 @@ export default class App extends Component {
         }
 
         //All "state" in react must be in {} I believe
-        this.setState({location});
+        if (location) {
+          this.setState({location});
+        } else {
+          this.setState({
+            errorMessage: 'Location could not be determined.',
+          });
+        } 
     };
 
     render() {
@@ -63,16 +69,17 @@ export default class App extends Component {
                 '\t\n Longitude: ' + longitude +
                 '\t\n Latitude: ' + latitude +
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
+        } else {
+          displayedText = 'Location could not be determined.';
         }
 
         return (
             (latitude && longitude) ?
                 <View style={{
-                    marginTop: 20,
-                    flex: 1,
-                    backgroundColor: '#263c3f'
+      marginTop: 0, flex: 1, backgroundColor: '#263c3f'
                 }}>
-                    <View style={{flex: 2, flexDirection: 'row'}}>
+                    <View style={{
+      flex: 2, flexDirection: 'row'}}>
                         <Text style={{
                             flex: 5,
                             fontSize: 18,
