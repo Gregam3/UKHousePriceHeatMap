@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
-
-// import Toast from 'react-native-smart-toast';
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -17,14 +15,12 @@ export default class App extends Component {
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
-        //This lines generates the permission pop-up
-
         let location;
 
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
         if (status !== 'granted') {
             this.setState({
-                errorMessage: 'Location access must be granted.',
+                errorMessage: 'Location access must be granted.'
             });
         } else {
             location = await Location.getCurrentPositionAsync();
@@ -33,7 +29,7 @@ export default class App extends Component {
                 this.setState({location});
             } else {
                 this.setState({
-                    errorMessage: 'Location could not be determined 1a.',
+                    errorMessage: 'Location could not be determined.'
                 });
             }
         }
@@ -42,14 +38,11 @@ export default class App extends Component {
     render() {
         let displayedText = 'Fetching position...';
 
-
         let latitude = null;
         let longitude = null;
 
         this.requestAndGetLocationAsync();
 
-        //For those unfamiliar with JS:
-        // if you just put a variable name in a predicate asserts whether it's not null (does not work with 'undefined')
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
@@ -69,14 +62,7 @@ export default class App extends Component {
                 }}>
                     <View style={{
       flex: 2, flexDirection: 'row'}}>
-                        <Text style={{
-                            flex: 5,
-                            margin: 5,
-                            fontSize: 18,
-                            fontWeight: 'bold',
-                            color: 'white',
-                            textAlign: 'center'
-                        }}>{displayedText}</Text>
+                        <Text style={styles.coordinatesText}>{displayedText}</Text>
                     </View>
                     <MapView
                         style={{flex: 11}}
@@ -91,14 +77,26 @@ export default class App extends Component {
                             longitudeDelta: 0.002
                         }}/>
                 </View> :
-                <Text style={{
-                    marginTop: 300,
-                    marginLeft: 120,
-                    fontSize: 40,
-                }}>{displayedText}</Text>
+                <Text style={styles.centerText}>{displayedText}</Text>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    centerText: {
+        marginTop: 300,
+        marginLeft: 120,
+        fontSize: 40,
+    },
+    coordinatesText: {
+        flex: 5,
+        margin: 5,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+        textAlign: 'center'
+    }
+});
 
 //Can easily be customised here https://mapstyle.withgoogle.com/, dump generated JSON in array
 const darkMapStyle = [
@@ -262,6 +260,3 @@ const darkMapStyle = [
         ]
     }
 ];
-
-//Empty style creates default style
-const lightMapStyle = [];
