@@ -51,17 +51,13 @@ export default class App extends Component {
 
             displayedText =
                 '\t\n Longitude: ' + longitude +
-                '\t\n Latitude: ' + latitude +
-                '\t\n Altitude: ' + this.state.location.coords.altitude;
+                '\t\n Latitude: ' + latitude
         }
 
         return (
             (latitude && longitude) ?
-                <View style={{
-      marginTop: 0, flex: 1, backgroundColor: '#263c3f'
-                }}>
-                    <View style={{
-      flex: 2, flexDirection: 'row'}}>
+                <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+                    <View style={{flex: 2, flexDirection: 'row'}}>
                         <Text style={styles.coordinatesText}>{displayedText}</Text>
                     </View>
                     <MapView
