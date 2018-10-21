@@ -33,19 +33,10 @@ export default class App extends Component {
                 this.setState({location});
             } else {
                 this.setState({
-                    errorMessage: 'Location could not be determined.',
+                    errorMessage: 'Location could not be determined 1a.',
                 });
             }
         }
-
-        //All "state" in react must be in {} I believe
-        if (location) {
-          this.setState({location});
-        } else {
-          this.setState({
-            errorMessage: 'Location could not be determined.',
-          });
-        } 
     };
 
     render() {
@@ -69,8 +60,6 @@ export default class App extends Component {
                 '\t\n Longitude: ' + longitude +
                 '\t\n Latitude: ' + latitude +
                 '\t\n Altitude: ' + this.state.location.coords.altitude;
-        } else {
-          displayedText = 'Location could not be determined.';
         }
 
         return (
@@ -82,6 +71,7 @@ export default class App extends Component {
       flex: 2, flexDirection: 'row'}}>
                         <Text style={{
                             flex: 5,
+                            margin: 5,
                             fontSize: 18,
                             fontWeight: 'bold',
                             color: 'white',
