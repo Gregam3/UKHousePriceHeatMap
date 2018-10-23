@@ -1,4 +1,4 @@
-package src.main.java.controller;
+package ase.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +8,6 @@ public class GeolocationController {
 
     @RequestMapping("/")
     public String locationMock() {
-        return "[EXAMPLE CO-ORDINATIONS]";
+        return "[EXAMPLE COORDINATES]";
     }
 }
