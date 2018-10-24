@@ -5,9 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
 public class GeolocationController {
-
-    @RequestMapping("/")
-    public String locationMock() {
-        return "[EXAMPLE COORDINATES]";
-    }
+  @RequestMapping("/")
+  public String locationMock() {
+    return "[EXAMPLE COORDINATES]";
+  }
 }
