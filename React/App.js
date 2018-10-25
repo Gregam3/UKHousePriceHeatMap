@@ -1,13 +1,26 @@
+import {Location, MapView, Permissions} from 'expo';
 import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView} from 'expo';
+import {StyleSheet, Text, View} from 'react-native';
+// import {Config} from './';
+import {AsyncStorage} from 'react-native';
 
 /**
  * @author Greg Mitten, Rikkey Paal
  * gregoryamitten@gmail.com
  */
 
+
+
 export default class App extends Component {
+  constructor(props) {
+    super(props);
+    conf.storeSetting('test', 'Yolo');
+    conf.retrieveSetting('test').then(function(result) {
+      console.log(result);
+    });
+  }
+
+
     state = {
         location: null,
         errorMessage: null
@@ -61,22 +74,63 @@ export default class App extends Component {
                         <Text style={styles.coordinatesText}>{displayedText}</Text>
                     </View>
                     <MapView
-                        style={{flex: 7}}
-                        showsMyLocationButton={true}
-                        showsUserLocation={true}
-                        provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle={darkMapStyle}
-                        initialRegion={{
-                            longitude: longitude,
-                            latitude: latitude,
-                            latitudeDelta: 0.0006,
-                            longitudeDelta: 0.002
-                        }}/>
-                </View> :
-                <Text style={styles.centerText}>{displayedText}</Text>
+        style =
+        {
+          { flex: 7 }
+        } showsMyLocationButton = {true} showsUserLocation = {true} provider =
+            {MapView.PROVIDER_GOOGLE} customMapStyle =
+                {darkMapStyle} initialRegion =
+        {
+          {
+            longitude: longitude, latitude: latitude, latitudeDelta: 0.0006,
+                longitudeDelta: 0.002
+          }
+        } />
+                </View >:
+                                          <Text style = {styles.centerText}>{
+                                              displayedText} <
+            /Text>
         );
     }
 }
+
+class Config {
+	
+	storeSetting = async(key, value) => {
+	  try {
+		await AsyncStorage.setItem(key, value);
+		return true; / /
+                check this only runs if sucessful
+    }
+    catch(error) {
+      console.log('Error saving setting: ' + error);
+      return false;
+    }
+}
+
+retrieveSetting =
+    async (key) => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    return value;
+  } catch (error) {
+    console.log('Error loading setting: ' + error);
+    return null;
+  }
+}
+
+eraseSetting = async (key) => {
+  try {
+    await AsyncStorage.removeItem(key);
+    return true;  // check this only runs if sucessful
+  } catch (error) {
+    console.log('Error erasing setting: ' + error);
+    return false;
+  }
+}
+} /* */
+
+const conf = new Config();
 
 const styles = StyleSheet.create({
     centerText: {
