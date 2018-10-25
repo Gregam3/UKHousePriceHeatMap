@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Compass",
-    "description": "This project is really great.",
+    "description": "This displays and logs the phones location",
     "slug": "Compass",
     "privacy": "public",
     "sdkVersion": "30.0.0",
