@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public abstract class DaoImpl<T> implements Dao<T> {
+public class DaoImpl<T> implements Dao<T> {
 
     /**A necessary parameter in many of the entityManager's methods*/
     private Class currentClass;
@@ -26,7 +26,6 @@ public abstract class DaoImpl<T> implements Dao<T> {
 
     @PersistenceContext(type = PersistenceContextType.EXTENDED)
     private EntityManager entityManager;
-
 
     @SuppressWarnings("unchecked")
     public T get(String id) {
@@ -42,7 +41,6 @@ public abstract class DaoImpl<T> implements Dao<T> {
         entityManager.merge(t);
     }
 
-    @SuppressWarnings("unchecked")
     public List list(String tableName) {
         checkIfCurrentClassIsValid();
         return entityManager.createQuery("from " + tableName, currentClass).getResultList();

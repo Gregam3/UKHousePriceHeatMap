@@ -11,13 +11,13 @@ import java.util.List;
  * gregoryamitten@gmail.com
  */
 
-//Maybe be able to remove annotations from parent class, won't know until we've got hibernate up and running
+//Might be able to remove annotations from parent class, won't know until we've got hibernate up and running
 @Repository
 @Transactional
 public interface Dao<T> {
     T get(String id);
     void delete(String id);
-    List list();
+    List list(String tableName);
     void update(T t);
     void add(T t);
 }
