@@ -10,4 +10,5 @@ public class GeolocationController {
     public String locationMock() {
         return "[EXAMPLE COORDINATES]";
     }
+
 }
