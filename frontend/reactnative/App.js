@@ -15,67 +15,67 @@ export default class App extends Component {
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
-    let location;
+        let location;
 
-    let {status} = await Permissions.askAsync(Permissions.LOCATION);
-if (status !== 'granted') {
-    this.setState({
-        errorMessage: 'Location access must be granted.'
-    });
-} else {
-    location = await Location.getCurrentPositionAsync();
+        let {status} = await Permissions.askAsync(Permissions.LOCATION);
+        if (status !== 'granted') {
+            this.setState({
+                errorMessage: 'Location access must be granted.'
+            });
+        } else {
+            location = await Location.getCurrentPositionAsync();
 
-    if (location) {
-        this.setState({location});
-    } else {
-        this.setState({
-            errorMessage: 'Location could not be determined.'
-        });
-    }
-}
-};
+            if (location) {
+                this.setState({location});
+            } else {
+                this.setState({
+                    errorMessage: 'Location could not be determined.'
+                });
+            }
+        }
+    };
 
-render() {
-    let displayedText = 'Fetching position...';
+    render() {
+        let displayedText = 'Fetching position...';
 
-    let latitude = null;
-    let longitude = null;
+        let latitude = null;
+        let longitude = null;
 
-    this.requestAndGetLocationAsync();
+        this.requestAndGetLocationAsync();
 
-    if (this.state.errorMessage) {
-        displayedText = this.state.errorMessage;
-    } else if (this.state.location) {
-        latitude = this.state.location.coords.latitude;
-        longitude = this.state.location.coords.longitude;
+        if (this.state.errorMessage) {
+            displayedText = this.state.errorMessage;
+        } else if (this.state.location) {
+            latitude = this.state.location.coords.latitude;
+            longitude = this.state.location.coords.longitude;
 
-        displayedText =
-            '\t\n Longitude: ' + longitude +
-            '\t\n Latitude: ' + latitude
-    }
+            displayedText =
+                '\t\n Longitude: ' + longitude +
+                '\t\n Latitude: ' + latitude
+        }
 
-    return (
+        return (
             (latitude && longitude) ?
-        <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-<View style={{flex: 1, flexDirection: 'row'}}>
-<Text style={styles.coordinatesText}>{displayedText}</Text>
-    </View>
-    <MapView
-    style={{flex: 7}}
-    showsMyLocationButton={true}
-    showsUserLocation={true}
-    provider={MapView.PROVIDER_GOOGLE}
-    customMapStyle={darkMapStyle}
-    initialRegion={{
-        longitude: longitude,
-            latitude: latitude,
-            latitudeDelta: 0.0006,
-            longitudeDelta: 0.002
-    }}/>
-    </View> :
-    <Text style={styles.centerText}>{displayedText}</Text>
-);
-}
+                <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                        <Text style={styles.coordinatesText}>{displayedText}</Text>
+                    </View>
+                    <MapView
+                        style={{flex: 7}}
+                        showsMyLocationButton={true}
+                        showsUserLocation={true}
+                        provider={MapView.PROVIDER_GOOGLE}
+                        customMapStyle={darkMapStyle}
+                        initialRegion={{
+                            longitude: longitude,
+                            latitude: latitude,
+                            latitudeDelta: 0.0006,
+                            longitudeDelta: 0.002
+                        }}/>
+                </View> :
+                <Text style={styles.centerText}>{displayedText}</Text>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
