@@ -9,7 +9,7 @@ import java.util.List;
  * gregoryamitten@gmail.com
  */
 
-//Annotations do not extend to child classes
+//Component annotations do not extend to child classes
 public class Service<T> {
     private Dao<T> dao;
 
