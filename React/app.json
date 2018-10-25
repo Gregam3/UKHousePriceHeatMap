@@ -22,10 +22,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-	  "bundleIdentifier": "asegroup1.phone.compass"
+	  "bundleIdentifier": "asegroup1.ios.compass"
     },
 	"android": {
-		"package": "asegroup1.phone.compass"
+		"package": "asegroup1.android.compass"
 	}
   }
 }
