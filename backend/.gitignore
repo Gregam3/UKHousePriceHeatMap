@@ -40,3 +40,11 @@ buildNumber.properties
 
 
 # End of https://www.gitignore.io/api/java,maven
+
+# Ignore IDE folders
+
+# Visual Studio Code
+.vscode/
+
+# Intelij
+.idea/
