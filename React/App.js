@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
-//import {Config} from './';
-import {AsyncStorage} from 'react-native';
+import * as Config from './lib/Config.js';
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -16,9 +15,24 @@ export default class App extends Component {
 	
 	constructor(props){
 		super(props);
-		Config.storeSetting("test", "Yolo");
+		// write "Test varaible" to key "test"
+		Config.storeSetting("test", "Test varaible").then(function(result) {
+			console.log("Write sucess: " + result);
+		});
+		// retrieve the stored value of "test"
 		Config.retrieveSetting("test").then(function(result) {
-			console.log(result);
+			// log retrieved key
+			console.log("Retrieved: " + result);
+		});
+		// remove the contents of "test"
+		Config.eraseSetting("test").then(function(result) {
+			// log if erase was sucessful or not
+			console.log("Erase sucess: " + result);
+		});
+		// retrieve to stored value of "test"
+		Config.retrieveSetting("test").then(function(result) {
+			// log retrieved key
+			console.log("Retrieved: " + result);
 		});
 	}
 	
@@ -92,40 +106,6 @@ export default class App extends Component {
         );
     }
 }
-
-class Config {
-	
-	static storeSetting = async(key, value) => {
-	  try {
-		await AsyncStorage.setItem(key, value);
-		return true; // check this only runs if sucessful
-	  } catch (error) {
-		  console.log("Error saving setting: " + error);
-		  return false;
-	  }
-	}
-	
-	static retrieveSetting = async (key) => {
-	  try {
-		const value = await AsyncStorage.getItem(key);
-		return value;
-	   } catch (error) {
-		 console.log("Error loading setting: " + error);
-		 return null;
-	   }
-	}
-	
-	static eraseSetting = async (key) => {
-	  try {
-		await AsyncStorage.removeItem(key);
-		return true; // check this only runs if sucessful
-	   } catch (error) {
-		 console.log("Error erasing setting: " + error);
-		 return false;
-	   }
-	}
-} /* */
-
 
 const styles = StyleSheet.create({
     centerText: {
