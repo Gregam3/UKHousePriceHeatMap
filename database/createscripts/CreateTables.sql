@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Users (
 );
 
 
-CREATE TABLE IF NOT EXISTS Location (
+CREATE TABLE IF NOT EXISTS Locations (
 	UserID CHAR(32),
 	Timelog DATETIME,
 	Longitude FLOAT,
