@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
+import BackgroundGeolocation from "react-native-background-geolocation";
 import {Location, Permissions, MapView} from 'expo';
 
 /**
- * @author Greg Mitten, Rikkey Paal
+ * @author Greg Mitten, Rikkey Paal, Baher Elgalfy
  * gregoryamitten@gmail.com
  */
 
@@ -35,6 +36,59 @@ export default class App extends Component {
         }
     };
 
+    //
+    subscribeToLocationAsync = async () => {
+        // let location;
+
+        //var options = [enableHighAccuracy(true), timeInterval(60000)];
+
+        // await Location.watchPositionAsync({
+        //     enableHighAccuracy: true,
+        //     timeInterval: 60000
+        // }, (errorCode) => {
+        //     console.log('[watchPosition] ERROR -', errorCode);
+        //   }, {
+        //     interval: 1000
+        //   }).then(function(location){
+        //     console.log(location.coords.latitude + " " + location.coords.longitude);
+
+
+        //     if (location) {
+        //         this.setState({location});
+        //     } else {
+        //         this.setState({
+        //             errorMessage: ')Location could not be determined.'
+        //         });
+        //     }
+        //   }).catch(function(error) {
+        //     console.log('There has been a problem with your fetch operation: ' + error.message);
+        //      // ADD THIS THROW error
+        //       throw error;
+        //     });
+        
+
+        //location = locationPromise.resolve();
+
+        // BackgroundGeolocation.onProviderChange(providerChangeEvent => {
+        //     console.log('[providerchange] ', provider.enabled, provider.status, provider.network, provider.gps);
+        // });
+
+        BackgroundGeolocation.ready({
+            url: 'https://52.56.164.149'
+        });
+
+        BackgroundGeolocation.watchPosition((location) => {
+            console.log('[watchPosition] -', location);
+        }, (errorCode) => {
+            console.log('[watchPosition] ERROR -', errorCode);
+        }, {
+            interval: 15000,
+            desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+            persist: true,
+            timeout: 60000
+        });
+    };
+
     render() {
         let displayedText = 'Fetching position...';
 
@@ -42,6 +96,7 @@ export default class App extends Component {
         let longitude = null;
 
         this.requestAndGetLocationAsync();
+        this.subscribeToLocationAsync();
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
