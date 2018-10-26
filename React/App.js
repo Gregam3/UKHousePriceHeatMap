@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
-import BackgroundGeolocation from "react-native-background-geolocation";
+//import BackgroundGeolocation from 'react-native-background-geolocation';
 import {Location, Permissions, MapView} from 'expo';
+import request from 'superagent';
 
 /**
  * @author Greg Mitten, Rikkey Paal, Baher Elgalfy
@@ -9,6 +10,12 @@ import {Location, Permissions, MapView} from 'expo';
  */
 
 export default class App extends Component {
+    // constructor(props){
+    //     super(props);
+    //     this.subscribeToLocationAsync();
+    //     console.log("HELOOOOOOOOO????");
+    // }
+
     state = {
         location: null,
         errorMessage: null
@@ -40,16 +47,14 @@ export default class App extends Component {
     subscribeToLocationAsync = async () => {
         // let location;
 
-        //var options = [enableHighAccuracy(true), timeInterval(60000)];
-
-        // await Location.watchPositionAsync({
+        // locationPromise = await Location.watchPositionAsync({
         //     enableHighAccuracy: true,
         //     timeInterval: 60000
-        // }, (errorCode) => {
+        //     }, (errorCode) => {
         //     console.log('[watchPosition] ERROR -', errorCode);
-        //   }, {
+        //     }, {
         //     interval: 1000
-        //   }).then(function(location){
+        //     }).then(function(location){
         //     console.log(location.coords.latitude + " " + location.coords.longitude);
 
 
@@ -60,33 +65,50 @@ export default class App extends Component {
         //             errorMessage: ')Location could not be determined.'
         //         });
         //     }
-        //   }).catch(function(error) {
+        //     }).catch(function(error) {
         //     console.log('There has been a problem with your fetch operation: ' + error.message);
-        //      // ADD THIS THROW error
-        //       throw error;
+        //         // ADD THIS THROW error
+        //         throw error;
         //     });
-        
 
+        const getLocation = (location) => {
+            console.log("Test Log " + location);
+
+            request
+            .post('http://192.168.0.10:8000/simulation/run/')
+            .set('Content-Type', 'application/json')
+            .send(location)
+            .end(function(err, res){
+                console.log(err.text);
+                console.log(res.text);
+            });
+        }
+          
+        const locationPromise = await Location.watchPositionAsync({
+            enableHighAccuracy: true,
+            timeInterval: 15000
+            }, getLocation);
+    
         //location = locationPromise.resolve();
 
         // BackgroundGeolocation.onProviderChange(providerChangeEvent => {
         //     console.log('[providerchange] ', provider.enabled, provider.status, provider.network, provider.gps);
         // });
 
-        BackgroundGeolocation.ready({
-            url: 'https://52.56.164.149'
-        });
+        // BackgroundGeolocation.ready({
+        //     url: 'http://192.168.0.10:8000/simulation/run/'
+        // });
 
-        BackgroundGeolocation.watchPosition((location) => {
-            console.log('[watchPosition] -', location);
-        }, (errorCode) => {
-            console.log('[watchPosition] ERROR -', errorCode);
-        }, {
-            interval: 15000,
-            desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
-            persist: true,
-            timeout: 60000
-        });
+        // BackgroundGeolocation.watchPosition((location) => {
+        //     console.log('[watchPosition] -', location);
+        // }, (errorCode) => {
+        //     console.log('[watchPosition] ERROR -', errorCode);
+        // }, {
+        //     interval: 15000,
+        //     desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+        //     persist: true,
+        //     timeout: 60000
+        // }, getLocation);
     };
 
     render() {
