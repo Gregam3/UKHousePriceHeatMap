@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Compass",
+    "name": "Location Viewer",
     "description": "This displays and logs the phones location",
-    "slug": "Compass",
+    "slug": "Location Viewer",
     "privacy": "public",
     "sdkVersion": "30.0.0",
     "platforms": ["ios", "android"],
