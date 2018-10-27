@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
+import * as Config from './lib/Config.js';
+
 /**
  * @author Greg Mitten, Rikkey Paal
  * gregoryamitten@gmail.com
