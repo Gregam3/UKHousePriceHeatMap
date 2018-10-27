@@ -1,6 +1,6 @@
-package ase.controller;
+package asegroup1.api.controllers;
 
-import main.ase.DataEntities.Location;
+import asegroup1.api.dataEntities.Location;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

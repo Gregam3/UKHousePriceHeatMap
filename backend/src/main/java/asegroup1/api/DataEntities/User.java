@@ -1,4 +1,4 @@
-package main.ase.DataEntities;
+package asegroup1.api.dataEntities;
 
 import java.util.ArrayList;
 

@@ -1,6 +1,6 @@
-package main.ase.controller;
+package asegroup1.api.controllers;
 
-import main.ase.DataEntities.User;
+import asegroup1.api.dataEntities.User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
