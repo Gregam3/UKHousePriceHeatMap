@@ -1,20 +1,18 @@
 package asegroup1.api.models;
 
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Users")
-public class User {
+@Table(name = "users")
+public class UserData {
 
     @Id
-    @Column(name = "UserID")
+    @Column(name="USER_ID")
     private String userId;
-
-    public User() {
-    }
 
     public String getUserId() {
         return userId;
