@@ -29,8 +29,8 @@ public class DaoImpl<T> implements Dao<T> {
 
     private String tableName;
 
-    public DaoImpl(T t) {
-        this.currentClass = t.getClass();
+    public void setCurrentClass(Class<T> currentClass) {
+        this.currentClass = currentClass;
     }
 
     @PersistenceContext(type = PersistenceContextType.EXTENDED)

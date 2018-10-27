@@ -1,6 +1,7 @@
-package ase.services;
+package asegroup1.api.services;
 
-import ase.daos.Dao;
+
+import asegroup1.api.daos.Dao;
 
 import java.util.List;
 
@@ -10,10 +11,10 @@ import java.util.List;
  */
 
 //Component annotations do not extend to child classes
-public class Service<T> {
+public class ServiceImpl<T> {
     private Dao<T> dao;
 
-    public Service(Dao<T> dao) {
+    public ServiceImpl(Dao<T> dao) {
         this.dao = dao;
     }
 
@@ -40,7 +41,7 @@ public class Service<T> {
     private void checkIfDaoIsValid() {
         if (dao == null) {
             throw new AssertionError("In order to use this method you must set the class in constructor. " +
-                    "E.g. for UserService extends Service<User>, you should put super(userDao) in your constructor." +
+                    "E.g. for UserServiceImpl extends ServiceImpl<User>, you should put super(userDao) in your constructor." +
                     "If userDao does not yet exist you must create it and then @Autowire it to give it its state");
         }
     }
