@@ -1,6 +1,5 @@
 package asegroup1.api.services;
 
-
 import asegroup1.api.daos.Dao;
 
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.List;
  * gregoryamitten@gmail.com
  */
 
-//Component annotations do not extend to child classes
 public class ServiceImpl<T> {
     private Dao<T> dao;
 

@@ -1,8 +1,5 @@
 package asegroup1.api.daos;
 
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -13,8 +10,6 @@ import java.util.List;
  * gregoryamitten@gmail.com
  */
 
-@Repository
-@Transactional
 public class DaoImpl<T> implements Dao<T> {
 
     /**
@@ -22,14 +17,7 @@ public class DaoImpl<T> implements Dao<T> {
      */
     private Class currentClass;
 
-    /**
-     * This is not the table name in the database, it corresponds to the entity name. E.g. User
-     */
-    private String hibernateTableName;
-
-    private String tableName;
-
-    public void setCurrentClass(Class<T> currentClass) {
+    protected void setCurrentClass(Class<T> currentClass) {
         this.currentClass = currentClass;
     }
 
@@ -42,6 +30,7 @@ public class DaoImpl<T> implements Dao<T> {
         return (T) entityManager.find(currentClass, id);
     }
 
+    //In hibernate, you query tables by there class name. This retrieves that.
     private String retrieveHibernateTableNameFromClassString() {
         String[] classNameSplitIntoPackageNames =  currentClass.getName().split("\\.");
 
@@ -59,15 +48,15 @@ public class DaoImpl<T> implements Dao<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public List list() {
+    public List<T> list() {
         checkIfCurrentClassIsValid();
-        return entityManager.createQuery("from " + currentClass.toGenericString(), currentClass).getResultList();
+        return entityManager.createQuery("from " + retrieveHibernateTableNameFromClassString(), currentClass).getResultList();
     }
 
     private void checkIfCurrentClassIsValid() {
         if (currentClass == null) {
-            throw new AssertionError("In order to use this method you must set the class in constructor. " +
-                    "E.g. for UserDaoImpl extends DaoImpl<User>, you should have super(User.class) in your constructor.");
+            throw new AssertionError("In order to use this method you must set the class with setCurrentClass(). " +
+                    "E.g. for UserDaoImpl extends DaoImpl<User>, you should have setCurrentClass(User.class) in your constructor.");
         }
     }
 
