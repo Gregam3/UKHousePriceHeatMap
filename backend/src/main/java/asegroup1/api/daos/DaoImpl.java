@@ -10,12 +10,12 @@ import java.util.List;
  * gregoryamitten@gmail.com
  */
 
-public class DaoImpl<T> implements Dao<T> {
+public class DaoImpl<T> {
 
     /**
      * A necessary parameter in many of the entityManager's methods
      */
-    private Class currentClass;
+    private Class<T> currentClass;
 
     protected void setCurrentClass(Class<T> currentClass) {
         this.currentClass = currentClass;
@@ -30,17 +30,12 @@ public class DaoImpl<T> implements Dao<T> {
         return (T) entityManager.find(currentClass, id);
     }
 
-    //In hibernate, you query tables by there class name. This retrieves that.
-    private String retrieveHibernateTableNameFromClassString() {
-        String[] classNameSplitIntoPackageNames =  currentClass.getName().split("\\.");
-
-        //Get the final element in array e.g. java.lang.Object
-        //                                                 ^
-        return classNameSplitIntoPackageNames[classNameSplitIntoPackageNames.length - 1];
-    }
-
     public void delete(String id) {
         entityManager.remove(get(id));
+    }
+
+    public void delete(T t) {
+        entityManager.remove(t);
     }
 
     public void update(T t) {
@@ -50,7 +45,7 @@ public class DaoImpl<T> implements Dao<T> {
     @SuppressWarnings("unchecked")
     public List<T> list() {
         checkIfCurrentClassIsValid();
-        return entityManager.createQuery("from " + retrieveHibernateTableNameFromClassString(), currentClass).getResultList();
+        return entityManager.createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
     }
 
     private void checkIfCurrentClassIsValid() {
