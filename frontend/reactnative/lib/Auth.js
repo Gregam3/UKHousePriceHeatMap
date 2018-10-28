@@ -2,6 +2,7 @@ import Forge from 'node-forge';
 
 import * as Config from './Config.js';
 
+let userKey;
 
 export function wipeUserId(){
 	Config.eraseSetting("userKey").then(function(result) {
@@ -30,9 +31,9 @@ export async function loadUserId(){
 				}
 			});
 			
-			return key;
+			userKey = key;
 		}else{ 
-			return result;
+			userKey = result;
 		}
 	});
 	
@@ -52,4 +53,8 @@ export function getSha256(key){
 export function isKeyFree(key){
 	//TODO: check the key in the java dbs
 	return true;
+}
+
+export function getUserKey(){
+	return userKey;
 }

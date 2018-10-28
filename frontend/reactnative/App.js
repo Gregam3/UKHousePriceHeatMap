@@ -18,9 +18,12 @@ export default class App extends Component {
 	constructor(props){
 		super(props);
 		
-		//this.wipeUserId();
-		const {userKey} = Auth.loadUserId();
-		console.log(userKey); 
+		//Auth.wipeUserId();
+		Auth.loadUserId();
+		setTimeout(function(){
+			console.log("Key: "+ Auth.getUserKey());
+		}, 5000); 
+		
 	}
 	
 	
