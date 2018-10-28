@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
-import * as Config from './lib/Config.js';
+import * as Auth from './lib/Auth.js';
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -14,6 +14,16 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
+	
+	constructor(props){
+		super(props);
+		
+		//this.wipeUserId();
+		const {userKey} = Auth.loadUserId();
+		console.log(userKey); 
+	}
+	
+	
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
