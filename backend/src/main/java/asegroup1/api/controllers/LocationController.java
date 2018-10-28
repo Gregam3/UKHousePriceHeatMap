@@ -5,13 +5,10 @@ import asegroup1.api.services.location.LocationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/location/")
+@RequestMapping("/location")
 public class LocationController {
 
 	private LocationServiceImpl locationService;
@@ -22,9 +19,9 @@ public class LocationController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
-	public @ResponseBody
-	String post(@RequestBody LocationData location) {
-		locationService.create(location)
-		return new ResponseEntity<String>("successfully added to databse", HttpStatus.OK);
+	public @ResponseBody ResponseEntity<String> post(@RequestBody LocationData location) {
+		locationService.create(location);
+
+		return new ResponseEntity<>("successfully added to database", HttpStatus.OK);
 	}
 }

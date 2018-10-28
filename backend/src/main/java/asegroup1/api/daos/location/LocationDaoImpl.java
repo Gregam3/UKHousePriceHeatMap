@@ -2,7 +2,7 @@ package asegroup1.api.daos.location;
 
 
 import asegroup1.api.daos.DaoImpl;
-import asegroup1.api.models.UserData;
+import asegroup1.api.models.LocationData;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;

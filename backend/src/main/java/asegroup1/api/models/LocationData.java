@@ -5,17 +5,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Table(name = "location_data")
-public class UserData {
+public class LocationData implements Serializable {
 
     @Id
     @Column(name="USER_ID")
     private String userId;
     @Id
     @Column(name="TIMELOG")
-    private DateTime timelog;
+    private Date timelog;
     @Column(name="LONGITUDE")
     private float longitude;
     @Column(name="LATITUDE")
@@ -23,7 +25,7 @@ public class UserData {
     @Column(name="ALTITUDE")
     private float altitude;
     @Column(name="DELIVERED")
-    private float delivered;
+    private boolean delivered;
 
     public String getUserId() {
         return userId;
@@ -33,11 +35,11 @@ public class UserData {
         this.userId = userId;
     }
 
-    public DateTime getTimelog() {
+    public Date getTimelog() {
         return timelog;
     }
 
-    public void setTimelog(DateTime timelog) {
+    public void setTimelog(Date timelog) {
         this.timelog = timelog;
     }
 
@@ -65,11 +67,11 @@ public class UserData {
         this.altitude = altitude;
     }
 
-    public float getDelivered() {
+    public boolean getDelivered() {
         return delivered;
     }
 
-    public void setDelivered(float delivered) {
+    public void setDelivered(boolean delivered) {
         this.delivered = delivered;
     }
 

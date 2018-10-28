@@ -1,7 +1,7 @@
 package asegroup1.api.services.location;
 
 import asegroup1.api.daos.Dao;
-import asegroup1.api.models.UserData;
+import asegroup1.api.models.LocationData;
 import asegroup1.api.services.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
