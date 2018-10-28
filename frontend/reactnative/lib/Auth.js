@@ -44,10 +44,11 @@ export function genUniqueString(){
 	return getSha256(new Date().getTime());
 }
 	
+// Adapted from https://www.npmjs.com/package/node-forge#sha256
 export function getSha256(key){
-	var md = Forge.md.sha256.create();
-	md.update(key);
-	return md.digest().toHex();
+	var messageDigest = Forge.md.sha256.create();
+	messageDigest.update(key);
+	return messageDigest.digest().toHex();
 }
 	
 export function isKeyFree(key){
@@ -56,5 +57,8 @@ export function isKeyFree(key){
 }
 
 export function getUserKey(){
+	if(!userKey){
+		throw "UserKey is not loaded";
+	}
 	return userKey;
 }
