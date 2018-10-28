@@ -1,11 +1,11 @@
 package asegroup1.api.daos.user;
 
 
-import asegroup1.api.daos.DaoImpl;
-import asegroup1.api.models.UserData;
-import org.springframework.stereotype.Repository;
+        import asegroup1.api.daos.DaoImpl;
+        import asegroup1.api.models.UserData;
+        import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
+        import javax.transaction.Transactional;
 
 @Transactional
 @Repository
