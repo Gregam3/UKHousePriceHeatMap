@@ -6,7 +6,6 @@ import asegroup1.api.models.UserData;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
