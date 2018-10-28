@@ -6,6 +6,8 @@ import asegroup1.api.models.UserData;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Objects;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,6 @@ class UserServiceImplTest {
 
         ResponseEntity<UserData> response = userController.get("test");
 
-        assert (response.getStatusCode().is2xxSuccessful() &&  userController.get("test").getBody().getUserId().equals(userId));
+        assert (response.getStatusCode().is2xxSuccessful() &&  Objects.requireNonNull(userController.get("test").getBody()).getUserId().equals(userId));
     }
 }

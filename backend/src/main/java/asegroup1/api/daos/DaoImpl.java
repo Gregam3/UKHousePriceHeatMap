@@ -27,7 +27,7 @@ public class DaoImpl<T> {
     @SuppressWarnings("unchecked")
     public T get(String id) {
         checkIfCurrentClassIsValid();
-        return (T) entityManager.find(currentClass, id);
+        return entityManager.find(currentClass, id);
     }
 
     public void delete(String id) {
