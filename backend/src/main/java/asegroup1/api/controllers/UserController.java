@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/user/")
 public class UserController {
 
 	private UserServiceImpl userService;
@@ -18,12 +18,12 @@ public class UserController {
 		this.userService = userService;
 	}
 
-	@RequestMapping(value = "/{userid}", method = RequestMethod.GET)
-	public ResponseEntity<UserData> get(@PathVariable("userid") String userid) {
+	@GetMapping(value = "get-user-data/{userid}")
+	public ResponseEntity<UserData> getUserData(@PathVariable("userid") String userid) {
 		return new ResponseEntity<>(userService.get(userid), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = {"","/"}, method = RequestMethod.POST)
+	@PostMapping(value = {"add-user-data","add-user-data/"})
 	public ResponseEntity<String> post(@RequestBody UserData userData) {
 		userService.create(userData);
 		return new ResponseEntity<>("User Added", HttpStatus.OK);

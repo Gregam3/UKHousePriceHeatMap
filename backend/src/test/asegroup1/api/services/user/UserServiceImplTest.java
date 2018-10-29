@@ -1,7 +1,6 @@
 package asegroup1.api.services.user;
 
 import asegroup1.api.controllers.UserController;
-import asegroup1.api.daos.user.UserDao;
 import asegroup1.api.models.UserData;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;

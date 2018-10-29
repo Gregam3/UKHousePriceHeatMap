@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/location")
+@RequestMapping("/location/")
 public class LocationController {
 
 	private LocationServiceImpl locationService;
@@ -18,9 +18,8 @@ public class LocationController {
 		this.locationService = locationService;
 	}
 
-	@RequestMapping(value = {"","/"},method = RequestMethod.POST)
-	public @ResponseBody
-	ResponseEntity<String> post(@RequestBody LocationData location) {
+	@PostMapping(value = {"add-location-data","add-location-data/"})
+	public ResponseEntity<String> postAddLocationData(@RequestBody LocationData location) {
 		locationService.create(location);
 		return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 	}
