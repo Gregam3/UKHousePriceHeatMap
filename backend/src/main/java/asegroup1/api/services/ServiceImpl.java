@@ -1,6 +1,7 @@
 package asegroup1.api.services;
 
-import asegroup1.api.daos.Dao;
+//import asegroup1.api.daos.Dao;
+import asegroup1.api.daos.DaoImpl;
 
 import java.util.List;
 
@@ -10,9 +11,9 @@ import java.util.List;
  */
 
 public class ServiceImpl<T> {
-	private Dao<T> dao;
+	private DaoImpl<T> dao;
 
-	public ServiceImpl(Dao<T> dao) {
+	public ServiceImpl(DaoImpl<T> dao) {
 		this.dao = dao;
 	}
 
@@ -31,14 +32,14 @@ public class ServiceImpl<T> {
 		dao.delete(id);
 	}
 
+	public void delete(T t) {
+		checkIfDaoIsValid();
+		dao.delete(t);
+	}
+
 	public List<T> list() {
 		checkIfDaoIsValid();
 		return dao.list();
-	}
-
-	public void create(T t) {
-		checkIfDaoIsValid();
-		dao.add(t);
 	}
 
 	private void checkIfDaoIsValid() {
