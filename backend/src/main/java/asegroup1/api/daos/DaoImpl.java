@@ -35,7 +35,6 @@ public class DaoImpl<T> implements Dao<T> {
         return entityManager.find(currentClass, id);
     }
 
-
 	public void delete(String id) {
 		entityManager.remove(get(id));
 	}

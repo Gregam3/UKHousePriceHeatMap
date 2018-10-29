@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserData> {
 
-    private DaoImpl<UserData> userDataDao;
-
     @Autowired
     public UserServiceImpl(DaoImpl<UserData> dao) {
         super(dao);
