@@ -42,6 +42,11 @@ public class ServiceImpl<T> {
 		return dao.list();
 	}
 
+    public void create(T t) {
+        checkIfDaoIsValid();
+        dao.add(t);
+    }
+
 	private void checkIfDaoIsValid() {
 		if (dao == null) {
 			throw new AssertionError("In order to use this method you must set the class in constructor. " +
