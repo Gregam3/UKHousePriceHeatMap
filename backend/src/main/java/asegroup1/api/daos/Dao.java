@@ -8,9 +8,13 @@ import java.util.List;
  */
 
 public interface Dao<T> {
-    T get(String id);
-    void delete(String id);
-    List list();
-    void update(T t);
-    void add(T t);
+	T get(String id);
+
+	void delete(String id);
+
+	List list();
+
+	void update(T t);
+
+	void add(T t);
 }

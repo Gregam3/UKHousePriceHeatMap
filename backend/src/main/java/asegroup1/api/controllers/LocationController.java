@@ -18,10 +18,10 @@ public class LocationController {
 		this.locationService = locationService;
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
-	public @ResponseBody ResponseEntity<String> post(@RequestBody LocationData location) {
+	@RequestMapping(value = {"","/"},method = RequestMethod.POST)
+	public @ResponseBody
+	ResponseEntity<String> post(@RequestBody LocationData location) {
 		locationService.create(location);
-
-		return new ResponseEntity<>("successfully added to database", HttpStatus.OK);
+		return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 	}
 }

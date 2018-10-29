@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "user_data")
-public class UserData implements Serializable{
+public class UserData implements Serializable {
 
 	@Id
 	@Column(name = "USER_ID")
