@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 @Transactional
 @Repository
 public class UserDaoImpl extends DaoImpl<UserData> {
-    public UserDaoImpl() {
-        setCurrentClass(UserData.class);
-    }
+	public UserDaoImpl() {
+		setCurrentClass(UserData.class);
+	}
 }

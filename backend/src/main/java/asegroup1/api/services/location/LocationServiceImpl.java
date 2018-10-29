@@ -1,18 +1,17 @@
-package asegroup1.api.services.user;
+package asegroup1.api.services.location;
 
 import asegroup1.api.daos.Dao;
-import asegroup1.api.models.UserData;
+import asegroup1.api.models.LocationData;
 import asegroup1.api.services.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceImpl extends ServiceImpl<UserData> {
+public class LocationServiceImpl extends ServiceImpl<LocationData> {
 
-	private Dao<UserData> userDataDao;
 
 	@Autowired
-	public UserServiceImpl(Dao<UserData> dao) {
+	public LocationServiceImpl(Dao<LocationData> dao) {
 		super(dao);
 	}
 }
