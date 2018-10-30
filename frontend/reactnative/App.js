@@ -15,11 +15,11 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
-	
-	 constructor(props) {
+
+    constructor(props) {
         super(props);
         //Auth.loadUserId();
-		this.lastSent = new Date();
+        this.lastSent = new Date() - 15000;
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
@@ -33,22 +33,16 @@ export default class App extends Component {
             });
         } else {
             location = await Location.getCurrentPositionAsync();
-			
-			
-			location = await Location.watchPositionAsync({
-				timeInterval : minTime,
-				distanceInterval : minDistance
-			});
-			
 
             if (location) {
                 this.setState({location});
-				
-				var timeDiff = new Date() - this.lastSent;
-				if(timeDiff >= 15000){
-					this.getLocation(location);
-					this.lastSent = new Date();
-				}
+
+                var timeDiff = new Date() - this.lastSent;
+                if (timeDiff >= 15000) {
+                    console.log("POST TRIGGERED");
+                    this.getLocation(location);
+                    this.lastSent = new Date();
+                }
             } else {
                 this.setState({
                     errorMessage: 'Location could not be determined.'
@@ -56,8 +50,8 @@ export default class App extends Component {
             }
         }
     };
-	
-	getLocation = (location) => {
+
+    getLocation = (location) => {
 
         let locationData = {
             latitude: location.coords.latitude,
