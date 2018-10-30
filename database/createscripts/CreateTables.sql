@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS location_data (
 
 	PRIMARY KEY(USER_ID, TIMELOG),
 	FOREIGN KEY(USER_ID) REFERENCES user_data(USER_ID)
-	-- Delete all users's locations if user is deleted
+	-- Delete all user's locations if user is deleted
 		ON DELETE CASCADE
-	-- Dont allow user to update ID if has locations
+	-- Dont allow user to update ID if they have locations
 		ON UPDATE RESTRICT
 );
