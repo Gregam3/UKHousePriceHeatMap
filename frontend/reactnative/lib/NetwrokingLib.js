@@ -7,7 +7,7 @@ export function postJSON(extention, jsonFile){
 
     request
     //.post('http://192.168.43.8:8080/'+extention)
-    .post('192.168.43.8:8080/'+extention)
+    .post('http://192.168.43.8:8080/'+extention)
     .set('Content-Type', 'application/json')
     .send(jsonFile)
     .end(function(err, res){

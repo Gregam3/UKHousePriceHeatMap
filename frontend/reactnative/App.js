@@ -20,7 +20,7 @@ export default class App extends Component {
         
         //console.log(location);
         // this.requestAndGetLocationAsync();
-        // this.subscribeToLocationAsync();
+        this.subscribeToLocationAsync();
 		//Auth.loadUserId();
 	}
 
@@ -64,7 +64,7 @@ export default class App extends Component {
         
         const locationPromise = await Location.watchPositionAsync({
             enableHighAccuracy: true,
-            timeInterval: 15000
+            timeInterval: 1500
             }, getLocation);
     };
 
@@ -75,7 +75,7 @@ export default class App extends Component {
         let longitude = null;
 
         this.requestAndGetLocationAsync();
-        this.subscribeToLocationAsync();
+        //this.subscribeToLocationAsync();
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
