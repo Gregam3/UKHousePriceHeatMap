@@ -1,4 +1,4 @@
-package asegroup1.api.services.user;
+package asegroup1.api.controllers.user;
 
 import asegroup1.api.controllers.UserController;
 import asegroup1.api.daos.user.UserDaoImpl;
