@@ -30,7 +30,7 @@ public class DaoImpl<T> implements Dao<T> {
         emFactory = Persistence.createEntityManagerFactory("asegroup1.api");
     }
 
-    @PersistenceContext(type = PersistenceContextType.EXTENDED)
+    @PersistenceContext(unitName = "asegroup1.api", type = PersistenceContextType.EXTENDED)
     public static EntityManager getEntityManager() {
         return emFactory.createEntityManager();
     }
