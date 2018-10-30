@@ -40,7 +40,6 @@ export default class App extends Component {
 
                 var timeDiff = new Date() - this.lastSent;
                 if (timeDiff >= 15000) {
-                    console.log("POST TRIGGERED");
                     this.getLocation(location);
                     this.lastSent = new Date();
                 }
