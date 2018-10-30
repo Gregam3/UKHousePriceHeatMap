@@ -1,8 +1,9 @@
-package asegroup1.api.services.user;
+package asegroup1.api.controllers.user;
 
 import asegroup1.api.controllers.UserController;
 import asegroup1.api.daos.user.UserDaoImpl;
 import asegroup1.api.models.UserData;
+import asegroup1.api.services.user.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class UserServiceImplTest {
+class UserControllerImplTest {
 
     @Test
     void testIfUserControllerSendsRequestThroughToDao() {
