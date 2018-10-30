@@ -2,8 +2,9 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
-import * as Config from './lib/Config.js';
 import * as NetLib from './lib/NetworkingLib.js';
+import * as Auth from './lib/Auth.js';
+
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -15,6 +16,14 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
+	
+	constructor(props){
+		super(props);
+		
+		Auth.loadUserId();
+	}
+	
+	
 
     constructor(props) {
         super(props);
