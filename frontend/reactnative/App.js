@@ -19,8 +19,8 @@ export default class App extends Component {
 		super(props);
         
         //console.log(location);
-        this.requestAndGetLocationAsync();
-        this.subscribeToLocationAsync();
+        // this.requestAndGetLocationAsync();
+        // this.subscribeToLocationAsync();
 		//Auth.loadUserId();
 	}
 
@@ -49,7 +49,17 @@ export default class App extends Component {
     subscribeToLocationAsync = async () => {
         console.log("susbscribe triggered");
         const getLocation = (location) => {
-            NetLib.postJSON('location/add-location-data/', location);
+
+            let locationData = {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                altitude: location.coords.altitude,
+                userId: "test person",
+                timelog: location.timestamp,
+                delivered: true
+            };
+
+            NetLib.postJSON('location/add-location-data/', locationData);
         }
         
         const locationPromise = await Location.watchPositionAsync({
@@ -65,7 +75,7 @@ export default class App extends Component {
         let longitude = null;
 
         this.requestAndGetLocationAsync();
-        //this.subscribeToLocationAsync();
+        this.subscribeToLocationAsync();
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
