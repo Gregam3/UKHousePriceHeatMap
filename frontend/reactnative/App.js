@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
-import * as Config from './lib/Config.js';
+import * as NetLib from './lib/NetwrokingLib.js';
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -14,6 +14,15 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
+
+    constructor(props){
+		super(props);
+        
+        //console.log(location);
+        this.requestAndGetLocationAsync();
+        this.subscribeToLocationAsync();
+		//Auth.loadUserId();
+	}
 
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
@@ -37,6 +46,18 @@ export default class App extends Component {
         }
     };
 
+    subscribeToLocationAsync = async () => {
+        console.log("susbscribe triggered");
+        const getLocation = (location) => {
+            NetLib.postJSON('location/add-location-data/', location);
+        }
+        
+        const locationPromise = await Location.watchPositionAsync({
+            enableHighAccuracy: true,
+            timeInterval: 15000
+            }, getLocation);
+    };
+
     render() {
         let displayedText = 'Fetching position...';
 
@@ -44,6 +65,7 @@ export default class App extends Component {
         let longitude = null;
 
         this.requestAndGetLocationAsync();
+        //this.subscribeToLocationAsync();
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
