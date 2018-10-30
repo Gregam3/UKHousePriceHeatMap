@@ -3,7 +3,7 @@ import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
 import * as Config from './lib/Config.js';
-import * as NetLib from './lib/NetwrokingLib.js';
+import * as NetLib from './lib/NetworkingLib.js';
 
 /**
  * @author Greg Mitten, Rikkey Paal
