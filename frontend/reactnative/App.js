@@ -2,7 +2,9 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 
+import * as NetLib from './lib/NetworkingLib.js';
 import * as Auth from './lib/Auth.js';
+
 
 /**
  * @author Greg Mitten, Rikkey Paal
@@ -23,6 +25,12 @@ export default class App extends Component {
 	
 	
 
+    constructor(props) {
+        super(props);
+        //Auth.loadUserId();
+        this.lastSent = new Date() - 15000;
+    }
+
     //Must be asynchronous as it has to wait for permissions to be accepted
     requestAndGetLocationAsync = async () => {
         let location;
@@ -37,6 +45,13 @@ export default class App extends Component {
 
             if (location) {
                 this.setState({location});
+
+                var timeDiff = new Date() - this.lastSent;
+                if (timeDiff >= 15000) {
+                    console.log("POST TRIGGERED");
+                    this.getLocation(location);
+                    this.lastSent = new Date();
+                }
             } else {
                 this.setState({
                     errorMessage: 'Location could not be determined.'
@@ -44,6 +59,21 @@ export default class App extends Component {
             }
         }
     };
+
+    getLocation = (location) => {
+
+        let locationData = {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            altitude: location.coords.altitude,
+            userId: "test person 1",
+            timelog: location.timestamp,
+            delivered: true
+        };
+
+        NetLib.postJSON('location/add-location-data/', locationData);
+    };
+
 
     render() {
         let displayedText = 'Fetching position...';
