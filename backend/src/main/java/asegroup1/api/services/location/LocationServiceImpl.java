@@ -12,22 +12,22 @@ import asegroup1.api.services.user.UserServiceImpl;
 @Service
 public class LocationServiceImpl extends ServiceImpl<LocationData> {
 
-	private UserServiceImpl userService;
-	private Dao<LocationData> locDao;
+    private UserServiceImpl userService;
+    private Dao<LocationData> locationDao;
 
-	@Autowired
-	public LocationServiceImpl(Dao<LocationData> dao, UserServiceImpl userService) {
-		super(dao);
-		this.userService = userService;
-		this.locDao = dao;
-	}
+    @Autowired
+    public LocationServiceImpl(Dao<LocationData> dao, UserServiceImpl userService) {
+        super(dao);
+        this.userService = userService;
+        this.locationDao = dao;
+    }
 
+    @Override
+    public void create(LocationData location) {
+        if (userService.get(location.getUserId()) == null) {
+            userService.create(new UserData(location.getUserId()));
+        }
 
-	@Override
-	public void create(LocationData location) {
-		if (userService.get(location.getUserId()) == null) {
-			userService.create(new UserData(location.getUserId()));
-		}
-		super.create(location);
-	}
+        super.create(location);
+    }
 }

@@ -16,18 +16,10 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
-	
-	constructor(props){
-		super(props);
-		
-		Auth.loadUserId();
-	}
-	
-	
 
     constructor(props) {
         super(props);
-        //Auth.loadUserId();
+        Auth.loadUserId();
         this.lastSent = new Date() - 15000;
     }
 
