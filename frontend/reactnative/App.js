@@ -16,19 +16,13 @@ export default class App extends Component {
         location: null,
         errorMessage: null
     };
-	
-	constructor(props){
-		super(props);
-		
-		Auth.loadUserId();
-	}
-	
-	
 
     constructor(props) {
         super(props);
-        //Auth.loadUserId();
         this.lastSent = new Date() - 15000;
+
+        Auth.wipeUserId();
+        Auth.loadUserId();
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
@@ -48,7 +42,6 @@ export default class App extends Component {
 
                 var timeDiff = new Date() - this.lastSent;
                 if (timeDiff >= 15000) {
-                    console.log("POST TRIGGERED");
                     this.getLocation(location);
                     this.lastSent = new Date();
                 }
@@ -66,7 +59,7 @@ export default class App extends Component {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
             altitude: location.coords.altitude,
-            userId: "test person 1",
+            userId: Auth.getUserKey(),
             timelog: location.timestamp,
             delivered: true
         };
