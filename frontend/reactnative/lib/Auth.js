@@ -35,7 +35,9 @@ export async function loadUserId(){
 		}else{ 
 			userKey = result;
 		}
+		console.log(userKey);
 	});
+	
 	
 }
 	
