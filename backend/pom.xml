@@ -5,8 +5,31 @@
     <!-- Details for the following settings are located https://maven.apache.org/guides/mini/guide-naming-conventions.html -->
     <groupId>aseGroup1</groupId>
     <artifactId>locationReciever</artifactId>
+	<packaging>jar</packaging>
     <version>3.0</version>
-
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>asegroup1.api.Application</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+	  <plugin>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-maven-plugin</artifactId>
+    <configuration>
+        <executable>true</executable>
+    </configuration>
+</plugin>
+    </plugins>
+  </build>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
