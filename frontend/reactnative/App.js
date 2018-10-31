@@ -20,7 +20,8 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         this.lastSent = new Date() - 15000;
-        Auth.loadUserId()
+
+        Auth.loadUserId();
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
