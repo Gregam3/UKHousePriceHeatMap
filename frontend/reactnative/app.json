@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "compass",
-    "description": "This project is really great.",
-    "slug": "compass",
+    "name": "Location Viewer",
+    "description": "This displays and logs the phones location",
+    "slug": "LocationViewer",
     "privacy": "public",
     "sdkVersion": "30.0.0",
     "platforms": ["ios", "android"],
@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#242f3e"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -21,7 +21,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
-    }
+      "supportsTablet": true,
+	  "bundleIdentifier": "asegroup1.ios"
+    },
+	"android": {
+		"package": "asegroup1.android"
+	}
   }
 }
