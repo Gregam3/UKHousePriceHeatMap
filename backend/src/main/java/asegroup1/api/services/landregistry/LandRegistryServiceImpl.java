@@ -1,6 +1,7 @@
 package asegroup1.api.services.landregistry;
 
 import asegroup1.api.models.LandRegistryData;
+import asegroup1.api.models.LandRegistryDataWithTransaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -27,7 +28,6 @@ public class LandRegistryServiceImpl {
         queries.load(new FileInputStream("src/main/java/asegroup1/api/services/landregistry/queries.properties"));
 
         transactionQuery = queries.getProperty("transactions-post-code-query");
-
     }
 
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
@@ -35,13 +35,12 @@ public class LandRegistryServiceImpl {
     private static final String SPACE = "%20";
     private String transactionQuery;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
         List<LandRegistryData> landRegistryDataList = new LinkedList<>();
-        String[] postCodeSplit = postCode.split(" ");
-
-        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCodeSplit[0] + SPACE + postCodeSplit[1])
+        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace("[]", SPACE))
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
@@ -49,8 +48,6 @@ public class LandRegistryServiceImpl {
 
             landRegistryDataList.add(
                     new LandRegistryData(
-                            0,
-                            new Date(0),
                             currentNode.get("paon").toString(),
                             currentNode.get("street").toString(),
                             currentNode.get("town").toString(),
@@ -69,7 +66,7 @@ public class LandRegistryServiceImpl {
 
         JSONObject queryResponse = executeSPARQLQuery(query);
 
-        ArrayNode transactionListResponse = (ArrayNode) new ObjectMapper().readTree(
+        ArrayNode transactionListResponse = (ArrayNode) objectMapper.readTree(
                 queryResponse.get("result").toString())
                 .get("results").get("bindings");
 
@@ -77,13 +74,13 @@ public class LandRegistryServiceImpl {
             ObjectNode currentNode = (ObjectNode) jsonNode;
 
             transactionsList.add(
-                    new LandRegistryData(
-                            currentNode.get("amount").get("value").asLong(),
-                            DATE_FORMAT.parse(currentNode.get("date").get("value").asText()),
+                    new LandRegistryDataWithTransaction(
                             currentNode.get("paon").get("value").asText(),
                             currentNode.get("street").get("value").asText(),
                             currentNode.get("town").get("value").asText(),
-                            currentNode.get("postcode").get("value").asText()
+                            currentNode.get("postcode").get("value").asText(),
+                            DATE_FORMAT.parse(currentNode.get("date").get("value").asText()),
+                            currentNode.get("amount").get("value").asLong()
                     )
             );
         }
