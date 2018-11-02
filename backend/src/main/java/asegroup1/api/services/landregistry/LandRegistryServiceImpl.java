@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -32,6 +34,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String SPACE = "%20";
     private String transactionQuery;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 
     public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
@@ -59,7 +62,7 @@ public class LandRegistryServiceImpl {
         return landRegistryDataList;
     }
 
-    public List<LandRegistryData> getTransactionsForPostCode(String postcode) throws IOException, UnirestException {
+    public List<LandRegistryData> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
 
         String query = transactionQuery.replace("REPLACETHIS", postcode);
@@ -76,7 +79,7 @@ public class LandRegistryServiceImpl {
             transactionsList.add(
                     new LandRegistryData(
                             currentNode.get("amount").get("value").asLong(),
-                            new Date(currentNode.get("date").get("value").asLong()),
+                            DATE_FORMAT.parse(currentNode.get("date").get("value").asText()),
                             currentNode.get("paon").get("value").asText(),
                             currentNode.get("street").get("value").asText(),
                             currentNode.get("town").get("value").asText(),

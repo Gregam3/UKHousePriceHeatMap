@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 
 @RestController
@@ -43,7 +44,7 @@ public class LandRegistryController {
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         try {
             return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(postCode), HttpStatus.OK);
-        } catch (IOException | UnirestException e) {
+        } catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
