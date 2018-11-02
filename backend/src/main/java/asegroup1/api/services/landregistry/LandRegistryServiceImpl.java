@@ -40,7 +40,7 @@ public class LandRegistryServiceImpl {
 
     public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
         List<LandRegistryData> landRegistryDataList = new LinkedList<>();
-        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace("[]", SPACE))
+        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
