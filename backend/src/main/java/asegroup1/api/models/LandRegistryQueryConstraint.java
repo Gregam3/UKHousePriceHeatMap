@@ -1,6 +1,5 @@
 package asegroup1.api.models;
 
-import java.sql.Date;
 import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
@@ -24,15 +23,11 @@ public class LandRegistryQueryConstraint {
 	private Boolean newBuild;
 	private EstateType estateType;
 	private TransactionCategory transactionCategory;
-	private Float minimumPrice;
-	private Float maximumPrice;
-	private Date earliest;
-	private Date latest;
 
 	public LandRegistryQueryConstraint(String primaryHouseName, String secondaryHouseName, String streetName, String townName, String district, String county, String postCode,
 			PropertyType propertyType,
 			Boolean newBuild,
-			EstateType estateType, TransactionCategory transactionCategory, Float minimumPrice, Float maximumPrice, Date earliest, Date latest) {
+			EstateType estateType, TransactionCategory transactionCategory) {
 		this.primaryHouseName = primaryHouseName;
 		this.secondaryHouseName = secondaryHouseName;
 		this.streetName = streetName;
@@ -45,18 +40,14 @@ public class LandRegistryQueryConstraint {
 		this.newBuild = newBuild;
 		this.estateType = estateType;
 		this.transactionCategory = transactionCategory;
-		this.minimumPrice = minimumPrice;
-		this.maximumPrice = maximumPrice;
-		this.earliest = earliest;
-		this.latest = latest;
 	}
 
 	public LandRegistryQueryConstraint() {
-		this(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+		this(null, null, null, null, null, null, null, null, null, null, null);
 	}
 
 	public String buildQueryWhere() {
-		return "WHERE { " + buildQuerySelection() + buildQueryColumns() + buildQueryFilter() + "}";
+		return "WHERE { " + buildQuerySelection() + buildQueryColumns() + "}";
 	}
 
 	private String buildQuerySelection() {
@@ -100,18 +91,6 @@ public class LandRegistryQueryConstraint {
 			str += "?transx " + nonLocationSelection.substring(0, nonLocationSelection.length() - 2) + ". ";
 		}
 		return str.trim();
-	}
-
-	private String buildQueryFilter() {
-		if (minimumPrice != null || maximumPrice != null || earliest != null || latest != null) {
-			// String str = "FILTER (";
-
-
-
-			return "";
-		} else {
-			return "";
-		}
 	}
 
 	private String buildQueryColumns() {
@@ -210,39 +189,6 @@ public class LandRegistryQueryConstraint {
 		this.transactionCategory = transactionCategory;
 	}
 
-	public float getMinimumPrice() {
-		return minimumPrice;
-	}
-
-	public void setMinimumPrice(float minimumPrice) {
-		this.minimumPrice = minimumPrice;
-	}
-
-	public float getMaximumPrice() {
-		return maximumPrice;
-	}
-
-	public void setMaximumPrice(float maximumPrice) {
-		this.maximumPrice = maximumPrice;
-	}
-
-	public Date getEarliest() {
-		return earliest;
-	}
-
-	public void setEarliest(Date earliest) {
-		this.earliest = earliest;
-	}
-
-	public Date getLatest() {
-		return latest;
-	}
-
-	public void setLatest(Date latest) {
-		this.latest = latest;
-	}
-
-
 	/**
 	 * Validates the parameters provided are valid for the creation of an instance
 	 * of {@link LandRegistryQueryConstraint}
@@ -252,8 +198,7 @@ public class LandRegistryQueryConstraint {
 	 */
 	public static ResponseEntity<?> validateRequestFormat(String primaryHouseName, String secondaryHouseName, String streetName, String townName, String district, String county,
 			String postCode,
-			PropertyType propertyType, Boolean newBuild, EstateType estateType, TransactionCategory transactionCategory, Float minimumPrice, Float maximumPrice, Date earliest,
-			Date latest) {
+			PropertyType propertyType, Boolean newBuild, EstateType estateType, TransactionCategory transactionCategory) {
 		ArrayList<String> issues = new ArrayList<>();
 
 		addNotNull(issues, isPrimaryHouseNameValid(primaryHouseName));
@@ -267,10 +212,6 @@ public class LandRegistryQueryConstraint {
 		addNotNull(issues, isNewBuildValid(newBuild));
 		addNotNull(issues, isEstateTypeValid(estateType));
 		addNotNull(issues, isTransactionCategoryValid(transactionCategory));
-		addNotNull(issues, isMinimumPriceValid(minimumPrice));
-		addNotNull(issues, isMaximumPriceValid(maximumPrice));
-		addNotNull(issues, isEarliestValid(earliest));
-		addNotNull(issues, isLatestValid(latest));
 
 
 		if (issues.isEmpty()) {
@@ -344,31 +285,6 @@ public class LandRegistryQueryConstraint {
 	public static String isTransactionCategoryValid(TransactionCategory transactionCategory2) {
 		return null;
 	}
-
-	public static String isMinimumPriceValid(float minimumPrice) {
-		if(minimumPrice < 0) {
-			return "Minimum Price: cannot be negative";
-		} else {
-			return null;
-		}
-	}
-
-	public static String isMaximumPriceValid(float maximumPrice) {
-		if(maximumPrice < 0) {
-			return "Maximum Price: cannot be negative";
-		} else {
-			return null;
-		}
-	}
-
-	public static String isEarliestValid(Date earliest) {
-		return null;
-	}
-
-	public static String isLatestValid(Date latest) {
-		return null;
-	}
-
 
 
 	public enum PropertyType {
