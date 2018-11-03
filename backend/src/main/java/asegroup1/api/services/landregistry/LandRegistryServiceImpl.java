@@ -1,22 +1,29 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.models.LandRegistryData;
-import asegroup1.api.models.LandRegistryDataWithTransaction;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import asegroup1.api.models.LandRegistryData;
+import asegroup1.api.models.LandRegistryDataWithTransaction;
+import asegroup1.api.models.LandRegistryQueryConstraint;
+import asegroup1.api.models.LandRegistryQuerySelect;
 
 
 @Service
@@ -38,9 +45,9 @@ public class LandRegistryServiceImpl {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
+	public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
         List<LandRegistryData> landRegistryDataList = new LinkedList<>();
-        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
+		JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
@@ -51,18 +58,25 @@ public class LandRegistryServiceImpl {
                             currentNode.get("paon").toString(),
                             currentNode.get("street").toString(),
                             currentNode.get("town").toString(),
-                            postCode
+							postCode
                     )
             );
         }
 
         return landRegistryDataList;
-    }
+	}
 
-    public List<LandRegistryData> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
+	public List<LandRegistryData> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		select.setPaon(true);
+		select.setStreet(true);
+		select.setTown(true);
+		select.setPostcode(true);
+		select.setTransactionDate(true);
+		select.setPricePaid(true);
 
-        String query = transactionQuery.replace("REPLACETHIS", postcode);
+		String query = buildQuery(select, values);
 
         JSONObject queryResponse = executeSPARQLQuery(query);
 
@@ -72,15 +86,44 @@ public class LandRegistryServiceImpl {
 
         for (JsonNode jsonNode : transactionListResponse) {
             ObjectNode currentNode = (ObjectNode) jsonNode;
+			String houseName = null;
+			String street = null;
+			String town = null;
+			String postcode = null;
+			Date date = null;
+			long pricePaid = -1;
 
-            transactionsList.add(
+			if (currentNode.get("paon").get("value") != null) {
+				houseName = currentNode.get("paon").get("value").asText();
+			}
+
+			if (currentNode.get("paon").get("value") != null) {
+				houseName = currentNode.get("paon").get("value").asText();
+			}
+
+			if (currentNode.get("town").get("value") != null) {
+				town = currentNode.get("town").get("value").asText();
+			}
+
+			if (currentNode.get("street").get("value") != null) {
+				street = currentNode.get("street").get("value").asText();
+			}
+
+			if (currentNode.get("postcode").get("value") != null) {
+				postcode = currentNode.get("postcode").get("value").asText();
+			}
+
+			if (currentNode.get("transactionDate").get("value") != null) {
+				date = DATE_FORMAT.parse(currentNode.get("transactionDate").get("value").asText());
+			}
+
+			if (currentNode.get("pricePaid").get("value") != null) {
+				pricePaid = currentNode.get("pricePaid").get("value").asLong();
+			}
+
+			transactionsList.add(
                     new LandRegistryDataWithTransaction(
-                            currentNode.get("paon").get("value").asText(),
-                            currentNode.get("street").get("value").asText(),
-                            currentNode.get("town").get("value").asText(),
-                            currentNode.get("postcode").get("value").asText(),
-                            DATE_FORMAT.parse(currentNode.get("date").get("value").asText()),
-                            currentNode.get("amount").get("value").asLong()
+							houseName, street, town, postcode, date, pricePaid
                     )
             );
         }
@@ -99,5 +142,21 @@ public class LandRegistryServiceImpl {
                 .getBody()
                 .getObject();
     }
+
+
+	private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
+		String query = getQueryPrefixDeclarations() + " " + select.buildQuerySelect() + " " + values.buildQueryWhere();
+
+
+		return query;
+	}
+
+	private String getQueryPrefixDeclarations() {
+		return "prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+				+ "prefix owl: <http://www.w3.org/2002/07/owl#> " + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> " + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> "
+				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> " + "prefix skos: <http://www.w3.org/2004/02/skos/core#> "
+				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
+	}
 
 }
