@@ -141,17 +141,17 @@ public class LandRegistryServiceImpl {
 
 
 	private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
-		String query = getQueryPrefixDeclarations() + " " + select.buildQuerySelect() + " " + values.buildQueryWhere();
+		String query = getQueryPrefixDeclarations() + "\n" + select.buildQuerySelect() + "\n" + values.buildQueryWhere();
 
 
 		return query;
 	}
 
 	private String getQueryPrefixDeclarations() {
-		return "prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-				+ "prefix owl: <http://www.w3.org/2002/07/owl#> " + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
-				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> " + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> "
-				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> " + "prefix skos: <http://www.w3.org/2004/02/skos/core#> "
+		return "prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+				+ "prefix owl: <http://www.w3.org/2002/07/owl#> \n" + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n" + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
+				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" + "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
 				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
 	}
 

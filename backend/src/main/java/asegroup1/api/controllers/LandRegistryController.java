@@ -47,13 +47,14 @@ public class LandRegistryController {
 
     @GetMapping("get-transactions/{post-code}")
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
-    	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-		constraint.setPostCode(postCode);
-
-		String message = LandRegistryQueryConstraint.isPostCodeValid(postCode);
-		if (message != null) {
-			return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+    	if (postCode.charAt(postCode.length() - 4) != 32) {
+			return new ResponseEntity<>(
+					"Post code must contain a space in the correct position and be in a valid format http://www.restore.ac.uk/geo-refer/38330mtuks00y19740000.php",
+					HttpStatus.BAD_REQUEST);
 		}
+    	
+    	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+    	constraint.setPostCode(postCode);
         try {
 			return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(constraint), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {
