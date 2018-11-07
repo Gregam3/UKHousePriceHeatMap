@@ -1,6 +1,7 @@
 package asegroup1.api.models;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.EnumSet;
 
 /**
  * 
@@ -8,17 +9,25 @@ import java.util.HashSet;
  */
 public class LandRegistryQuerySelect {
 
-	private HashSet<Selectable> selectableMap;
+	// list used instead of hashset, as it allows custom ordering of output request
+	// data
+	private ArrayList<Selectable> selectableMap;
 
 	public LandRegistryQuerySelect(Selectable... selectables) {
-		selectableMap = new HashSet<>();
+		selectableMap = new ArrayList<Selectable>();
 		addSelectable(selectables);
 	}
 
 	public void addSelectable(Selectable... selectables) {
 		for (Selectable selectable : selectables) {
-			selectableMap.add(selectable);
+			if (!selectableMap.contains(selectable)) {
+				selectableMap.add(selectable);
+			}
 		}
+	}
+
+	public void selectAll() {
+		EnumSet.allOf(Selectable.class).forEach(v -> selectableMap.add(v));
 	}
 
 	public void removeSelectable(Selectable... selectables) {
@@ -27,9 +36,14 @@ public class LandRegistryQuerySelect {
 		}
 	}
 
+	public void deselectAll() {
+		selectableMap.clear();
+	}
+
 	public boolean hasSelectable(Selectable selectable) {
 		return selectableMap.contains(selectable);
 	}
+
 
 	private String getSelectableText(Selectable selectable) {
 		switch (selectable) {
@@ -56,4 +70,5 @@ public class LandRegistryQuerySelect {
 		}
 		return str.trim();
 	}
+
 }
