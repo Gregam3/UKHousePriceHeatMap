@@ -18,7 +18,7 @@ public class DaoImpl<T> implements Dao<T> {
     /**
      * A necessary parameter in many of the entityManager's methods
      */
-    private Class currentClass;
+    private Class<T> currentClass;
 
     protected void setCurrentClass(Class<T> currentClass) {
         this.currentClass = currentClass;
@@ -34,7 +34,7 @@ public class DaoImpl<T> implements Dao<T> {
 
     //Each time a Dao wants to access the database they fetch a new entity manager
     private EntityManager getEntityManager() {
-        //On the first attempt to get an entity manager the factory creates a new one based on the properties in the template entity manager
+        //On the first attempt to get an entity manager, a factory is created based on the properties in the template entity manager, entity managers are retrieved from this factory
         if (entityManagerFactory == null)
             entityManagerFactory = entityManager.getEntityManagerFactory();
 
@@ -45,15 +45,6 @@ public class DaoImpl<T> implements Dao<T> {
     public T get(String id) {
         checkIfCurrentClassIsValid();
         return (T) getEntityManager().find(currentClass, id);
-    }
-
-    //In hibernate, you query tables by there class name. This retrieves that.
-    private String retrieveHibernateTableNameFromClassString() {
-        String[] classNameSplitIntoPackageNames = currentClass.getName().split("\\.");
-
-        //Get the final element in array e.g. java.lang.Object
-        //                                                 ^
-        return classNameSplitIntoPackageNames[classNameSplitIntoPackageNames.length - 1];
     }
 
     public void delete(String id) {
@@ -67,7 +58,7 @@ public class DaoImpl<T> implements Dao<T> {
     @SuppressWarnings("unchecked")
     public List<T> list() {
         checkIfCurrentClassIsValid();
-        return getEntityManager().createQuery("from " + retrieveHibernateTableNameFromClassString(), currentClass).getResultList();
+        return getEntityManager().createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
     }
 
     private void checkIfCurrentClassIsValid() {
