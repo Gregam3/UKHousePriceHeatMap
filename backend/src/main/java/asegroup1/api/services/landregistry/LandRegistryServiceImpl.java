@@ -24,6 +24,7 @@ import asegroup1.api.models.LandRegistryData;
 import asegroup1.api.models.LandRegistryDataWithTransaction;
 import asegroup1.api.models.LandRegistryQueryConstraint;
 import asegroup1.api.models.LandRegistryQuerySelect;
+import asegroup1.api.models.LandRegistryQuerySelect.Selectable;
 
 
 @Service
@@ -68,13 +69,8 @@ public class LandRegistryServiceImpl {
 
 	public List<LandRegistryData> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
-		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
-		select.setPaon(true);
-		select.setStreet(true);
-		select.setTown(true);
-		select.setPostcode(true);
-		select.setTransactionDate(true);
-		select.setPricePaid(true);
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect(Selectable.primaryAddress, Selectable.street, Selectable.town, Selectable.postcode, Selectable.transactionDate,
+				Selectable.pricePaid);
 
 		String query = buildQuery(select, values);
 
