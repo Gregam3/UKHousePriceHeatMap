@@ -64,11 +64,11 @@ public class LandRegistryQuerySelect {
 	}
 
 	public String buildQuerySelect() {
-		String str = "SELECT ";
+		StringBuilder selectStringBuilder = new StringBuilder("SELECT ");
 		for (Selectable selectable : selectableMap) {
-			str += "?" + getSelectableText(selectable) + " ";
+			selectStringBuilder.append("?" + getSelectableText(selectable) + " ");
 		}
-		return str.trim();
+		return selectStringBuilder.toString().trim();
 	}
 
 }

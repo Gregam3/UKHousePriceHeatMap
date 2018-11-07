@@ -89,11 +89,11 @@ public class LandRegistryQueryConstraint {
 		// order by type
 		Collections.sort(constraintList);
 		
-		String retStr = "";
+		StringBuilder whereStringBuilder = new StringBuilder();
 		for(Constraint constraint : constraintList) {
-			retStr += constraint.toString() + " \n";
+			whereStringBuilder.append(constraint.toString() + " \n");
 		}
-		return retStr.trim();
+		return whereStringBuilder.toString().trim();
 	}
 
 	private String buildQueryColumns() {
