@@ -1,0 +1,22 @@
+---
+language: node_js
+node_js:
+  - node
+  - lts/*
+cache:
+  directories:
+    - ~/.npm
+    - .jest
+before_script:
+  - npm install -g npm@latest
+script:
+  - npm ci
+  - npx jest --ci
+jobs:
+  include:
+    - stage: deploy
+      node_js: lts/*
+      script:
+        - npm ci
+        - npx expo login -u briso -p asegroup1
+        - npx expo publish --non-interactive
