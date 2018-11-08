@@ -2,13 +2,13 @@ package asegroup1.api.models;
 
 import java.util.Date;
 
-public class LandRegistryData {
+public class Address {
     private String houseName;
     private String streetName;
     private String townName;
     private String postCode;
 
-    public LandRegistryData(String houseName, String streetName, String townName, String postCode) {
+    public Address(String houseName, String streetName, String townName, String postCode) {
         this.houseName = houseName;
         this.streetName = streetName;
         this.townName = townName;

@@ -1,6 +1,5 @@
 package asegroup1.api.controllers;
 
-import asegroup1.api.models.LandRegistryData;
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class LandRegistryController {
         }
 
         try {
-            return new ResponseEntity<>(landRegistryService.getLandRegistryDataByPostCode(postCode), HttpStatus.OK);
+            return new ResponseEntity<>(landRegistryService.getAddressesByPostCode(postCode), HttpStatus.OK);
         } catch (UnirestException | IOException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
@@ -43,7 +42,7 @@ public class LandRegistryController {
     @GetMapping("get-transactions/{post-code}")
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         try {
-            return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(postCode), HttpStatus.OK);
+            return new ResponseEntity<>(landRegistryService.getTransactionsByPostCode(postCode), HttpStatus.OK);
         } catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
