@@ -8,6 +8,7 @@ cache:
     - ~/.npm
     - .jest
 before_script:
+  - cd /frontend/react
   - npm install -g npm@latest
 script:
   - npm ci
