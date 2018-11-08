@@ -8,6 +8,7 @@ cache:
     - ~/.npm
     - .jest
 before_script:
+  - cd /frontend/reactnative/
   - npm install -g npm@latest
 script:
   - npm ci
