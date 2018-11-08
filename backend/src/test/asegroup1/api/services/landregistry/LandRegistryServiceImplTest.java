@@ -78,6 +78,7 @@ class LandRegistryServiceImplTest {
     @Test
     void testIfPassingInvalidPostCodeToTransactionSearchReturnsNoAddresses() {
         try {
+            //Provides the invalid postcode of "0"
             assert landRegistryService.getTransactionsByPostCode("0").isEmpty();
         } catch (IOException | UnirestException | ParseException e) {
             e.printStackTrace();

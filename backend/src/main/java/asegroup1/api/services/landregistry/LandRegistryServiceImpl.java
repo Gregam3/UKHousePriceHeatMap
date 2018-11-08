@@ -89,7 +89,7 @@ public class LandRegistryServiceImpl {
     }
 
 
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException, IOException {
+    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
                 .field("output", "json")
