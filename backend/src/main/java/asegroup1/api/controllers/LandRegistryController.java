@@ -1,6 +1,5 @@
 package asegroup1.api.controllers;
 
-import asegroup1.api.models.LandRegistryData;
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.springframework.beans.factory.annotation.Autowired;
