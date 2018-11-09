@@ -97,15 +97,18 @@ public class LandRegistryServiceImpl {
 
         for (Address address : addresses) {
             addressUriBuilder
+                    .append(OPEN_STREET_MAP_URL_PREFIX)
                     .append(address.getHouseName())
                     .append(" ")
                     .append(address.getStreetName())
                     .append(" ")
                     .append(address.getTownName());
 
+            addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
+
             try {
                 JSONObject response = Unirest.get(
-                        OPEN_STREET_MAP_URL_PREFIX + addressUriBuilder.toString() + OPEN_STREET_MAP_URL_SUFFIX
+                        addressUriBuilder.toString()
                 ).asJson().getBody().getArray().getJSONObject(0);
 
                 address.setLatitude(response.getDouble("lat"));
