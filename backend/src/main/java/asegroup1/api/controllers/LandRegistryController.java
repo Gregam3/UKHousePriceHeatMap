@@ -58,6 +58,8 @@ public class LandRegistryController {
 
     	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
 		constraint.getEqualityConstraints().setPostCode(postCode);
+		constraint.setMinDate(LocalDate.now().minusYears(5));
+
         try {
 			return new ResponseEntity<>(landRegistryService.getTransactions(constraint, true), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {
@@ -66,10 +68,10 @@ public class LandRegistryController {
     }
 
 	@GetMapping("get-transactionsTown/{town}")
-	public ResponseEntity<?> getTransactionDataForTown(@PathVariable("town") String postCode) {
+	public ResponseEntity<?> getTransactionDataForTown(@PathVariable("town") String town) {
 
 		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-		constraint.getEqualityConstraints().setTownName(postCode);
+		constraint.getEqualityConstraints().setTownName(town);
 		constraint.setMinDate(LocalDate.now().minusYears(5));
 
 		try {
