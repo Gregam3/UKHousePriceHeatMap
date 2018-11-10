@@ -1,7 +1,7 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.models.LandRegistryData;
-import asegroup1.api.models.LandRegistryDataWithTransaction;
+import asegroup1.api.models.Address;
+import asegroup1.api.models.AddressWithTransaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -38,16 +38,16 @@ public class LandRegistryServiceImpl {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
-        List<LandRegistryData> landRegistryDataList = new LinkedList<>();
+    public List<Address> getAddressesByPostCode(String postCode) throws UnirestException, IOException {
+        List<Address> addressList = new LinkedList<>();
         JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
             JSONObject currentNode = (JSONObject) addresses.get(i);
 
-            landRegistryDataList.add(
-                    new LandRegistryData(
+            addressList.add(
+                    new Address(
                             currentNode.get("paon").toString(),
                             currentNode.get("street").toString(),
                             currentNode.get("town").toString(),
@@ -56,11 +56,11 @@ public class LandRegistryServiceImpl {
             );
         }
 
-        return landRegistryDataList;
+        return addressList;
     }
 
-    public List<LandRegistryData> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
-        List<LandRegistryData> transactionsList = new LinkedList<>();
+    public List<AddressWithTransaction> getTransactionsByPostCode(String postcode) throws IOException, UnirestException, ParseException {
+        List<AddressWithTransaction> transactionsList = new LinkedList<>();
 
         String query = transactionQuery.replace("REPLACETHIS", postcode);
 
@@ -74,7 +74,7 @@ public class LandRegistryServiceImpl {
             ObjectNode currentNode = (ObjectNode) jsonNode;
 
             transactionsList.add(
-                    new LandRegistryDataWithTransaction(
+                    new AddressWithTransaction(
                             currentNode.get("paon").get("value").asText(),
                             currentNode.get("street").get("value").asText(),
                             currentNode.get("town").get("value").asText(),
@@ -89,7 +89,7 @@ public class LandRegistryServiceImpl {
     }
 
 
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException, IOException {
+    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
                 .field("output", "json")
@@ -99,5 +99,4 @@ public class LandRegistryServiceImpl {
                 .getBody()
                 .getObject();
     }
-
 }
