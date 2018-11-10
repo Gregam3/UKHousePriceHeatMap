@@ -101,7 +101,7 @@ class LandRegistryServiceImplTest {
 
         Address address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
-        //lat 50.824190
+        //lat 50.824190 for address
         assert (address.getLatitude() > 50.822 && address.getLatitude() < 50.824);
     }
 
@@ -118,7 +118,7 @@ class LandRegistryServiceImplTest {
 
         Address address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
-        //long -0.378000
+        //long -0.378000 for address
         assert (address.getLongitude() > -0.37700 && address.getLongitude() < -0.37500);
     }
 
@@ -133,8 +133,6 @@ class LandRegistryServiceImplTest {
                 "",
                 ""
         ));
-
-        boolean JSONExceptionArrayNotFoundOccurred = false;
 
         Address address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
