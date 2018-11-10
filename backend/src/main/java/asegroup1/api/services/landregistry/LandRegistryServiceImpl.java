@@ -59,10 +59,11 @@ public class LandRegistryServiceImpl {
         return landRegistryDataList;
 	}
 
-	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values, LandRegistryQuerySelect select) throws IOException, UnirestException, ParseException {
+	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values, LandRegistryQuerySelect select, boolean latestOnly)
+			throws IOException, UnirestException, ParseException {
 		List<HashMap<String, String>> transactionsList = new LinkedList<>();
 		
-		String query = buildQuery(select, values);
+		String query = latestOnly ? buildUniqueQuery(select, values) : buildQuery(select, values);
 
         JSONObject queryResponse = executeSPARQLQuery(query);
 
@@ -78,8 +79,8 @@ public class LandRegistryServiceImpl {
         return transactionsList;
     }
 
-	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
-		return getTransactions(values, new LandRegistryQuerySelect(true));
+	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values, boolean latestOnly) throws IOException, UnirestException, ParseException {
+		return getTransactions(values, new LandRegistryQuerySelect(true), latestOnly);
 	}
 
 
@@ -96,8 +97,11 @@ public class LandRegistryServiceImpl {
 
 
 	private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
-
 		return getQueryPrefixDeclarations() + "\n" + select.buildQuerySelect() + "\n" + values.buildQueryWhere();
+	}
+
+	private String buildUniqueQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
+		return getQueryPrefixDeclarations() + "\n" + select.buildQuerySelectUnique() + "\n" + values.buildQueryWhere() + values.buildUniqueGrouping();
 	}
 
 	private String getQueryPrefixDeclarations() {

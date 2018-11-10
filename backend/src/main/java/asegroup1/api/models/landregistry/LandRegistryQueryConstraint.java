@@ -63,6 +63,8 @@ public class LandRegistryQueryConstraint {
 
 	/* QUERY GENERATION */
 
+
+
 	public String buildQueryWhere() {
 		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + buildQueryFilter() + "\n" + buildQueryAddressColumns();
 		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
@@ -110,6 +112,10 @@ public class LandRegistryQueryConstraint {
 		return "OPTIONAL {?addr lrcommon:paon ?paon} \n" + "OPTIONAL {?addr lrcommon:saon ?saon} \n"
 				+ "OPTIONAL {?addr lrcommon:street ?street} \n" + "OPTIONAL {?addr lrcommon:locality ?locality} \n" + "OPTIONAL {?addr lrcommon:town ?town} \n"
 				+ "OPTIONAL {?addr lrcommon:district ?district} \n" + "OPTIONAL {?addr lrcommon:county ?county} \n" + "OPTIONAL {?addr lrcommon:postcode ?postcode}";
+	}
+
+	public String buildUniqueGrouping() {
+		return "GROUP BY ?paon ?saon ?street ?postcode";
 	}
 
 	/* TYPE DECLARATIONS */

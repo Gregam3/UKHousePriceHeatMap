@@ -67,10 +67,31 @@ public class LandRegistryQuerySelect {
 		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode;
 	}
 
+
 	public String buildQuerySelect() {
 		StringBuilder selectStringBuilder = new StringBuilder("SELECT ");
 		for (Selectable selectable : selectableMap) {
 			selectStringBuilder.append("?" + selectable.toString() + " ");
+		}
+		return selectStringBuilder.toString().trim();
+	}
+
+	/**
+	 * The following selectables will be auto selected paon, saon, street, postcode,
+	 * transactionDate
+	 * 
+	 * @param getUnique
+	 * @return
+	 */
+	public String buildQuerySelectUnique() {
+
+		LandRegistryQuerySelect tmp = new LandRegistryQuerySelect(selectableMap.toArray(new Selectable[selectableMap.size()]));
+		tmp.deselect(Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode, Selectable.transactionDate);
+
+		StringBuilder selectStringBuilder = new StringBuilder("SELECT ?paon ?saon ?street ?postcode (max(?transactionDate) AS ?TransactionDate) ");
+		for (Selectable selectable : tmp.selectableMap) {
+			String selectStr = selectable.toString();
+			selectStringBuilder.append("(SAMPLE(?" + selectStr + ") AS ?" + selectStr.substring(0, 1).toUpperCase() + selectStr.substring(1) + ") ");
 		}
 		return selectStringBuilder.toString().trim();
 	}

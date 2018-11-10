@@ -2,6 +2,7 @@ package asegroup1.api.controllers;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,10 +59,24 @@ public class LandRegistryController {
     	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
 		constraint.getEqualityConstraints().setPostCode(postCode);
         try {
-			return new ResponseEntity<>(landRegistryService.getTransactions(constraint), HttpStatus.OK);
+			return new ResponseEntity<>(landRegistryService.getTransactions(constraint, true), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
+
+	@GetMapping("get-transactionsTown/{town}")
+	public ResponseEntity<?> getTransactionDataForTown(@PathVariable("town") String postCode) {
+
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		constraint.getEqualityConstraints().setTownName(postCode);
+		constraint.setMinDate(LocalDate.now().minusYears(5));
+
+		try {
+			return new ResponseEntity<>(landRegistryService.getTransactions(constraint, true), HttpStatus.OK);
+		} catch (IOException | UnirestException | ParseException e) {
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		}
+	}
 
 }

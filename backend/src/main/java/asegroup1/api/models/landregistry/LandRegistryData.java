@@ -132,8 +132,11 @@ public class LandRegistryData {
 		if (value.asText().length() == 0) {
 			return true;
 		}
+		if (name.length() < 2) {
+			return false;
+		}
 		try {
-			selectable = Selectable.valueOf(name);
+			selectable = Selectable.valueOf(name.substring(0, 1).toLowerCase() + name.substring(1));
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			return false;
