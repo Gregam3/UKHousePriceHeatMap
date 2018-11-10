@@ -22,7 +22,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 
 
 @Service
@@ -66,8 +65,7 @@ public class LandRegistryServiceImpl {
 
 	public List<HashMap<String, String>> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
 		List<HashMap<String, String>> transactionsList = new LinkedList<>();
-		LandRegistryQuerySelect select = new LandRegistryQuerySelect(Selectable.paon, Selectable.street, Selectable.town, Selectable.postcode, Selectable.transactionDate,
-				Selectable.pricePaid);
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
 
 		String query = buildQuery(select, values);
 
@@ -111,24 +109,6 @@ public class LandRegistryServiceImpl {
 				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n" + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
 				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" + "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
 				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
-	}
-
-	public static void main(String[] args) {
-
-		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
-		select.selectAll();
-
-		LandRegistryData data = new LandRegistryData();
-		data.setPostCode("bn23 7ly");
-
-		LandRegistryQueryConstraint values = new LandRegistryQueryConstraint(data);
-		values.buildQueryWhere();
-
-		try {
-			System.out.println(new LandRegistryServiceImpl().buildQuery(select, values));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 }
