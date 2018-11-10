@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import asegroup1.api.models.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 
@@ -53,8 +53,10 @@ public class LandRegistryController {
 					HttpStatus.BAD_REQUEST);
 		}
     	
+
+
     	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-    	constraint.setPostCode(postCode);
+		constraint.getEqualityConstraints().setPostCode(postCode);
         try {
 			return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(constraint), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {

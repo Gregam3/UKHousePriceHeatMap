@@ -1,4 +1,4 @@
-package asegroup1.api.models;
+package asegroup1.api.models.landregistry;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -45,25 +45,14 @@ public class LandRegistryQuerySelect {
 	}
 
 
-	private String getSelectableText(Selectable selectable) {
-		switch (selectable) {
-			case primaryAddress:
-				return "paon";
-			case secondaryAddress:
-				return "saon";
-			default:
-				return selectable.name();
-		}
-	}
-
 	public enum Selectable {
-		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, primaryAddress, secondaryAddress, street, locality, town, district, county, postcode;
+		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode;
 	}
 
 	public String buildQuerySelect() {
 		StringBuilder selectStringBuilder = new StringBuilder("SELECT ");
 		for (Selectable selectable : selectableMap) {
-			selectStringBuilder.append("?" + getSelectableText(selectable) + " ");
+			selectStringBuilder.append("?" + selectable.toString() + " ");
 		}
 		return selectStringBuilder.toString().trim();
 	}

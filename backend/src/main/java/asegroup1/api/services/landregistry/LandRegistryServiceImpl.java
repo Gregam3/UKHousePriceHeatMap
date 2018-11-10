@@ -4,7 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -16,15 +16,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import asegroup1.api.models.LandRegistryData;
-import asegroup1.api.models.LandRegistryDataWithTransaction;
-import asegroup1.api.models.LandRegistryQueryConstraint;
-import asegroup1.api.models.LandRegistryQuerySelect;
-import asegroup1.api.models.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 
 
 @Service
@@ -46,30 +44,29 @@ public class LandRegistryServiceImpl {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
-	public List<LandRegistryData> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
-        List<LandRegistryData> landRegistryDataList = new LinkedList<>();
+	public List<HashMap<String, String>> getLandRegistryDataByPostCode(String postCode) throws UnirestException, IOException {
+		List<HashMap<String, String>> landRegistryDataList = new LinkedList<>();
 		JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
             JSONObject currentNode = (JSONObject) addresses.get(i);
 
-            landRegistryDataList.add(
-                    new LandRegistryData(
-                            currentNode.get("paon").toString(),
-                            currentNode.get("street").toString(),
-                            currentNode.get("town").toString(),
-							postCode
-                    )
-            );
+			LandRegistryData data = new LandRegistryData();
+			data.setPrimaryHouseName(currentNode.get("paon").toString());
+			data.setStreetName(currentNode.get("street").toString());
+			data.setTownName(currentNode.get("town").toString());
+			data.setPostCode(postCode);
+
+			landRegistryDataList.add(data.getMappings());
         }
 
         return landRegistryDataList;
 	}
 
-	public List<LandRegistryData> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
-        List<LandRegistryData> transactionsList = new LinkedList<>();
-		LandRegistryQuerySelect select = new LandRegistryQuerySelect(Selectable.primaryAddress, Selectable.street, Selectable.town, Selectable.postcode, Selectable.transactionDate,
+	public List<HashMap<String, String>> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
+		List<HashMap<String, String>> transactionsList = new LinkedList<>();
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect(Selectable.paon, Selectable.street, Selectable.town, Selectable.postcode, Selectable.transactionDate,
 				Selectable.pricePaid);
 
 		String query = buildQuery(select, values);
@@ -81,47 +78,8 @@ public class LandRegistryServiceImpl {
                 .get("results").get("bindings");
 
         for (JsonNode jsonNode : transactionListResponse) {
-            ObjectNode currentNode = (ObjectNode) jsonNode;
-			String houseName = null;
-			String street = null;
-			String town = null;
-			String postcode = null;
-			Date date = null;
-			long pricePaid = -1;
 
-			if (currentNode.get("paon").get("value") != null) {
-				houseName = currentNode.get("paon").get("value").asText();
-			}
-
-			if (currentNode.get("paon").get("value") != null) {
-				houseName = currentNode.get("paon").get("value").asText();
-			}
-
-			if (currentNode.get("town").get("value") != null) {
-				town = currentNode.get("town").get("value").asText();
-			}
-
-			if (currentNode.get("street").get("value") != null) {
-				street = currentNode.get("street").get("value").asText();
-			}
-
-			if (currentNode.get("postcode").get("value") != null) {
-				postcode = currentNode.get("postcode").get("value").asText();
-			}
-
-			if (currentNode.get("transactionDate").get("value") != null) {
-				date = DATE_FORMAT.parse(currentNode.get("transactionDate").get("value").asText());
-			}
-
-			if (currentNode.get("pricePaid").get("value") != null) {
-				pricePaid = currentNode.get("pricePaid").get("value").asLong();
-			}
-
-			transactionsList.add(
-                    new LandRegistryDataWithTransaction(
-							houseName, street, town, postcode, date, pricePaid
-                    )
-            );
+			transactionsList.add(new LandRegistryData(jsonNode).getMappings());
         }
 
         return transactionsList;
@@ -153,6 +111,24 @@ public class LandRegistryServiceImpl {
 				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n" + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
 				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" + "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
 				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
+	}
+
+	public static void main(String[] args) {
+
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		select.selectAll();
+
+		LandRegistryData data = new LandRegistryData();
+		data.setPostCode("bn23 7ly");
+
+		LandRegistryQueryConstraint values = new LandRegistryQueryConstraint(data);
+		values.buildQueryWhere();
+
+		try {
+			System.out.println(new LandRegistryServiceImpl().buildQuery(select, values));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
