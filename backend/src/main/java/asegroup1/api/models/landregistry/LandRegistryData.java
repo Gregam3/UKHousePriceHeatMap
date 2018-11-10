@@ -129,6 +129,9 @@ public class LandRegistryData {
 
 	public boolean setConstraint(String name, JsonNode value) {
 		Selectable selectable;
+		if (value.asText().length() == 0) {
+			return true;
+		}
 		try {
 			selectable = Selectable.valueOf(name);
 		} catch (IllegalArgumentException e) {
@@ -178,7 +181,7 @@ public class LandRegistryData {
 			case propertyType:
 				PropertyType propertyType;
 				try {
-					propertyType = PropertyType.valueOf(value.asText().toUpperCase());
+					propertyType = PropertyType.valueOf(value.asText().toUpperCase().replace("-", "_"));
 					setPropertyType(propertyType);
 					return true;
 				} catch (IllegalArgumentException e) {
@@ -197,13 +200,13 @@ public class LandRegistryData {
 			case transactionCategory:
 				TransactionCategory transactionCategory;
 				try {
-					transactionCategory = TransactionCategory.valueOf(value.asText());
-					setTransactionCategory(transactionCategory);
-					return true;
+					transactionCategory = TransactionCategory.valueOf(value.asText().toUpperCase().replace(" ", "_"));
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 					return false;
 				}
+				setTransactionCategory(transactionCategory);
+				return true;
 			case transactionDate:
 				try {
 					LocalDate date = LocalDate.parse(value.asText());

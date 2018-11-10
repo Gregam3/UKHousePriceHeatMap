@@ -164,7 +164,7 @@ public class LandRegistryQueryConstraint {
 	}
 
 	public enum PropertyType {
-		DETATCHED, SEMI_DETACHED, TERRACED, FLAT, OTHER;
+		DETACHED, SEMI_DETACHED, TERRACED, FLAT_MAISONETTE, OTHER;
 	}
 
 	public enum EstateType {

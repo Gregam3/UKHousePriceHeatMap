@@ -58,9 +58,10 @@ public class LandRegistryController {
     	LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
 		constraint.getEqualityConstraints().setPostCode(postCode);
         try {
-			return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(constraint), HttpStatus.OK);
+			return new ResponseEntity<>(landRegistryService.getTransactions(constraint), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
+
 }

@@ -15,10 +15,20 @@ public class LandRegistryQuerySelect {
 
 	public LandRegistryQuerySelect(Selectable... selectables) {
 		selectableMap = new ArrayList<Selectable>();
-		addSelectable(selectables);
+		select(selectables);
 	}
 
-	public void addSelectable(Selectable... selectables) {
+	public LandRegistryQuerySelect(boolean selectAll, Selectable... exceptions) {
+		selectableMap = new ArrayList<Selectable>();
+		if (selectAll) {
+			selectAll();
+			deselect(exceptions);
+		} else {
+			select(exceptions);
+		}
+	}
+
+	public void select(Selectable... selectables) {
 		for (Selectable selectable : selectables) {
 			if (!selectableMap.contains(selectable)) {
 				selectableMap.add(selectable);
@@ -30,7 +40,7 @@ public class LandRegistryQuerySelect {
 		EnumSet.allOf(Selectable.class).forEach(v -> selectableMap.add(v));
 	}
 
-	public void removeSelectable(Selectable... selectables) {
+	public void deselect(Selectable... selectables) {
 		for (Selectable selectable : selectables) {
 			selectableMap.remove(selectable);
 		}
@@ -42,6 +52,14 @@ public class LandRegistryQuerySelect {
 
 	public boolean hasSelectable(Selectable selectable) {
 		return selectableMap.contains(selectable);
+	}
+
+	public void toggleSelectable(Selectable selectable) {
+		if (hasSelectable(selectable)) {
+			deselect(selectable);
+		} else {
+			select(selectable);
+		}
 	}
 
 

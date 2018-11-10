@@ -3,7 +3,6 @@ package asegroup1.api.services.landregistry;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,14 +31,11 @@ public class LandRegistryServiceImpl {
         Properties queries = new Properties();
         queries.load(new FileInputStream("src/main/java/asegroup1/api/services/landregistry/queries.properties"));
 
-        transactionQuery = queries.getProperty("transactions-post-code-query");
     }
 
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String SPACE = "%20";
-    private String transactionQuery;
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -63,10 +59,9 @@ public class LandRegistryServiceImpl {
         return landRegistryDataList;
 	}
 
-	public List<HashMap<String, String>> getTransactionsForPostCode(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
+	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values, LandRegistryQuerySelect select) throws IOException, UnirestException, ParseException {
 		List<HashMap<String, String>> transactionsList = new LinkedList<>();
-		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
-
+		
 		String query = buildQuery(select, values);
 
         JSONObject queryResponse = executeSPARQLQuery(query);
@@ -83,6 +78,10 @@ public class LandRegistryServiceImpl {
         return transactionsList;
     }
 
+	public List<HashMap<String, String>> getTransactions(LandRegistryQueryConstraint values) throws IOException, UnirestException, ParseException {
+		return getTransactions(values, new LandRegistryQuerySelect(true));
+	}
+
 
     private JSONObject executeSPARQLQuery(String query) throws UnirestException, IOException {
         //Navigates through JSON and returns list of addresses based on post code
@@ -97,10 +96,8 @@ public class LandRegistryServiceImpl {
 
 
 	private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
-		String query = getQueryPrefixDeclarations() + "\n" + select.buildQuerySelect() + "\n" + values.buildQueryWhere();
 
-
-		return query;
+		return getQueryPrefixDeclarations() + "\n" + select.buildQuerySelect() + "\n" + values.buildQueryWhere();
 	}
 
 	private String getQueryPrefixDeclarations() {
