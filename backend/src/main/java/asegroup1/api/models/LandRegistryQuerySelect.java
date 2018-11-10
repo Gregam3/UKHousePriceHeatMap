@@ -47,8 +47,6 @@ public class LandRegistryQuerySelect {
 
 	private String getSelectableText(Selectable selectable) {
 		switch (selectable) {
-			case housePriceIndex:
-				return "hpi";
 			case primaryAddress:
 				return "paon";
 			case secondaryAddress:
@@ -59,8 +57,7 @@ public class LandRegistryQuerySelect {
 	}
 
 	public enum Selectable {
-		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, primaryAddress, secondaryAddress, street, locality, town, district, county, postcode,
-		date, housePriceIndex;
+		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, primaryAddress, secondaryAddress, street, locality, town, district, county, postcode;
 	}
 
 	public String buildQuerySelect() {
