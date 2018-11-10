@@ -1,12 +1,12 @@
 package asegroup1.api.models;
 
-import java.util.Date;
-
 public class Address {
     private String houseName;
     private String streetName;
     private String townName;
     private String postCode;
+    private Double latitude;
+    private Double longitude;
 
     public Address(String houseName, String streetName, String townName, String postCode) {
         this.houseName = houseName;
@@ -15,6 +15,14 @@ public class Address {
         this.postCode = postCode;
     }
 
+    public Address(String houseName, String streetName, String townName, String postCode, Double latitude, Double longitude) {
+        this.houseName = houseName;
+        this.streetName = streetName;
+        this.townName = townName;
+        this.postCode = postCode;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public String getHouseName() {
         return houseName;
@@ -46,5 +54,21 @@ public class Address {
 
     public void setPostCode(String postCode) {
         this.postCode = postCode;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

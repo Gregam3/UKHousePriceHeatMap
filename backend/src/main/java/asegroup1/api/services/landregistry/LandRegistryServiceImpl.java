@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
@@ -32,15 +33,19 @@ public class LandRegistryServiceImpl {
 
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
-    private static final String SPACE = "%20";
+    private static final String OPEN_STREET_MAP_URL_PREFIX = "https://nominatim.openstreetmap.org/search/";
+    private static final String OPEN_STREET_MAP_URL_SUFFIX = "?format=json&addressdetails=1&limit=1&polygon_svg=1";
+    //    private static final String GOOGLE_GEOCODE_API_KEY = "AIzaSyAdX29NBwzTwVEM9K-eLnDx86Al-yHGRqQ";
+    private static final String LR_SPACE = "%20";
+    private static final String GOOGLE_SPACE = "+";
     private String transactionQuery;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
-    public List<Address> getAddressesByPostCode(String postCode) throws UnirestException, IOException {
+    public List<Address> getAddressesForPostCode(String postCode) throws UnirestException, IOException {
         List<Address> addressList = new LinkedList<>();
-        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", SPACE).toUpperCase())
+        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", LR_SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
         for (int i = 0; i < addresses.length(); i++) {
@@ -56,11 +61,11 @@ public class LandRegistryServiceImpl {
             );
         }
 
-        return addressList;
+        return getPositionForAddresses(addressList);
     }
 
-    public List<AddressWithTransaction> getTransactionsByPostCode(String postcode) throws IOException, UnirestException, ParseException {
-        List<AddressWithTransaction> transactionsList = new LinkedList<>();
+    public List<Address> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
+        List<Address> transactionsList = new LinkedList<>();
 
         String query = transactionQuery.replace("REPLACETHIS", postcode);
 
@@ -85,11 +90,44 @@ public class LandRegistryServiceImpl {
             );
         }
 
-        return transactionsList;
+        return getPositionForAddresses(transactionsList);
     }
 
+    public List<Address> getPositionForAddresses(List<Address> addresses) {
+        StringBuilder addressUriBuilder = new StringBuilder();
 
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
+        for (Address address : addresses) {
+            addressUriBuilder
+                    .append(OPEN_STREET_MAP_URL_PREFIX)
+                    .append(address.getHouseName())
+                    .append(" ")
+                    .append(address.getStreetName())
+                    .append(" ")
+                    .append(address.getTownName());
+
+            addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
+
+            try {
+                JSONObject response = Unirest.get(
+                        addressUriBuilder.toString()
+                ).asJson().getBody().getArray().getJSONObject(0);
+
+                address.setLatitude(response.getDouble("lat"));
+                address.setLongitude(response.getDouble("lon"));
+
+            } catch (UnirestException | JSONException e) {
+                e.printStackTrace();
+                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+            }
+
+            //Clear the StringBuilder buffer
+            addressUriBuilder.delete(0, addressUriBuilder.length());
+        }
+
+        return addresses;
+    }
+
+    private JSONObject executeSPARQLQuery(String query) throws UnirestException, IOException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
                 .field("output", "json")
