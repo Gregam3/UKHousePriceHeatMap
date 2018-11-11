@@ -2,6 +2,7 @@ package asegroup1.api.models.landregistry;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
@@ -16,6 +17,8 @@ public class LandRegistryQueryConstraint {
 
 	private HashSet<RangeConstraint> rangeConstraints;
 	private LandRegistryData equalityConstraints;
+	private ArrayList<String> postcodes;
+
 
 	public LandRegistryQueryConstraint(LandRegistryData eqalityConstraints) {
 		rangeConstraints = new HashSet<>();
@@ -61,12 +64,26 @@ public class LandRegistryQueryConstraint {
 		setPriceConstraint(false, price);
 	}
 
+
+
 	/* QUERY GENERATION */
 
 
 
+	public ArrayList<String> getPostcodes() {
+		return postcodes;
+	}
+
+	public void setPostcodes(ArrayList<String> postcodes) {
+		this.postcodes = postcodes;
+	}
+
+	public void setPostcodes(String... postcodes) {
+		setPostcodes(new ArrayList<>(Arrays.asList(postcodes)));
+	}
+
 	public String buildQueryWhere() {
-		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + buildQueryFilter() + "\n" + buildQueryAddressColumns();
+		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
 		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
 	}
 
@@ -84,19 +101,31 @@ public class LandRegistryQueryConstraint {
 	}
 
 	private String buildQueryFilter() {
-		if (rangeConstraints.isEmpty()) {
-			return ".";
+		boolean hasPoscodes = postcodes != null && !postcodes.isEmpty();
+		if (rangeConstraints.isEmpty() && hasPoscodes) {
+			return "";
 		} else {
 			StringBuilder filterStringBuilder = new StringBuilder("\nFILTER (\n\t");
 			int i = rangeConstraints.size();
 			for (RangeConstraint constraint : rangeConstraints) {
 				filterStringBuilder.append(constraint.toString());
-				if (--i != 0) {
+				if (hasPoscodes || --i != 0) {
 					filterStringBuilder.append(" &&\n\t");
 				} else {
 					filterStringBuilder.append("\n");
 				}
 			}
+			if (hasPoscodes) {
+				filterStringBuilder.append("REGEX(?postcode, \"");
+				for (i = 0; i < postcodes.size(); i++) {
+					filterStringBuilder.append("(" + postcodes.get(i).toUpperCase() + ")");
+					if (i != postcodes.size() - 1) {
+						filterStringBuilder.append("|");
+					}
+				}
+				filterStringBuilder.append("\")\n");
+			}
+
 			filterStringBuilder.append(")");
 			return filterStringBuilder.toString();
 		}
@@ -105,7 +134,7 @@ public class LandRegistryQueryConstraint {
 	private String buildQueryTransactionColumns() {
 		return "?transx lrppi:propertyAddress ?addr ; \n" + "	lrppi:propertyType/skos:prefLabel ?propertyType ; \n" + "	lrppi:estateType/skos:prefLabel ?estateType ; \n"
 				+ "	lrppi:transactionDate ?transactionDate ; \n" + "	lrppi:pricePaid ?pricePaid ; \n" + "	lrppi:newBuild ?newBuild ; \n"
-				+ "	lrppi:transactionCategory/skos:prefLabel ?transactionCategory";
+				+ "	lrppi:transactionCategory/skos:prefLabel ?transactionCategory.";
 	}
 
 	private String buildQueryAddressColumns() {
