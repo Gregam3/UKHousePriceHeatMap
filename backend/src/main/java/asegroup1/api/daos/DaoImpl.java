@@ -27,7 +27,7 @@ public class DaoImpl<T> implements Dao<T> {
 	}
 
 	@PersistenceContext(type = PersistenceContextType.EXTENDED)
-	protected EntityManager entityManager;
+	public EntityManager entityManager;
 
 	@SuppressWarnings("unchecked")
 	public T get(String id) {
