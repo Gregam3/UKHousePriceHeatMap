@@ -20,14 +20,14 @@ public class DaoImpl<T> implements Dao<T> {
 	/**
 	 * A necessary parameter in many of the entityManager's methods
 	 */
-	private Class currentClass;
+	protected Class currentClass;
 
 	protected void setCurrentClass(Class<T> currentClass) {
 		this.currentClass = currentClass;
 	}
 
 	@PersistenceContext(type = PersistenceContextType.EXTENDED)
-	private EntityManager entityManager;
+	protected EntityManager entityManager;
 
 	@SuppressWarnings("unchecked")
 	public T get(String id) {
