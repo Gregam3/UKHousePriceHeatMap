@@ -199,15 +199,18 @@ public class LandRegistryQueryConstraint {
 	}
 
 	public enum PropertyType {
-		DETACHED, SEMI_DETACHED, TERRACED, FLAT_MAISONETTE, OTHER;
+		detached, semi_detached, terraced, flat_maisonette, other;
+
 	}
 
 	public enum EstateType {
-		FREEHOLD, LEASEHOLD;
+		freehold, leasehold;
+
 	}
 
 	public enum TransactionCategory {
-		STANDARD_PRICE_PAID_TRANSACTION, ADDITIONAL_PRICE_PAID_TRANSACTION;
+		standard_price_paid_transaction, additional_price_paid_transaction;
 	}
+
 
 }

@@ -78,7 +78,7 @@ public class LandRegistryData {
 
 
 	public void setPropertyType(PropertyType propertyType) {
-		addTransConstraint(Selectable.propertyType, "propertyType/skos:prefLabel", parseEnumValue("lrcommon", propertyType.toString()));
+		addTransConstraint(Selectable.propertyType, "propertyType/skos:prefLabel", parseEnumAsString("lrcommon", propertyType.toString()));
 	}
 
 	public void setNewBuild(Boolean newBuild) {
@@ -86,11 +86,11 @@ public class LandRegistryData {
 	}
 
 	public void setEstateType(EstateType estateType) {
-		addTransConstraint(Selectable.estateType, "estateType/skos:prefLabel", parseEnumValue("lrcommon", estateType.toString()));
+		addTransConstraint(Selectable.estateType, "estateType/skos:prefLabel", parseEnumAsString("lrcommon", estateType.toString()));
 	}
 
 	public void setTransactionCategory(TransactionCategory transactionCategory) {
-		addTransConstraint(Selectable.transactionCategory, "transactionCategory/skos:prefLabel", parseEnumValue("lrppi", transactionCategory.toString()));
+		addTransConstraint(Selectable.transactionCategory, "transactionCategory/skos:prefLabel", parseEnumAsString("lrppi", transactionCategory.toString()));
 	}
 
 	public void setPricePaid(int pricePaid) {
@@ -107,7 +107,7 @@ public class LandRegistryData {
 
 	public String getConstraint(Selectable selectable) {
 		if (hasConstraint(selectable)) {
-			return constraints.get(selectable).value;
+			return constraints.get(selectable).getvalue();
 		} else {
 			return null;
 		}
@@ -123,13 +123,13 @@ public class LandRegistryData {
 
 	}
 
-	private String parseEnumValue(String namespace, String enumStr) {
-		return namespace + ":" + enumStr.toLowerCase().replace('_', '-');
+	private String parseEnumAsString(String namespace, String enumStr) {
+		return namespace + ":" + enumStr.replace('_', '-');
 	}
 
-	public boolean setConstraint(String name, JsonNode value) {
+	public boolean setConstraint(String name, String value) {
 		Selectable selectable;
-		if (value.asText().length() == 0) {
+		if (value.length() == 0) {
 			return true;
 		}
 		if (name.length() < 2) {
@@ -138,89 +138,85 @@ public class LandRegistryData {
 		try {
 			selectable = Selectable.valueOf(name.substring(0, 1).toLowerCase() + name.substring(1));
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
 			return false;
 		}
 		switch (selectable) {
 			case county:
-				setCounty(value.asText());
+				setCounty(value);
 				return true;
 			case district:
-				setDistrict(value.asText());
+				setDistrict(value);
 				return true;
 			case estateType:
 				EstateType estateType;
 				try {
-					estateType = EstateType.valueOf(value.asText().toUpperCase());
+					estateType = EstateType.valueOf(value);
 					setEstateType(estateType);
 					return true;
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
 					return false;
 				}
 			case locality:
-				setLocality(value.asText());
+				setLocality(value);
 				return true;
 			case newBuild:
-				if (value.isBoolean()) {
-					setNewBuild(value.asBoolean());
+				if (value.toLowerCase().matches("(false)|(true)")) {
+					setNewBuild(Boolean.parseBoolean(value));
 					return true;
 				} else {
 					return false;
 				}
 			case paon:
-				setPrimaryHouseName(value.asText());
+				setPrimaryHouseName(value);
 				return true;
 			case postcode:
-				setPostCode(value.asText());
+				setPostCode(value);
 				return true;
 			case pricePaid:
-				if (value.isInt()) {
-					setPricePaid(value.asInt());
+				try {
+					setPricePaid(Integer.parseInt(value));
 					return true;
-				} else {
+				} catch (NumberFormatException e) {
 					return false;
 				}
 			case propertyType:
 				PropertyType propertyType;
 				try {
-					propertyType = PropertyType.valueOf(value.asText().toUpperCase().replace("-", "_"));
+					propertyType = PropertyType.valueOf(value);
 					setPropertyType(propertyType);
 					return true;
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
 					return false;
 				}
 			case saon:
-				setSecondaryHouseName(value.asText());
+				setSecondaryHouseName(value);
 				return true;
 			case street:
-				setStreetName(value.asText());
+				setStreetName(value);
 				return true;
 			case town:
-				setTownName(value.asText());
+				setTownName(value);
 				return true;
 			case transactionCategory:
 				TransactionCategory transactionCategory;
 				try {
-					transactionCategory = TransactionCategory.valueOf(value.asText().toUpperCase().replace(" ", "_"));
+					transactionCategory = TransactionCategory.valueOf(value);
 				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
 					return false;
 				}
 				setTransactionCategory(transactionCategory);
 				return true;
 			case transactionDate:
 				try {
-					LocalDate date = LocalDate.parse(value.asText());
+					LocalDate date = LocalDate.parse(value);
 					setTransactionDate(date);
 					return true;
 				} catch (DateTimeParseException e) {
-					e.printStackTrace();
 					return false;
 				}
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	public boolean parseResponse(JsonNode json) {
@@ -230,7 +226,7 @@ public class LandRegistryData {
 		while (iter.hasNext()) {
 			Entry<String, JsonNode> field = iter.next();
 			if (field.getValue().has("value")) {
-				if (!setConstraint(field.getKey(), field.getValue().get("value"))) {
+				if (!setConstraint(field.getKey(), field.getValue().get("value").asText())) {
 					sucessful = false;
 				}
 			}
@@ -251,7 +247,7 @@ public class LandRegistryData {
 
 
 	abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
-		private String namespace, type, name, value;
+		protected String namespace, type, name, value;
 		private boolean isString;
 
 		public EqualityConstraint(String namespace, String type, String name, String value, boolean isString) {
@@ -263,7 +259,7 @@ public class LandRegistryData {
 		}
 
 		public String toString() {
-			return getNamespace() + " " + getSelector() + " " + (isString ? "\"" + value + "\"" : getvalue()) + ".";
+			return getNamespace() + " " + getSelector() + " " + (isString ? "\"" + value + "\"" : value) + ".";
 		}
 
 		public String getNamespace() {
@@ -299,6 +295,15 @@ public class LandRegistryData {
 		@Override
 		public int compareTo(EqualityConstraint o) {
 			return o instanceof TransConstraint ? 0 : 1;
+		}
+
+		@Override
+		public String getvalue() {
+			if (value.contains(":")) {
+				return value.substring(value.indexOf(':') + 1).replace('-', '_');
+			} else {
+				return value;
+			}
 		}
 	}
 }
