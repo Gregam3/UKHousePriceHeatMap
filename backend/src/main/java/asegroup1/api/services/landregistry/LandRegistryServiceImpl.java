@@ -1,12 +1,10 @@
 package asegroup1.api.services.landregistry;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,12 +24,6 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 @Service
 //Does not need to extend ServiceImpl as does not use a Dao
 public class LandRegistryServiceImpl {
-
-    public LandRegistryServiceImpl() throws IOException {
-        Properties queries = new Properties();
-        queries.load(new FileInputStream("src/main/java/asegroup1/api/services/landregistry/queries.properties"));
-
-    }
 
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
