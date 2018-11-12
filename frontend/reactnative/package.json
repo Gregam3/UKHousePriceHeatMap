@@ -13,7 +13,9 @@
     "node-forge": "^0.7.6",
     "react": "16.3.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-30.0.0.tar.gz",
-    "superagent": "^4.0.0-beta.5",
+    "superagent": "^4.0.0-beta.5"
+  },
+  "devDependencies": {
     "expo-cli": "^2.3.5"
   }
 }
