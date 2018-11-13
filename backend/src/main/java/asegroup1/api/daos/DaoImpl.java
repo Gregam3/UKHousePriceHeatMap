@@ -41,10 +41,9 @@ public class DaoImpl<T> implements Dao<T> {
         return entityManagerFactory.createEntityManager();
     }
 
-    @SuppressWarnings("unchecked")
     public T get(String id) {
         checkIfCurrentClassIsValid();
-        return (T) getEntityManager().find(currentClass, id);
+        return getEntityManager().find(currentClass, id);
     }
 
     public void delete(String id) {
@@ -55,7 +54,6 @@ public class DaoImpl<T> implements Dao<T> {
         getEntityManager().merge(t);
     }
 
-    @SuppressWarnings("unchecked")
     public List<T> list() {
         checkIfCurrentClassIsValid();
         return getEntityManager().createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
