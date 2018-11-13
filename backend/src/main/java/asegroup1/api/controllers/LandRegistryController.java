@@ -33,7 +33,7 @@ public class LandRegistryController {
         }
 
         try {
-            return new ResponseEntity<>(landRegistryService.getAddressesByPostCode(postCode), HttpStatus.OK);
+            return new ResponseEntity<>(landRegistryService.getAddressesForPostCode(postCode), HttpStatus.OK);
         } catch (UnirestException | IOException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
@@ -47,7 +47,7 @@ public class LandRegistryController {
         }
 
         try {
-            return new ResponseEntity<>(landRegistryService.getTransactionsByPostCode(postCode), HttpStatus.OK);
+            return new ResponseEntity<>(landRegistryService.getTransactionsForPostCode(postCode), HttpStatus.OK);
         } catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
