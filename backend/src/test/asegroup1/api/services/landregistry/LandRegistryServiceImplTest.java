@@ -3,7 +3,6 @@ package asegroup1.api.services.landregistry;
 import asegroup1.api.models.Address;
 import asegroup1.api.models.AddressWithTransaction;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -62,10 +61,10 @@ class LandRegistryServiceImplTest {
     @Test
     void testIfSearchTransactionsByPostCodeReturnsValidPrices() {
         try {
-            List<Address> addressByPostCode = landRegistryService.getTransactionsForPostCode("BN14 7BH");
+            List<AddressWithTransaction> addressByPostCode = landRegistryService.getTransactionsForPostCode("BN14 7BH");
 
             //Checking not only if results are returned but that results contain valid data
-            if (((AddressWithTransaction) addressByPostCode.get(0)).getPrice() <= 0) {
+            if ((addressByPostCode.get(0)).getPrice() <= 0) {
                 System.err.println("Transaction has invalid price");
                 assert false;
             }

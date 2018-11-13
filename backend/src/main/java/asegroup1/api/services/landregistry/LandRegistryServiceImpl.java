@@ -37,7 +37,6 @@ public class LandRegistryServiceImpl {
     private static final String OPEN_STREET_MAP_URL_SUFFIX = "?format=json&addressdetails=1&limit=1&polygon_svg=1";
     //    private static final String GOOGLE_GEOCODE_API_KEY = "AIzaSyAdX29NBwzTwVEM9K-eLnDx86Al-yHGRqQ";
     private static final String LR_SPACE = "%20";
-    private static final String GOOGLE_SPACE = "+";
     private String transactionQuery;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -64,8 +63,8 @@ public class LandRegistryServiceImpl {
         return getPositionForAddresses(addressList);
     }
 
-    public List<Address> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
-        List<Address> transactionsList = new LinkedList<>();
+    public List<AddressWithTransaction> getTransactionsForPostCode(String postcode) throws IOException, UnirestException, ParseException {
+        List<AddressWithTransaction> transactionsList = new LinkedList<>();
 
         String query = transactionQuery.replace("REPLACETHIS", postcode);
 
@@ -93,7 +92,7 @@ public class LandRegistryServiceImpl {
         return getPositionForAddresses(transactionsList);
     }
 
-    public List<Address> getPositionForAddresses(List<Address> addresses) {
+    public <E extends Address> List<E> getPositionForAddresses(List<E> addresses) {
         StringBuilder addressUriBuilder = new StringBuilder();
 
         for (Address address : addresses) {
