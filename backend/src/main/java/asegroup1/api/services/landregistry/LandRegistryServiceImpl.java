@@ -97,12 +97,11 @@ public class LandRegistryServiceImpl {
 		for (LandRegistryData address : addresses) {
             addressUriBuilder
                     .append(OPEN_STREET_MAP_URL_PREFIX)
-					.append(address.getConstraint(Selectable.paon))
+					.append(address.getConstraintNotNull(Selectable.paon))
                     .append(" ")
-					.append(address.getConstraint(Selectable.street))
+					.append(address.getConstraintNotNull(Selectable.street))
                     .append(" ")
-					.append(address.getConstraint(Selectable.town));
-
+					.append(address.getConstraintNotNull(Selectable.town));
             addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
 
             try {

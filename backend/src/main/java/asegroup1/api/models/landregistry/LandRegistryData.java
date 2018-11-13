@@ -117,6 +117,11 @@ public class LandRegistryData {
 		}
 	}
 
+	public String getConstraintNotNull(Selectable selectable) {
+		String constraint = getConstraint(selectable);
+		return constraint == null ? "" : constraint;
+	}
+
 	public boolean removeConstraint(Selectable selectable) {
 		if (hasConstraint(selectable)) {
 			constraints.remove(selectable);
