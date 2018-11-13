@@ -1,5 +1,6 @@
 package asegroup1.api.services.landregistry;
 
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.Address;
 import asegroup1.api.models.AddressWithTransaction;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +12,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -24,7 +26,11 @@ import java.util.*;
 //Does not need to extend ServiceImpl as does not use a Dao
 public class LandRegistryServiceImpl {
 
-    public LandRegistryServiceImpl() throws IOException {
+    private LandRegistryDaoImpl postCodeCoordinatesDao;
+
+    @Autowired
+    public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) throws IOException {
+        this.postCodeCoordinatesDao = postCodeCoordinatesDao;
         Properties queries = new Properties();
         queries.load(new FileInputStream("src/main/java/asegroup1/api/services/landregistry/queries.properties"));
 
@@ -39,8 +45,7 @@ public class LandRegistryServiceImpl {
     private static final String LR_SPACE = "%20";
     private String transactionQuery;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public List<Address> getAddressesForPostCode(String postCode) throws UnirestException, IOException {
         List<Address> addressList = new LinkedList<>();
@@ -70,7 +75,7 @@ public class LandRegistryServiceImpl {
 
         JSONObject queryResponse = executeSPARQLQuery(query);
 
-        ArrayNode transactionListResponse = (ArrayNode) objectMapper.readTree(
+        ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(
                 queryResponse.get("result").toString())
                 .get("results").get("bindings");
 
@@ -92,6 +97,10 @@ public class LandRegistryServiceImpl {
         return getPositionForAddresses(transactionsList);
     }
 
+    public List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
+        return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
+    }
+  
     public <E extends Address> List<E> getPositionForAddresses(List<E> addresses) {
         StringBuilder addressUriBuilder = new StringBuilder();
 

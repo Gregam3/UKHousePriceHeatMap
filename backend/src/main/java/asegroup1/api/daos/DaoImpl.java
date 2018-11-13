@@ -23,8 +23,6 @@ public class DaoImpl<T> implements Dao<T> {
     protected void setCurrentClass(Class<T> currentClass) {
         this.currentClass = currentClass;
     }
-
-
     private static EntityManagerFactory entityManagerFactory;
 
 

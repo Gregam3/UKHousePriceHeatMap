@@ -23,7 +23,7 @@ class LandRegistryServiceImplTest {
     @BeforeAll
     private static void setUpService() {
         try {
-            landRegistryService = new LandRegistryServiceImpl();
+            landRegistryService = new LandRegistryServiceImpl(null);
         } catch (IOException e) {
             e.printStackTrace();
         }
