@@ -29,7 +29,6 @@ public class DaoImpl<T> implements Dao<T> {
 	@PersistenceContext(type = PersistenceContextType.EXTENDED)
 	public EntityManager entityManager;
 
-	@SuppressWarnings("unchecked")
 	public T get(String id) {
 		checkIfCurrentClassIsValid();
 		return entityManager.find(currentClass, id);
@@ -43,7 +42,6 @@ public class DaoImpl<T> implements Dao<T> {
 		entityManager.merge(t);
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<T> list() {
 		checkIfCurrentClassIsValid();
 		return entityManager.createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
