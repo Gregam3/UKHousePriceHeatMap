@@ -246,6 +246,20 @@ public class LandRegistryData {
 	}
 
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof LandRegistryData) {
+			LandRegistryData data = (LandRegistryData) obj;
+			if (data.getAllConstraints().size() != getAllConstraints().size()) {
+				return false;
+			} else {
+				return data.getAllConstraints().equals(getAllConstraints());
+			}
+		} else {
+			return false;
+		}
+	}
+
 	abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
 		protected String namespace, type, name, value;
 		private boolean isString;
@@ -272,6 +286,16 @@ public class LandRegistryData {
 
 		public String getvalue() {
 			return value;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof EqualityConstraint) {
+				EqualityConstraint constraint = (EqualityConstraint) obj;
+				return this.toString().equals(constraint.toString());
+			} else {
+				return false;
+			}
 		}
 	}
 

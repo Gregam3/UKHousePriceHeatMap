@@ -29,8 +29,8 @@ class LandRegistryQuerySelectTest {
 
 	@BeforeEach
 	void initTests() {
-		selectables = EnumSet.allOf(Selectable.class);
 		querySelect = new LandRegistryQuerySelect();
+		selectables = EnumSet.allOf(Selectable.class);
 	}
 
 
@@ -58,7 +58,7 @@ class LandRegistryQuerySelectTest {
 		}
 	}
 
-	private List<Selectable> genRandomSelectables() {
+	List<Selectable> genRandomSelectables() {
 		Random r = new Random();
 		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
 		ArrayList<Selectable> selected = new ArrayList<>();
@@ -70,7 +70,7 @@ class LandRegistryQuerySelectTest {
 		return selected;
 	}
 
-	private Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
+	Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
 		return select.toArray(new Selectable[select.size()]);
 	}
 
@@ -231,22 +231,59 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
 	 */
 	@Test
-	void testBuildQuerySelectUnique() {
+	void testBuildQuerySelectUniqueFilled() {
+		ArrayList<Selectable> usedSelectables = new ArrayList<>(
+				Arrays.asList(new Selectable[] { Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode, Selectable.transactionDate }));
+		selectables.removeAll(usedSelectables);
 		List<Selectable> initial = fillWithRandomData();
-		initial.removeAll(Arrays.asList(new Selectable[] { Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode }));
-		String regex;
-		StringBuilder regexBuilder = new StringBuilder("SELECT \\?paon \\?saon \\?street \\?postcode \\(max\\(\\?transactionDate\\) AS \\?TransactionDate\\)(\\s\\(SAMPLE\\(\\?(");
-		initial.forEach(v -> {
-			regexBuilder.append("(" + v.toString() + "\\) AS \\?" + v.toString().substring(0, 1).toUpperCase() + v.toString().substring(1) + "\\))|");
-		});
-		regexBuilder.deleteCharAt(regexBuilder.length() - 1);
-		regexBuilder.append("))+");
-		regex = regexBuilder.toString();
+		testBuildQuerySelectUnique(initial);
+	}
 
-		System.out.println(regex);
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
+	 */
+	@Test
+	void testBuildQuerySelectUniqueEmpty() {
+		testBuildQuerySelectUnique(new ArrayList<>());
+	}
+
+
+	void testBuildQuerySelectUnique(List<Selectable> initial) {
+		String regex = buildQuerySelectRegex(initial);
+
 		System.out.println(querySelect.buildQuerySelectUnique());
 
 		assertTrue(querySelect.buildQuerySelectUnique().matches(regex));
 	}
 
+
+
+	String buildQuerySelectRegex(List<Selectable> selectables) {
+		StringBuilder select = new StringBuilder("SELECT \\?paon \\?saon \\?street \\?postcode \\(max\\(\\?transactionDate\\) AS \\?TransactionDate\\)");
+
+
+
+		if (!selectables.isEmpty()) {
+			StringBuilder extention = new StringBuilder();
+			StringBuilder sample = new StringBuilder("SAMPLE\\(\\?");
+			StringBuilder variableLower = new StringBuilder();
+			StringBuilder variableUpper = new StringBuilder();
+			selectables.forEach(v -> {
+				variableLower.append("(" + v.toString() + ")|");
+				variableUpper.append("(" + v.toString().substring(0, 1).toUpperCase() + v.toString().substring(1) + ")|");
+			});
+			variableLower.deleteCharAt(variableLower.length() - 1);
+			variableUpper.deleteCharAt(variableUpper.length() - 1);
+
+			sample.append("(" + variableLower + ")\\) AS \\?(" + variableUpper + ")");
+			System.out.println(sample);
+
+			extention.append("(\\(" + sample + "\\)\\s*)+");
+			select.append("\\s*" + extention);
+		}
+		
+		return select.toString();
+
+	}
 }

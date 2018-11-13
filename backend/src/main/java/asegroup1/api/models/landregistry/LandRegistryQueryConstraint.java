@@ -23,11 +23,11 @@ public class LandRegistryQueryConstraint {
 	public LandRegistryQueryConstraint(LandRegistryData eqalityConstraints) {
 		rangeConstraints = new HashSet<>();
 		this.equalityConstraints = eqalityConstraints;
+		postcodes = new ArrayList<>();
 	}
 
 	public LandRegistryQueryConstraint() {
-		rangeConstraints = new HashSet<>();
-		equalityConstraints = new LandRegistryData();
+		this(new LandRegistryData());
 	}
 
 
@@ -45,6 +45,15 @@ public class LandRegistryQueryConstraint {
 
 	public void setMaxDate(LocalDate date) {
 		setDateConstraint(true, date);
+	}
+
+	public RangeConstraint getRangeConstraint(String name, String comparitor) {
+		for (RangeConstraint constraint : rangeConstraints) {
+			if (constraint.getName().equals(name) && constraint.getComparitor().equals(comparitor)) {
+				return constraint;
+			}
+		}
+		return null;
 	}
 
 	public void setMinDate(LocalDate date) {
@@ -102,7 +111,7 @@ public class LandRegistryQueryConstraint {
 
 	private String buildQueryFilter() {
 		boolean hasPoscodes = postcodes != null && !postcodes.isEmpty();
-		if (rangeConstraints.isEmpty() && hasPoscodes) {
+		if (rangeConstraints.isEmpty() && !hasPoscodes) {
 			return "";
 		} else {
 			StringBuilder filterStringBuilder = new StringBuilder("\nFILTER (\n\t");

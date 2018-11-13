@@ -38,7 +38,7 @@ class LandRegistryDataTest {
 		lRData = new LandRegistryData();
 	}
 
-	private String generateRandomString() {
+	static String generateRandomString() {
 		return "Random: " + Math.random();
 	}
 
