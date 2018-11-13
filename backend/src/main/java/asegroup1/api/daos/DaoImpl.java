@@ -1,10 +1,14 @@
 package asegroup1.api.daos;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.*;
-import java.util.List;
 
 /**
  * @author Greg Mitten
@@ -28,7 +32,7 @@ public class DaoImpl<T> implements Dao<T> {
 
     //Set up entity manager based on properties provided in application.properties
     @PersistenceContext(type = PersistenceContextType.EXTENDED)
-    private EntityManager entityManager;
+	protected EntityManager entityManager;
 
     //Each time a Dao wants to access the database they fetch a new entity manager
     private EntityManager getEntityManager() {
