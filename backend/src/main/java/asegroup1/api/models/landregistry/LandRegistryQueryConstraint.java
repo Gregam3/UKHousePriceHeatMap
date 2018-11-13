@@ -47,9 +47,9 @@ public class LandRegistryQueryConstraint {
 		setDateConstraint(true, date);
 	}
 
-	public RangeConstraint getRangeConstraint(String name, String comparitor) {
+	public RangeConstraint getRangeConstraint(String name, String comparator) {
 		for (RangeConstraint constraint : rangeConstraints) {
-			if (constraint.getName().equals(name) && constraint.getComparitor().equals(comparitor)) {
+			if (constraint.getName().equals(name) && constraint.getComparator().equals(comparator)) {
 				return constraint;
 			}
 		}
@@ -162,12 +162,12 @@ public class LandRegistryQueryConstraint {
 
 
 	class RangeConstraint {
-		private String type, name, comparitor, value;
+		private String type, name, comparator, value;
 
-		public RangeConstraint(String type, String name, String comparitor, String value) {
+		public RangeConstraint(String type, String name, String comparator, String value) {
 			this.type = type;
 			this.name = name;
-			this.comparitor = comparitor;
+			this.comparator = comparator;
 			this.value = value;
 		}
 
@@ -179,8 +179,8 @@ public class LandRegistryQueryConstraint {
 			return name;
 		}
 
-		public String getComparitor() {
-			return comparitor;
+		public String getComparator() {
+			return comparator;
 		}
 
 		public String getValue() {
@@ -193,7 +193,7 @@ public class LandRegistryQueryConstraint {
 				RangeConstraint constraint = (RangeConstraint) obj;
 				// value is not compared, to force only once instance of a specific constraint
 				// in the rangeConstraints list
-				return constraint.getComparitor().equals(getComparitor()) && constraint.getName().equals(getName()) && constraint.getType().equals(getType());
+				return constraint.getComparator().equals(getComparator()) && constraint.getName().equals(getName()) && constraint.getType().equals(getType());
 			} else {
 				return false;
 			}
@@ -201,7 +201,7 @@ public class LandRegistryQueryConstraint {
 
 		@Override
 		public String toString() {
-			return "?" + name + " " + comparitor + " " + value + (type != null ? "^^" + type : "");
+			return "?" + name + " " + comparator + " " + value + (type != null ? "^^" + type : "");
 		}
 
 

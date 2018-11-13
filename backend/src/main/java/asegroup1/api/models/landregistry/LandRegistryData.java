@@ -129,17 +129,20 @@ public class LandRegistryData {
 
 	public boolean setConstraint(String name, String value) {
 		Selectable selectable;
-		if (value.length() == 0) {
-			return true;
-		}
-		if (name.length() < 2) {
-			return false;
-		}
+
 		try {
+			if (name.length() < 2) {
+				throw new IllegalArgumentException("Constraint Name is Invalid");
+			}
 			selectable = Selectable.valueOf(name.substring(0, 1).toLowerCase() + name.substring(1));
 		} catch (IllegalArgumentException e) {
-			return false;
+			throw new IllegalArgumentException("Constraint Name is Invalid");
 		}
+		if (value.length() == 0) {
+			removeConstraint(selectable);
+			return true;
+		}
+
 		switch (selectable) {
 			case county:
 				setCounty(value);
@@ -220,18 +223,18 @@ public class LandRegistryData {
 	}
 
 	public boolean parseResponse(JsonNode json) {
-		boolean sucessful = true;
+		boolean successful = true;
 
 		Iterator<Entry<String, JsonNode>> iter = json.fields();
 		while (iter.hasNext()) {
 			Entry<String, JsonNode> field = iter.next();
 			if (field.getValue().has("value")) {
 				if (!setConstraint(field.getKey(), field.getValue().get("value").asText())) {
-					sucessful = false;
+					successful = false;
 				}
 			}
 		}
-		return sucessful;
+		return successful;
 	}
 
 	@JsonIgnore

@@ -26,7 +26,7 @@ class LandRegistryQueryConstraintTest {
 
 	LandRegistryQueryConstraint constraint;
 
-	private static String[] genRandomPostcodes() {
+	private static String[] getRandomPostCodes() {
 		return new String[] { "OX14 1WH", "L18 9SN", "TN27 8JG", "PL8 2EE" };
 	}
 
@@ -130,7 +130,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	void testSetPostcodesArrayListOfString() {
-		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(genRandomPostcodes()));
+		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(getRandomPostCodes()));
 		constraint.setPostcodes(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
 	}
@@ -140,7 +140,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	void testSetPostcodesStringArray() {
-		String[] postcodes = genRandomPostcodes();
+		String[] postcodes = getRandomPostCodes();
 		constraint.setPostcodes(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
 	}
@@ -154,7 +154,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(genRandomPostcodes());
+		constraint.setPostcodes(getRandomPostCodes());
 
 		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
 	}
@@ -168,7 +168,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(genRandomPostcodes());
+		constraint.setPostcodes(getRandomPostCodes());
 
 		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
 	}
@@ -294,12 +294,6 @@ class LandRegistryQueryConstraintTest {
 		str.append(")");
 		return str.toString();
 	}
-
-//	public static void main(String[] args) {
-//		System.out.println(regexOptionalList("-", "test", "thats", "what", "this", "is yup"));
-//	}
-
-
 
 	/**
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildUniqueGrouping()}.

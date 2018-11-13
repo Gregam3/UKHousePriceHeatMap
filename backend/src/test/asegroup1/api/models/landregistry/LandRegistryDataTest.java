@@ -373,9 +373,9 @@ class LandRegistryDataTest {
 		}
 		try {
 			assertFalse(lRData.setConstraint(invalidSelectable, "someData"));
-
+			fail("Should throw illigalArgumentException");
 		} catch (IllegalArgumentException e) {
-			fail("Should not throw illigalArgumentException");
+			// expected, as should not be parseable
 		}
 	}
 
