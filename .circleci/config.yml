@@ -6,7 +6,11 @@ publish: &publish
     - image: circleci/node:10.4.1
   steps:
     - checkout
-
+    
+    - run:
+        name: Check directory
+        command: ls -la
+    
     - run:
         name: Installing dependencies
         command: npm install

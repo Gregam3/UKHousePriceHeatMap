@@ -6,14 +6,11 @@ node_js:
 cache:
   directories:
     - ~/.npm
-    - .jest
 before_script:
   - cd frontend/reactnative/
   - npm install -g npm@latest
   - npm install
 script:
-  - npm ci
-  - npx jest --ci
 jobs:
   include:
     - stage: deploy
