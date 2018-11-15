@@ -34,7 +34,7 @@ class LandRegistryDataTest {
 	private LandRegistryData lRData;
 
 	@BeforeEach
-	void initLandRegistryData() {
+	public void initLandRegistryData() {
 		lRData = new LandRegistryData();
 	}
 
@@ -50,7 +50,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#LandRegistryData()}.
 	 */
 	@Test
-	void testLandRegistryData() {
+	public void testLandRegistryData() {
 		assertNotNull(lRData.getAllConstraints());
 		assertTrue(lRData.getAllConstraints().isEmpty());
 
@@ -63,7 +63,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPrimaryHouseName(java.lang.String)}.
 	 */
 	@Test
-	void testSetPrimaryHouseName() {
+	public void testSetPrimaryHouseName() {
 		String houseNameStr = generateRandomString();
 		lRData.setPrimaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.paon, houseNameStr);
@@ -77,7 +77,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setSecondaryHouseName(java.lang.String)}.
 	 */
 	@Test
-	void testSetSecondaryHouseName() {
+	public void testSetSecondaryHouseName() {
 		String houseNameStr = generateRandomString();
 		lRData.setSecondaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.saon, houseNameStr);
@@ -91,7 +91,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setStreetName(java.lang.String)}.
 	 */
 	@Test
-	void testSetStreetName() {
+	public void testSetStreetName() {
 		String streetNameStr = generateRandomString();
 		lRData.setStreetName(streetNameStr);
 		assertStoredStringEqual(Selectable.street, streetNameStr);
@@ -105,7 +105,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setTownName(java.lang.String)}.
 	 */
 	@Test
-	void testSetTownName() {
+	public void testSetTownName() {
 		String townNameStr = generateRandomString();
 		lRData.setTownName(townNameStr);
 		assertStoredStringEqual(Selectable.town, townNameStr);
@@ -119,7 +119,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setLocality(java.lang.String)}.
 	 */
 	@Test
-	void testSetLocality() {
+	public void testSetLocality() {
 		String localityNameStr = generateRandomString();
 		lRData.setLocality(localityNameStr);
 		assertStoredStringEqual(Selectable.locality, localityNameStr);
@@ -133,7 +133,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setDistrict(java.lang.String)}.
 	 */
 	@Test
-	void testSetDistrict() {
+	public void testSetDistrict() {
 		String districtNameStr = generateRandomString();
 		lRData.setDistrict(districtNameStr);
 		assertStoredStringEqual(Selectable.district, districtNameStr);
@@ -147,7 +147,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setCounty(java.lang.String)}.
 	 */
 	@Test
-	void testSetCounty() {
+	public void testSetCounty() {
 		String countyNameStr = generateRandomString();
 		lRData.setCounty(countyNameStr);
 		assertStoredStringEqual(Selectable.county, countyNameStr);
@@ -161,7 +161,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
 	 */
 	@Test
-	void testSetPostCode() {
+	public void testSetPostCode() {
 		String postCode = "bn21 4nv";
 
 		try {
@@ -185,7 +185,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPropertyType(asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType)}.
 	 */
 	@Test
-	void testSetPropertyType() {
+	public void testSetPropertyType() {
 		EnumSet.allOf(PropertyType.class).forEach(propertyType -> {
 			lRData.setPropertyType(propertyType);
 			assertEquals(propertyType.toString(), lRData.getConstraint(Selectable.propertyType));
@@ -196,7 +196,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setNewBuild(java.lang.Boolean)}.
 	 */
 	@Test
-	void testSetNewBuild() {
+	public void testSetNewBuild() {
 		Boolean newBuild = true;
 		lRData.setNewBuild(newBuild);
 		assertEquals(newBuild.toString(), lRData.getConstraint(Selectable.newBuild));
@@ -210,7 +210,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setEstateType(asegroup1.api.models.landregistry.LandRegistryQueryConstraint.EstateType)}.
 	 */
 	@Test
-	void testSetEstateType() {
+	public void testSetEstateType() {
 		EnumSet.allOf(EstateType.class).forEach(estateType -> {
 			lRData.setEstateType(estateType);
 			assertEquals(estateType.toString(), lRData.getConstraint(Selectable.estateType));
@@ -221,7 +221,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setTransactionCategory(asegroup1.api.models.landregistry.LandRegistryQueryConstraint.TransactionCategory)}.
 	 */
 	@Test
-	void testSetTransactionCategory() {
+	public void testSetTransactionCategory() {
 		EnumSet.allOf(TransactionCategory.class).forEach(transactionCategory -> {
 			lRData.setTransactionCategory(transactionCategory);
 			assertEquals(transactionCategory.toString(), lRData.getConstraint(Selectable.transactionCategory));
@@ -232,7 +232,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPricePaid(int)}.
 	 */
 	@Test
-	void testSetPricePaid() {
+	public void testSetPricePaid() {
 		Random rand = new Random();
 		int num = 0;
 		for (int i = 0; i < 5; i++) {
@@ -246,7 +246,7 @@ class LandRegistryDataTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setTransactionDate(java.time.LocalDate)}.
 	 */
 	@Test
-	void testSetTransactionDate() {
+	public void testSetTransactionDate() {
 		Random rand = new Random();
 		LocalDate expectedDate, actualDate;
 		for (int i = 0; i < 5; i++) {
@@ -266,7 +266,7 @@ class LandRegistryDataTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setConstraint(java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	void testSetConstraint() {
+	public void testSetConstraint() {
 		
 
 		EnumSet.allOf(Selectable.class).forEach(selectable -> {
@@ -362,7 +362,7 @@ class LandRegistryDataTest {
 	}
 
 	@Test
-	void testSetConstraintInvalidKey() {
+	public void testSetConstraintInvalidKey() {
 		// test adding value with invalid selectable
 		String invalidSelectable = "invalidSelectable";
 		try {
