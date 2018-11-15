@@ -26,6 +26,8 @@ class LandRegistryQuerySelectTest {
 	private EnumSet<Selectable> selectables;
 	private LandRegistryQuerySelect querySelect;
 
+	private static long randomSeed = 8312595207343625996L;
+
 
 	@BeforeEach
 	void initTests() {
@@ -59,7 +61,7 @@ class LandRegistryQuerySelectTest {
 	}
 
 	List<Selectable> genRandomSelectables() {
-		Random r = new Random();
+		Random r = new Random(randomSeed);
 		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
 		ArrayList<Selectable> selected = new ArrayList<>();
 		int reps = r.nextInt(selectables.size() - 1) + 1;

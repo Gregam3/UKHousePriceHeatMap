@@ -26,6 +26,8 @@ class LandRegistryQueryConstraintTest {
 
 	LandRegistryQueryConstraint constraint;
 
+	private static long randomSeed = 8312595207343625996L;
+
 	private static String[] getRandomPostCodes() {
 		return new String[] { "OX14 1WH", "L18 9SN", "TN27 8JG", "PL8 2EE" };
 	}
@@ -47,7 +49,7 @@ class LandRegistryQueryConstraintTest {
 	static LandRegistryData genLandRegistryData() {
 		LandRegistryData data = new LandRegistryData();
 		data.setNewBuild(true);
-		data.setPricePaid(new Random().nextInt(Integer.MAX_VALUE));
+		data.setPricePaid(new Random(randomSeed).nextInt(Integer.MAX_VALUE));
 		data.setPrimaryHouseName(LandRegistryDataTest.generateRandomString());
 		data.setStreetName(LandRegistryDataTest.generateRandomString());
 		data.setTownName(LandRegistryDataTest.generateRandomString());
@@ -106,7 +108,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	void testSetMaxPricePaid() {
-		int pricePaid = new Random().nextInt(Integer.MAX_VALUE);
+		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMaxPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", "<");
 		assertNotNull(rangeConstraint);
@@ -118,7 +120,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	void testSetMinPricePaid() {
-		int pricePaid = new Random().nextInt(Integer.MAX_VALUE);
+		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMinPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", ">");
 		assertNotNull(rangeConstraint);
