@@ -29,7 +29,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
  * @author Richousrick
  *
  */
-class LandRegistryDataTest {
+public class LandRegistryDataTest {
 
 	private LandRegistryData lRData;
 
