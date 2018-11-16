@@ -33,13 +33,16 @@ class LandRegistryDataTest {
 
 	private LandRegistryData lRData;
 
+	private static long randomSeed = 8312595207343625996L;
+
+
 	@BeforeEach
 	void initLandRegistryData() {
 		lRData = new LandRegistryData();
 	}
 
 	static String generateRandomString() {
-		return "Random: " + Math.random();
+		return "Random: " + new Random(randomSeed).nextLong();
 	}
 
 	private void assertStoredStringEqual(Selectable selectable, String expected) {
@@ -271,7 +274,7 @@ class LandRegistryDataTest {
 
 		EnumSet.allOf(Selectable.class).forEach(selectable -> {
 			String value = null;
-			Random rand = new Random();
+			Random rand = new Random(randomSeed);
 			switch (selectable) {
 				case paon:
 				case saon:
