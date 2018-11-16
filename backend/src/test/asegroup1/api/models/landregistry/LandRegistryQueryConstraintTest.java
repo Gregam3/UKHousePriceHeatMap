@@ -33,11 +33,11 @@ class LandRegistryQueryConstraintTest {
 	}
 
 	@BeforeEach
-	void initConstraint() {
+	public void initConstraint() {
 		constraint = new LandRegistryQueryConstraint();
 	}
 
-	void testFiltersEmpty() {
+	private void testFiltersEmpty() {
 		assertNull(constraint.getRangeConstraint("transactionDate", "<"));
 		assertNull(constraint.getRangeConstraint("transactionDate", ">"));
 		assertNull(constraint.getRangeConstraint("pricePaid", "<"));
@@ -46,7 +46,7 @@ class LandRegistryQueryConstraintTest {
 
 	}
 
-	static LandRegistryData genLandRegistryData() {
+	private static LandRegistryData genLandRegistryData() {
 		LandRegistryData data = new LandRegistryData();
 		data.setNewBuild(true);
 		data.setPricePaid(new Random(randomSeed).nextInt(Integer.MAX_VALUE));
@@ -62,7 +62,7 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#LandRegistryQueryConstraint(asegroup1.api.models.landregistry.LandRegistryData)}.
 	 */
 	@Test
-	void testLandRegistryQueryConstraintLandRegistryData() {
+	public void testLandRegistryQueryConstraintLandRegistryData() {
 		LandRegistryData data = genLandRegistryData();
 
 		constraint = new LandRegistryQueryConstraint(data);
@@ -73,7 +73,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#LandRegistryQueryConstraint()}.
 	 */
 	@Test
-	void testLandRegistryQueryConstraint() {
+	public void testLandRegistryQueryConstraint() {
 		assertEquals(0, constraint.getEqualityConstraints().getAllConstraints().size());
 		testFiltersEmpty();
 	}
@@ -83,7 +83,7 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setMaxDate(java.time.LocalDate)}.
 	 */
 	@Test
-	void testSetMaxDate() {
+	public void testSetMaxDate() {
 		LocalDate date = LocalDate.now();
 		constraint.setMaxDate(date);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("transactionDate", "<");
@@ -95,7 +95,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setMinDate(java.time.LocalDate)}.
 	 */
 	@Test
-	void testSetMinDate() {
+	public void testSetMinDate() {
 		LocalDate date = LocalDate.now();
 		constraint.setMinDate(date);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("transactionDate", ">");
@@ -107,7 +107,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setMaxPricePaid(int)}.
 	 */
 	@Test
-	void testSetMaxPricePaid() {
+	public void testSetMaxPricePaid() {
 		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMaxPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", "<");
@@ -119,7 +119,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setMinPricePaid(int)}.
 	 */
 	@Test
-	void testSetMinPricePaid() {
+	public void testSetMinPricePaid() {
 		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMinPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", ">");
@@ -131,7 +131,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.util.ArrayList)}.
 	 */
 	@Test
-	void testSetPostcodesArrayListOfString() {
+	public void testSetPostcodesArrayListOfString() {
 		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(getRandomPostCodes()));
 		constraint.setPostcodes(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
@@ -141,7 +141,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.lang.String[])}.
 	 */
 	@Test
-	void testSetPostcodesStringArray() {
+	public void testSetPostcodesStringArray() {
 		String[] postcodes = getRandomPostCodes();
 		constraint.setPostcodes(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
@@ -151,7 +151,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
 	 */
 	@Test
-	void testBuildQueryWhereComplete() {
+	public void testBuildQueryWhereComplete() {
 		LandRegistryData data = genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
@@ -166,7 +166,7 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
 	 */
 	@Test
-	void testBuildQueryWhereNoConstraint() {
+	public void testBuildQueryWhereNoConstraint() {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
@@ -180,7 +180,7 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
 	 */
 	@Test
-	void testBuildQueryWhereNoPostCode() {
+	public void testBuildQueryWhereNoPostCode() {
 		LandRegistryData data = genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
@@ -194,7 +194,7 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
 	 */
 	@Test
-	void testBuildQueryWhereNoFilters() {
+	public void testBuildQueryWhereNoFilters() {
 		LandRegistryData data = genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 
@@ -206,13 +206,13 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
 	 */
 	@Test
-	void testBuildQueryWhereEmpty() {
+	public void testBuildQueryWhereEmpty() {
 		constraint = new LandRegistryQueryConstraint();
 
 		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
 	}
 
-	String buildQueryRegex() {
+	private String buildQueryRegex() {
 		String delimeter = "\\s*";
 		// value regex parts
 		String valueReference = "\\?\\w+";
@@ -301,7 +301,7 @@ class LandRegistryQueryConstraintTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildUniqueGrouping()}.
 	 */
 	@Test
-	void testBuildUniqueGrouping() {
+	public void testBuildUniqueGrouping() {
 		String regex;
 		StringBuilder regexBuilder = new StringBuilder("GROUP BY(\\s\\?(");
 		EnumSet.allOf(Selectable.class).forEach(v -> {
