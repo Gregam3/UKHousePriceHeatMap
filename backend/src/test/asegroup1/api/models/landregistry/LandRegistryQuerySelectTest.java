@@ -30,7 +30,7 @@ class LandRegistryQuerySelectTest {
 
 
 	@BeforeEach
-	void initTests() {
+	public void initTests() {
 		querySelect = new LandRegistryQuerySelect();
 		selectables = EnumSet.allOf(Selectable.class);
 	}
@@ -60,7 +60,7 @@ class LandRegistryQuerySelectTest {
 		}
 	}
 
-	List<Selectable> genRandomSelectables() {
+	private List<Selectable> genRandomSelectables() {
 		Random r = new Random(randomSeed);
 		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
 		ArrayList<Selectable> selected = new ArrayList<>();
@@ -72,7 +72,7 @@ class LandRegistryQuerySelectTest {
 		return selected;
 	}
 
-	Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
+	private Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
 		return select.toArray(new Selectable[select.size()]);
 	}
 
@@ -90,7 +90,7 @@ class LandRegistryQuerySelectTest {
 	 * with no parameters provided.
 	 */
 	@Test
-	void testLandRegistryQuerySelect() {
+	public void testLandRegistryQuerySelect() {
 		testQuerySelectEmpty();
 	}
 
@@ -99,7 +99,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
 	 */
 	@Test
-	void testLandRegistryQuerySelectSelectableArray() {
+	public void testLandRegistryQuerySelectSelectableArray() {
 		List<Selectable> select = genRandomSelectables();
 		querySelect = new LandRegistryQuerySelect(buildRandomSelectablesArray(select));
 		testQuerySelectMatches(select);
@@ -109,7 +109,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(boolean, asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
 	 */
 	@Test
-	void testLandRegistryQuerySelectBooleanSelectableArray() {
+	public void testLandRegistryQuerySelectBooleanSelectableArray() {
 		List<Selectable> select = genRandomSelectables();
 		querySelect = new LandRegistryQuerySelect(false, buildRandomSelectablesArray(select));
 		testQuerySelectMatches(select);
@@ -126,7 +126,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#select(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
 	 */
 	@Test
-	void testSelectDeselectOne() {
+	public void testSelectDeselectOne() {
 		List<Selectable> select = genRandomSelectables();
 		for (Selectable selectable : select) {
 			querySelect.select(selectable);
@@ -142,7 +142,8 @@ class LandRegistryQuerySelectTest {
 	 * and
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
 	 */
-	void testSelectDeselectMany() {
+	@Test
+	public void testSelectDeselectMany() {
 		List<Selectable> select = fillWithRandomData();
 		testQuerySelectMatches(select);
 		querySelect.deselect(buildRandomSelectablesArray(select));
@@ -156,7 +157,7 @@ class LandRegistryQuerySelectTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselectAll()}.
 	 */
 	@Test
-	void testSelectDeselectAllEmpty() {
+	public void testSelectDeselectAllEmpty() {
 		querySelect.selectAll();
 		testQuerySelectFull();
 		querySelect.deselectAll();
@@ -169,7 +170,7 @@ class LandRegistryQuerySelectTest {
 	 * when there is some data in select
 	 */
 	@Test
-	void testSelectAllMixed() {
+	public void testSelectAllMixed() {
 		fillWithRandomData();
 		querySelect.selectAll();
 		testQuerySelectFull();
@@ -181,7 +182,7 @@ class LandRegistryQuerySelectTest {
 	 * when there is some data in select
 	 */
 	@Test
-	void testDeselectAllMixed() {
+	public void testDeselectAllMixed() {
 		fillWithRandomData();
 		querySelect.deselectAll();
 		testQuerySelectEmpty();
@@ -191,7 +192,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#toggleSelectable(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable)}.
 	 */
 	@Test
-	void testToggleSelectable() {
+	public void testToggleSelectable() {
 		List<Selectable> initial = fillWithRandomData();
 		List<Selectable> toToggle = genRandomSelectables();
 		List<Selectable> expected = new ArrayList<Selectable>(initial);
@@ -215,7 +216,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect()}.
 	 */
 	@Test
-	void testBuildQuerySelect() {
+	public void testBuildQuerySelect() {
 		List<Selectable> initial = fillWithRandomData();
 		String regex;
 		StringBuilder regexBuilder = new StringBuilder("SELECT(\\s\\?(");
@@ -233,7 +234,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
 	 */
 	@Test
-	void testBuildQuerySelectUniqueFilled() {
+	public void testBuildQuerySelectUniqueFilled() {
 		ArrayList<Selectable> usedSelectables = new ArrayList<>(
 				Arrays.asList(new Selectable[] { Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode, Selectable.transactionDate }));
 		selectables.removeAll(usedSelectables);
@@ -246,12 +247,12 @@ class LandRegistryQuerySelectTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
 	 */
 	@Test
-	void testBuildQuerySelectUniqueEmpty() {
+	public void testBuildQuerySelectUniqueEmpty() {
 		testBuildQuerySelectUnique(new ArrayList<>());
 	}
 
 
-	void testBuildQuerySelectUnique(List<Selectable> initial) {
+	private void testBuildQuerySelectUnique(List<Selectable> initial) {
 		String regex = buildQuerySelectRegex(initial);
 
 		System.out.println(querySelect.buildQuerySelectUnique());
@@ -261,7 +262,7 @@ class LandRegistryQuerySelectTest {
 
 
 
-	String buildQuerySelectRegex(List<Selectable> selectables) {
+	private String buildQuerySelectRegex(List<Selectable> selectables) {
 		StringBuilder select = new StringBuilder("SELECT \\?paon \\?saon \\?street \\?postcode \\(max\\(\\?transactionDate\\) AS \\?TransactionDate\\)");
 
 
