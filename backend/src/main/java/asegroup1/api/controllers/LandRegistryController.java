@@ -64,11 +64,25 @@ public class LandRegistryController {
 
         try {
         	
-			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(constraint, true)), HttpStatus.OK);
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(constraint)), HttpStatus.OK);
 		} catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
     }
+
+	@GetMapping("get-transactionsTown/{town}")
+	public ResponseEntity<?> getTransactionFromTown(@PathVariable("town") String town) {
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		constraint.getEqualityConstraints().setTownName(town);
+		constraint.setMinDate(LocalDate.now().minusYears(5));
+
+		try {
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(constraint)),
+					HttpStatus.OK);
+		} catch (IOException | UnirestException | ParseException e) {
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		}
+	}
 
 	private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
 		List<HashMap<String, String>> keys = new ArrayList<>();

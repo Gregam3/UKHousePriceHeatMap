@@ -15,7 +15,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
 
 /**
  * @author Greg Mitten

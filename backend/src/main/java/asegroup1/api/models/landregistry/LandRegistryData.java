@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.EstateType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.TransactionCategory;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
 public class LandRegistryData {
 	private HashMap<Selectable, EqualityConstraint> constraints;

@@ -2,7 +2,8 @@ package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,9 +21,12 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 
 
 @Service
@@ -64,13 +68,13 @@ public class LandRegistryServiceImpl {
 	}
 
 
-	public List<LandRegistryData> getTransactionsForPostCode(LandRegistryQueryConstraint values, LandRegistryQuerySelect select, boolean latestOnly)
+	public List<LandRegistryData> getTransactions(LandRegistryQuery query)
 			throws IOException, UnirestException {
 		List<LandRegistryData> transactionsList = new LinkedList<>();
 
-		String query = latestOnly ? buildUniqueQuery(select, values) : buildQuery(select, values);
+		String queryStr = query.buildQuery();
 
-		JSONObject queryResponse = executeSPARQLQuery(query);
+		JSONObject queryResponse = executeSPARQLQuery(queryStr);
 
 		ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
 
@@ -81,8 +85,39 @@ public class LandRegistryServiceImpl {
 		return getPositionForAddresses(transactionsList);
     }
 
-	public List<LandRegistryData> getTransactions(LandRegistryQueryConstraint values, boolean latestOnly) throws IOException, UnirestException, ParseException {
-		return getTransactionsForPostCode(values, new LandRegistryQuerySelect(true), latestOnly);
+	public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint, LandRegistryQueryGroup group)
+			throws IOException, UnirestException {
+		return getTransactions(new LandRegistryQuery(constraint, group, select));
+	}
+
+	public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint) throws IOException, UnirestException {
+		return getTransactions(new LandRegistryQuery(constraint, null, select));
+	}
+
+	public List<LandRegistryData> getLatestTransactions(List<Selectable> values, LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
+		LandRegistryQueryGroup group = new LandRegistryQueryGroup(Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode);
+
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		select.setSelectValue(Selectable.paon, Aggrigation.NONE);
+		values.remove(Selectable.paon);
+		select.setSelectValue(Selectable.saon, Aggrigation.NONE);
+		values.remove(Selectable.saon);
+		select.setSelectValue(Selectable.street, Aggrigation.NONE);
+		values.remove(Selectable.street);
+		select.setSelectValue(Selectable.postcode, Aggrigation.NONE);
+		values.remove(Selectable.postcode);
+		select.setSelectValue(Selectable.transactionDate, Aggrigation.MAX);
+		values.remove(Selectable.transactionDate);
+
+		for (Selectable selectable : values) {
+			select.setSelectValue(selectable, Aggrigation.SAMPLE);
+		}
+
+		return getTransactions(select, constraint, group);
+	}
+
+	public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
+		return getLatestTransactions(new ArrayList(), constraint);
 	}
 
     public List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
@@ -90,36 +125,29 @@ public class LandRegistryServiceImpl {
     }
   
 	public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
-        StringBuilder addressUriBuilder = new StringBuilder();
+		StringBuilder addressUriBuilder = new StringBuilder();
 
 		for (LandRegistryData address : addresses) {
-            addressUriBuilder
-                    .append(OPEN_STREET_MAP_URL_PREFIX)
-					.append(address.getConstraintNotNull(Selectable.paon))
-                    .append(" ")
-					.append(address.getConstraintNotNull(Selectable.street))
-                    .append(" ")
-					.append(address.getConstraintNotNull(Selectable.town));
-            addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
+			addressUriBuilder.append(OPEN_STREET_MAP_URL_PREFIX).append(address.getConstraintNotNull(Selectable.paon)).append(" ")
+					.append(address.getConstraintNotNull(Selectable.street)).append(" ").append(address.getConstraintNotNull(Selectable.town));
+			addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
 
-            try {
-                JSONObject response = Unirest.get(
-                        addressUriBuilder.toString()
-                ).asJson().getBody().getArray().getJSONObject(0);
+			try {
+				JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0);
 
-                address.setLatitude(response.getDouble("lat"));
-                address.setLongitude(response.getDouble("lon"));
+				address.setLatitude(response.getDouble("lat"));
+				address.setLongitude(response.getDouble("lon"));
 
-            } catch (UnirestException | JSONException e) {
-                e.printStackTrace();
-                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-            }
+			} catch (UnirestException | JSONException e) {
+				e.printStackTrace();
+				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+			}
 
-            //Clear the StringBuilder buffer
-            addressUriBuilder.delete(0, addressUriBuilder.length());
-        }
+			// Clear the StringBuilder buffer
+			addressUriBuilder.delete(0, addressUriBuilder.length());
+		}
 
-        return addresses;
+		return addresses;
     }
 
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
@@ -133,19 +161,18 @@ public class LandRegistryServiceImpl {
                 .getObject();
     }
 
-	private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
-		return getQueryPrefixDeclarations() + "\n" + select.buildQuerySelect() + "\n" + values.buildQueryWhere();
+	public static void main(String[] args) {
+		LandRegistryData equalityConstraints = new LandRegistryData();
+		equalityConstraints.setTownName("Eastbourne");
+
+		LandRegistryQueryConstraint values = new LandRegistryQueryConstraint(equalityConstraints);
+		values.setMinDate(LocalDate.now().minusYears(5));
+
+		try {
+			System.out.println(new LandRegistryServiceImpl(null).getLatestTransactions(new ArrayList<>(), values));
+		} catch (IOException | UnirestException | ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private String buildUniqueQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
-		return getQueryPrefixDeclarations() + "\n" + select.buildQuerySelectUnique() + "\n" + values.buildQueryWhere() + values.buildUniqueGrouping();
-	}
-
-	private String getQueryPrefixDeclarations() {
-		return "prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-				+ "prefix owl: <http://www.w3.org/2002/07/owl#> \n" + "prefix xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-				+ "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n" + "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
-				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" + "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
-				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
-	}
 }

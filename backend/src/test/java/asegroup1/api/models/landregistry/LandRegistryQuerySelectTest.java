@@ -15,7 +15,7 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
 
 /**
  * @author Richousrick
@@ -24,14 +24,14 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 class LandRegistryQuerySelectTest {
 
 	private EnumSet<Selectable> selectables;
-	private LandRegistryQuerySelect querySelect;
+	private LandRegistryQueryGroup querySelect;
 
 	private static long randomSeed = 8312595207343625996L;
 
 
 	@BeforeEach
 	public void initTests() {
-		querySelect = new LandRegistryQuerySelect();
+		querySelect = new LandRegistryQueryGroup();
 		selectables = EnumSet.allOf(Selectable.class);
 	}
 
@@ -86,7 +86,7 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
 	 * with no parameters provided.
 	 */
 	@Test
@@ -96,34 +96,34 @@ class LandRegistryQuerySelectTest {
 
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
 	 */
 	@Test
 	public void testLandRegistryQuerySelectSelectableArray() {
 		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQuerySelect(buildRandomSelectablesArray(select));
+		querySelect = new LandRegistryQueryGroup(buildRandomSelectablesArray(select));
 		testQuerySelectMatches(select);
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(boolean, asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#LandRegistryQuerySelect(boolean, asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
 	 */
 	@Test
 	public void testLandRegistryQuerySelectBooleanSelectableArray() {
 		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQuerySelect(false, buildRandomSelectablesArray(select));
+		querySelect = new LandRegistryQueryGroup(false, buildRandomSelectablesArray(select));
 		testQuerySelectMatches(select);
 
 
 		select = genRandomSelectables();
 		ArrayList<Selectable> inverse = new ArrayList<>(selectables);
 		inverse.removeAll(select);
-		querySelect = new LandRegistryQuerySelect(true, buildRandomSelectablesArray(select));
+		querySelect = new LandRegistryQueryGroup(true, buildRandomSelectablesArray(select));
 		testQuerySelectMatches(inverse);
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#select(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#select(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
 	 */
 	@Test
 	public void testSelectDeselectOne() {
@@ -138,9 +138,9 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#select(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#select(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}
 	 * and
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#deselect(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
 	 */
 	@Test
 	public void testSelectDeselectMany() {
@@ -152,9 +152,9 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#selectAll()}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#selectAll()}
 	 * and
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselectAll()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#deselectAll()}.
 	 */
 	@Test
 	public void testSelectDeselectAllEmpty() {
@@ -166,7 +166,7 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#selectAll()}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#selectAll()}
 	 * when there is some data in select
 	 */
 	@Test
@@ -178,7 +178,7 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselectAll()}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#deselectAll()}
 	 * when there is some data in select
 	 */
 	@Test
@@ -189,7 +189,7 @@ class LandRegistryQuerySelectTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#toggleSelectable(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable)}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#toggleSelectable(asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable)}.
 	 */
 	@Test
 	public void testToggleSelectable() {
@@ -213,7 +213,7 @@ class LandRegistryQuerySelectTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect()}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#buildQuerySelect()}.
 	 */
 	@Test
 	public void testBuildQuerySelect() {
@@ -231,7 +231,7 @@ class LandRegistryQuerySelectTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#buildQuerySelectUnique()}.
 	 */
 	@Test
 	public void testBuildQuerySelectUniqueFilled() {
@@ -244,7 +244,7 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#buildQuerySelectUnique()}.
 	 */
 	@Test
 	public void testBuildQuerySelectUniqueEmpty() {

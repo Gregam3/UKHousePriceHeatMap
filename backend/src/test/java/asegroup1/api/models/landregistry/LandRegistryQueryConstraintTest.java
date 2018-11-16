@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.RangeConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
 
 /**
  * @author Richousrick
@@ -148,7 +148,7 @@ class LandRegistryQueryConstraintTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereComplete() {
@@ -158,12 +158,12 @@ class LandRegistryQueryConstraintTest {
 		constraint.setMinPricePaid(20122);
 		constraint.setPostcodes(getRandomPostCodes());
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(buildQueryRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoConstraint() {
@@ -172,12 +172,12 @@ class LandRegistryQueryConstraintTest {
 		constraint.setMinPricePaid(20122);
 		constraint.setPostcodes(getRandomPostCodes());
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(buildQueryRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoPostCode() {
@@ -186,30 +186,30 @@ class LandRegistryQueryConstraintTest {
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(buildQueryRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoFilters() {
 		LandRegistryData data = genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(buildQueryRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereEmpty() {
 		constraint = new LandRegistryQueryConstraint();
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(buildQueryRegex()));
 	}
 
 	private String buildQueryRegex() {

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.TransactionCategory;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
 
 /**
  * @author Richousrick
