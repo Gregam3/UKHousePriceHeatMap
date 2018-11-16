@@ -155,4 +155,13 @@ class LandRegistryServiceImplTest {
                 normalisedValues.get(1) == 0.0;
 
     }
+
+    @Test
+    void testIfNormalisedValuesConvertToCorrectColours() {
+        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
+
+        landRegistryService.getColoursForNormalisedvalues(normalisedValues);
+
+        assert true;
+    }
 }

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,6 +153,20 @@ public class LandRegistryServiceImpl {
             normalisedValues.add((double) (price - min) /  (double) (max - min));
 
         return normalisedValues;
+    }
+
+    public List<Colour> getColoursForNormalisedvalues(List<Double> normalisedValues) {
+        List<Colour> colours = new ArrayList<>();
+
+        for (Double normalisedValue : normalisedValues) {
+            int red = 255 - (int) (normalisedValue * 200);
+
+            colours.add(new Colour(
+                    red
+            ));
+        }
+
+        return colours;
     }
 
     private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
