@@ -55,7 +55,7 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		queryBuilder.append(body.buildQueryContent().replaceAll("\n", "\n\t"));
 		if (grouping) {
 			queryBuilder.append("\n");
-			queryBuilder.append(groupConstraint.buildGroupSelect());
+			queryBuilder.append(groupConstraint.buildGroup());
 		}
 		return queryBuilder.toString().trim();
 	}

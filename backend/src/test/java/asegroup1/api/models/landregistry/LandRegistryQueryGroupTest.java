@@ -218,25 +218,21 @@ class LandRegistryQueryGroupTest {
 	@Test
 	public void testBuildQuerySelect() {
 		List<Selectable> initial = fillWithRandomData();
-		String regex;
-		StringBuilder regexBuilder = new StringBuilder("SELECT(\\s\\?(");
-		initial.forEach(v -> {
-			regexBuilder.append("(" + v.toString() + ")|");
-		});
-		regexBuilder.deleteCharAt(regexBuilder.length() - 1);
-		regexBuilder.append("))+");
-		regex = regexBuilder.toString();
 
-		assertTrue(querySelect.buildGroupSelect().matches(regex));
+		String buildGroup = querySelect.buildGroup();
+
+		String regex = buildQuerySelectRegex(initial);
+
+		assertTrue(buildGroup.matches(regex));
 	}
 
 	private String buildQuerySelectRegex(List<Selectable> selectables) {
-		StringBuilder group = new StringBuilder("GROUP BY (\\?");
+		StringBuilder group = new StringBuilder("GROUP BY( \\?(");
 		for (Selectable selectable : selectables) {
 			group.append("(" + selectable.toString() + ")|");
 		}
 		group.deleteCharAt(group.length() - 1);
-		group.append(")+");
+		group.append("))+");
 
 		return group.toString();
 

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,6 +15,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 /**
  * @author Greg Mitten
@@ -66,7 +66,8 @@ class LandRegistryServiceImplTest {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
-			List<LandRegistryData> addressByPostCode = landRegistryService.getLatestTransactions(constraint);
+
+			List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(new LandRegistryQuerySelect(Selectable.pricePaid), constraint);
 
             //Checking not only if results are returned but that results contain valid data
             if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
@@ -75,7 +76,7 @@ class LandRegistryServiceImplTest {
             }
 
             assert true;
-        } catch (IOException | UnirestException | ParseException | NumberFormatException e) {
+		} catch (IOException | UnirestException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }

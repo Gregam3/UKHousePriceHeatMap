@@ -14,6 +14,13 @@ public class LandRegistryQuerySelect {
 		selectValues = new LinkedHashMap<>();
 	}
 
+	public LandRegistryQuerySelect(Selectable... selectables) {
+		selectValues = new LinkedHashMap<>();
+		for (Selectable selectable : selectables) {
+			setSelectValue(selectable, Aggrigation.SAMPLE);
+		}
+	}
+
 
 	public void setSelectValue(Selectable selectable, Aggrigation aggrigation) {
 		selectValues.put(selectable, aggrigation);

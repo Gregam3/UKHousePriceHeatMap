@@ -113,7 +113,7 @@ public class LandRegistryQueryGroup {
 		return selectableMap;
 	}
 
-	public String buildGroupSelect() {
+	public String buildGroup() {
 		StringBuilder groupBuilder = new StringBuilder("GROUP BY ");
 		for (Selectable selectable : selectableMap) {
 			groupBuilder.append("?");
