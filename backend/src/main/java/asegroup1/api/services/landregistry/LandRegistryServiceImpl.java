@@ -155,7 +155,7 @@ public class LandRegistryServiceImpl {
         return normalisedValues;
     }
 
-    public List<Colour> getColoursForNormalisedvalues(List<Double> normalisedValues) {
+    public List<Colour> getColoursForNormalisedValues(List<Double> normalisedValues) {
         List<Colour> colours = new ArrayList<>();
 
         for (Double normalisedValue : normalisedValues) {

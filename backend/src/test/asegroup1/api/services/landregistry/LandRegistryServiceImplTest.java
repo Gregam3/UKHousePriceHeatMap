@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import asegroup1.api.models.heatmap.Colour;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -160,8 +161,10 @@ class LandRegistryServiceImplTest {
     void testIfNormalisedValuesConvertToCorrectColours() {
         List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
 
-        landRegistryService.getColoursForNormalisedvalues(normalisedValues);
+        List<Colour> coloursForNormalisedValues = landRegistryService.getColoursForNormalisedValues(normalisedValues);
 
-        assert true;
+        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
+        assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
+                && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
     }
 }
