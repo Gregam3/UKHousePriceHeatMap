@@ -20,50 +20,101 @@ public class LandRegistryData {
 
 	private Double latitude, longitude;
 
+	/**
+	 * Initialise the {@Link LandRegistryData} class, to be empty
+	 */
 	public LandRegistryData() {
 		constraints = new HashMap<>();
 		longitude = null;
 		latitude = null;
 	}
 
+	/**
+	 * Initialise the {@Link LandRegistryData} class, with the content of a
+	 * {@link JsonNode}. The {@link JsonNode} is sent to
+	 * {@link #parseResponse(JsonNode)}.
+	 * 
+	 * @param json fields to initialise the class with.
+	 */
 	public LandRegistryData(JsonNode json) {
 		this();
 		parseResponse(json);
 	}
 
-
 	private void addAddrConstraint(Selectable selectable, String value) {
 		constraints.put(selectable, new AddrConstraint(selectable.toString(), value.toUpperCase()));
 	}
 
+	/**
+	 * Set the primaryHouseName
+	 * 
+	 * @param primaryHouseName to set
+	 */
 	public void setPrimaryHouseName(String primaryHouseName) {
 		addAddrConstraint(Selectable.paon, primaryHouseName);
 	}
 
+	/**
+	 * Set the secondaryHouseName
+	 * 
+	 * @param secondaryHouseName to set
+	 */
 	public void setSecondaryHouseName(String secondaryHouseName) {
 		addAddrConstraint(Selectable.saon, secondaryHouseName);
 	}
 
+	/**
+	 * Set the streetName
+	 * 
+	 * @param streetName to set
+	 */
 	public void setStreetName(String streetName) {
 		addAddrConstraint(Selectable.street, streetName);
 	}
 
+	/**
+	 * Set the townName
+	 * 
+	 * @param townName to set
+	 */
 	public void setTownName(String townName) {
 		addAddrConstraint(Selectable.town, townName);
 	}
 
+	/**
+	 * Set the locality
+	 * 
+	 * @param locality to set
+	 */
 	public void setLocality(String locality) {
 		addAddrConstraint(Selectable.locality, locality);
 	}
 
+	/**
+	 * Set the district
+	 * 
+	 * @param district to set
+	 */
 	public void setDistrict(String district) {
 		addAddrConstraint(Selectable.district, district);
 	}
 
+	/**
+	 * Set the county
+	 * 
+	 * @param county to set
+	 */
 	public void setCounty(String county) {
 		addAddrConstraint(Selectable.county, county);
 	}
 
+	/**
+	 * Set the postCode. The post code must be in the form "AAA AAA(A)", where A is
+	 * an alpha-numeric character, and (A) denotes an optional character.
+	 * 
+	 * @param postCode to set
+	 * @throws InvalidParameterException if the post code is invalid
+	 */
 	public void setPostCode(String postCode) throws InvalidParameterException {
 		if (postCode.length() < 7 || postCode.charAt(postCode.length() - 4) != 32) {
 			throw new InvalidParameterException("Post Code: must contain a space in the correct position");
@@ -81,34 +132,79 @@ public class LandRegistryData {
 	}
 
 
+	/**
+	 * Set the propertyType
+	 * 
+	 * @param propertyType to set
+	 */
 	public void setPropertyType(PropertyType propertyType) {
 		addTransConstraint(Selectable.propertyType, "propertyType/skos:prefLabel", parseEnumAsString("lrcommon", propertyType.toString()));
 	}
 
+	/**
+	 * Set if the property was newly built
+	 * 
+	 * @param newBuild to set
+	 */
 	public void setNewBuild(Boolean newBuild) {
 		addTransConstraint(Selectable.newBuild, "newBuild", newBuild.toString());
 	}
 
+	/**
+	 * Set the estateType
+	 * 
+	 * @param estateType to set
+	 */
 	public void setEstateType(EstateType estateType) {
 		addTransConstraint(Selectable.estateType, "estateType/skos:prefLabel", parseEnumAsString("lrcommon", estateType.toString()));
 	}
 
+	/**
+	 * Set the transactionCategory
+	 * 
+	 * @param transactionCategory to set
+	 */
 	public void setTransactionCategory(TransactionCategory transactionCategory) {
 		addTransConstraint(Selectable.transactionCategory, "transactionCategory/skos:prefLabel", parseEnumAsString("lrppi", transactionCategory.toString()));
 	}
 
+	/**
+	 * Set the pricePaid
+	 * 
+	 * @param pricePaid to set
+	 */
 	public void setPricePaid(int pricePaid) {
 		addTransConstraint(Selectable.pricePaid, "pricePaid", pricePaid + "");
 	}
 
+	/**
+	 * Set the transaction date
+	 * 
+	 * @param date to set
+	 */
 	public void setTransactionDate(LocalDate date) {
 		addTransConstraint(Selectable.transactionDate, "transactionDate", date.toString(), true);
 	}
 
+
+	/**
+	 * Check if a constraint is mapped to a value.
+	 * 
+	 * @param selectable to check
+	 * @return true, if the specified {@link Selectable} exists with a value in this
+	 *         instance.
+	 */
 	public boolean hasConstraint(Selectable selectable) {
 		return constraints.containsKey(selectable);
 	}
 
+	/**
+	 * Get the value of a constraint stored in this instance.
+	 * 
+	 * @param selectable to get the value of
+	 * @return a string representing the value of the {@link Selectable} stored, or
+	 *         null if no such value is stored.
+	 */
 	public String getConstraint(Selectable selectable) {
 		if (hasConstraint(selectable)) {
 			return constraints.get(selectable).getvalue();
@@ -117,11 +213,24 @@ public class LandRegistryData {
 		}
 	}
 
+	/**
+	 * Get the value of a constraint stored in this instance.
+	 * 
+	 * @param selectable to get the value of
+	 * @return a string representing the value of the {@link Selectable} stored, or
+	 *         an empty string if no such value is stored.
+	 */
 	public String getConstraintNotNull(Selectable selectable) {
 		String constraint = getConstraint(selectable);
 		return constraint == null ? "" : constraint;
 	}
 
+	/**
+	 * Remove any value mapped to a constraint in this instance.
+	 * 
+	 * @param selectable to remove.
+	 * @return true, if a mapping existed, false otherwise.
+	 */
 	public boolean removeConstraint(Selectable selectable) {
 		if (hasConstraint(selectable)) {
 			constraints.remove(selectable);
@@ -136,6 +245,15 @@ public class LandRegistryData {
 		return namespace + ":" + enumStr.replace('_', '-');
 	}
 
+	/**
+	 * Attempts to set a constraint by parsing the name of the constraint and its
+	 * value. Provided both are valid, they are stored in this object.
+	 * 
+	 * @param name  of the {@link Selectable} to be set
+	 * @param value to set the selectable to
+	 * @return true, if the value was added successfully
+	 * @throws IllegalArgumentException if the name is invalid
+	 */
 	public boolean setConstraint(String name, String value) {
 		Selectable selectable;
 
@@ -231,6 +349,12 @@ public class LandRegistryData {
 		}
 	}
 
+	/**
+	 * Parses the JSON, and fills its self with the content.
+	 * 
+	 * @param json to fill this instance with
+	 * @return true, if the JSON was parsed without error.
+	 */
 	public boolean parseResponse(JsonNode json) {
 		boolean successful = true;
 
@@ -246,11 +370,23 @@ public class LandRegistryData {
 		return successful;
 	}
 
+	/**
+	 * Get the mappings stored in this instance
+	 * 
+	 * @return the mappings stored in this instance
+	 */
 	@JsonIgnore
 	public HashMap<Selectable, EqualityConstraint> getAllConstraints() {
 		return constraints;
 	}
 
+	/**
+	 * Get a map storing a string representation of the mappings stored in in this
+	 * instance.
+	 * 
+	 * @return a map storing a string representation of the mappings stored in in
+	 *         this instance
+	 */
 	public HashMap<String, String> getMappings() {
 		HashMap<String, String> retMap = new HashMap<>();
 		constraints.forEach((k, v) -> retMap.put(k.toString(), v.getvalue()));
@@ -264,7 +400,11 @@ public class LandRegistryData {
 		return retMap;
 	}
 
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof LandRegistryData) {
@@ -279,18 +419,38 @@ public class LandRegistryData {
 		}
 	}
 
+	/**
+	 * Get the latitude.
+	 * 
+	 * @return the latitude
+	 */
 	public Double getLatitude() {
 		return latitude;
 	}
 
+	/**
+	 * Set the latitude.
+	 * 
+	 * @param latitude to set
+	 */
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
+	/**
+	 * Get the longitude.
+	 * 
+	 * @return the longitude
+	 */
 	public Double getLongitude() {
 		return longitude;
 	}
 
+	/**
+	 * Set the longitude.
+	 * 
+	 * @param longitude to set
+	 */
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
