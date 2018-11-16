@@ -28,27 +28,23 @@ class LandRegistryServiceImplTest {
 
     @BeforeAll
     private static void setUpService() {
-        try {
-            landRegistryService = new LandRegistryServiceImpl(null);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        landRegistryService = new LandRegistryServiceImpl(null);
     }
 
     @Test
     void testIfSearchAddressesByPostCodeReturnsCorrectStreet() {
         try {
             //This postcode only has one street name
-			List<LandRegistryData> addressByPostCode = landRegistryService.getAddressesForPostCode("BH9 2SL");
+            List<LandRegistryData> addressByPostCode = landRegistryService.getAddressesForPostCode("BH9 2SL");
 
             //Checking not only if results are returned but that results contain correct data
-			if (!addressByPostCode.get(0).getConstraint(Selectable.street).equals("ENSBURY PARK ROAD")) {
+            if (!addressByPostCode.get(0).getConstraint(Selectable.street).equals("ENSBURY PARK ROAD")) {
                 System.err.println("incorrect street name returned");
                 assert false;
             }
 
             assert true;
-        } catch (UnirestException | IOException e) {
+        } catch (UnirestException e) {
             e.printStackTrace();
             assert false;
         }
@@ -58,7 +54,7 @@ class LandRegistryServiceImplTest {
     void testIfPassingInvalidPostCodeToAddressSearchReturnsNoAddresses() {
         try {
             assert landRegistryService.getAddressesForPostCode("0").isEmpty();
-        } catch (IOException | UnirestException e) {
+        } catch (UnirestException e) {
             e.printStackTrace();
             assert false;
         }
@@ -67,19 +63,19 @@ class LandRegistryServiceImplTest {
     @Test
     void testIfSearchTransactionsByPostCodeReturnsValidPrices() {
         try {
-			LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-			constraint.getEqualityConstraints().setPostCode("BN14 7BH");
+            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+            constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
-			List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(constraint, true);
+            List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(constraint, true);
 
             //Checking not only if results are returned but that results contain valid data
-			if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
+            if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
                 System.err.println("Transaction has invalid price");
                 assert false;
             }
 
             assert true;
-		} catch (IOException | UnirestException | ParseException | NumberFormatException e) {
+        } catch (IOException | UnirestException | ParseException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }
@@ -89,27 +85,27 @@ class LandRegistryServiceImplTest {
     void testIfPassingInvalidPostCodeToTransactionSearchReturnsNoAddresses() {
         try {
             //Provides the invalid postcode of "0"
-			LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-			constraint.getEqualityConstraints().setPostCode("0");
+            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+            constraint.getEqualityConstraints().setPostCode("0");
 
-			fail("Constraint should throw an InvalidParameterException");
-		} catch (InvalidParameterException e) {
-			assert true;
+            fail("Constraint should throw an InvalidParameterException");
+        } catch (InvalidParameterException e) {
+            assert true;
         }
     }
 
     @Test
     void testIfLatitudeForAddressesAreFetchedAndRoughlyAccurate() {
-		List<LandRegistryData> addresses = new LinkedList<>();
+        List<LandRegistryData> addresses = new LinkedList<>();
 
-		LandRegistryData data = new LandRegistryData();
-		data.setPrimaryHouseName("85");
-		data.setStreetName("QUEEN STREET");
-		data.setTownName("WORTHING");
-		data.setPostCode("BN14 7BH");
-		addresses.add(data);
+        LandRegistryData data = new LandRegistryData();
+        data.setPrimaryHouseName("85");
+        data.setStreetName("QUEEN STREET");
+        data.setTownName("WORTHING");
+        data.setPostCode("BN14 7BH");
+        addresses.add(data);
 
-		LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
+        LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //lat 50.824190 for address
         assert (address.getLatitude() > 50.822 && address.getLatitude() < 50.824);
@@ -117,16 +113,16 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfLongitudeForAddressesAreFetchedAndRoughlyAccurate() {
-		List<LandRegistryData> addresses = new LinkedList<>();
+        List<LandRegistryData> addresses = new LinkedList<>();
 
-		LandRegistryData data = new LandRegistryData();
-		data.setPrimaryHouseName("85");
-		data.setStreetName("QUEEN STREET");
-		data.setTownName("WORTHING");
-		data.setPostCode("BN14 7BH");
-		addresses.add(data);
+        LandRegistryData data = new LandRegistryData();
+        data.setPrimaryHouseName("85");
+        data.setStreetName("QUEEN STREET");
+        data.setTownName("WORTHING");
+        data.setPostCode("BN14 7BH");
+        addresses.add(data);
 
-		LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
+        LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //long -0.378000 for address
         assert (address.getLongitude() > -0.37700 && address.getLongitude() < -0.37500);
@@ -134,12 +130,12 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfInvalidPostCodeFetchesNullCoordinates() {
-		List<LandRegistryData> addresses = new LinkedList<>();
+        List<LandRegistryData> addresses = new LinkedList<>();
 
         //Invalid address
-		addresses.add(new LandRegistryData());
+        addresses.add(new LandRegistryData());
 
-		LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
+        LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         assert address != null;
         assert address.getLatitude() == null && address.getLongitude() == null;

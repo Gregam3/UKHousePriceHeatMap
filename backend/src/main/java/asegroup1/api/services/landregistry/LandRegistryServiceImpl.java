@@ -32,7 +32,7 @@ public class LandRegistryServiceImpl {
     private LandRegistryDaoImpl postCodeCoordinatesDao;
 
     @Autowired
-    public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) throws IOException {
+    public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
         this.postCodeCoordinatesDao = postCodeCoordinatesDao;
     }
 
@@ -40,12 +40,10 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String OPEN_STREET_MAP_URL_PREFIX = "https://nominatim.openstreetmap.org/search/";
     private static final String OPEN_STREET_MAP_URL_SUFFIX = "?format=json&addressdetails=1&limit=1&polygon_svg=1";
-    //    private static final String GOOGLE_GEOCODE_API_KEY = "AIzaSyAdX29NBwzTwVEM9K-eLnDx86Al-yHGRqQ";
     private static final String LR_SPACE = "%20";
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-	public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException, IOException {
+	public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
 		List<LandRegistryData> landRegistryDataList = new LinkedList<>();
         JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", LR_SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
@@ -67,7 +65,7 @@ public class LandRegistryServiceImpl {
 
 
 	public List<LandRegistryData> getTransactionsForPostCode(LandRegistryQueryConstraint values, LandRegistryQuerySelect select, boolean latestOnly)
-			throws IOException, UnirestException, ParseException {
+			throws IOException, UnirestException {
 		List<LandRegistryData> transactionsList = new LinkedList<>();
 
 		String query = latestOnly ? buildUniqueQuery(select, values) : buildQuery(select, values);
@@ -124,7 +122,7 @@ public class LandRegistryServiceImpl {
         return addresses;
     }
 
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException, IOException {
+    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
                 .field("output", "json")
