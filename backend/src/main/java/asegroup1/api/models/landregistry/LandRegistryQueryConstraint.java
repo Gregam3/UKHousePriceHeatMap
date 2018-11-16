@@ -20,18 +20,29 @@ public class LandRegistryQueryConstraint {
 	private ArrayList<String> postcodes;
 
 
-	public LandRegistryQueryConstraint(LandRegistryData eqalityConstraints) {
+	/**
+	 * Initialise the LandRegistryQueryConstraint with equality Constraints
+	 * 
+	 * @param equalityConstraints to initialise the instance with
+	 */
+	public LandRegistryQueryConstraint(LandRegistryData equalityConstraints) {
 		rangeConstraints = new HashSet<>();
-		this.equalityConstraints = eqalityConstraints;
+		this.equalityConstraints = equalityConstraints;
 		postcodes = new ArrayList<>();
 	}
 
+	/**
+	 * Initialise the LandRegistryQueryConstraint to be empty
+	 */
 	public LandRegistryQueryConstraint() {
 		this(new LandRegistryData());
 	}
 
-
-
+	/**
+	 * Get the equality constraints stored in this instance.
+	 * 
+	 * @return the equality constraints stored in this instance
+	 */
 	public LandRegistryData getEqualityConstraints() {
 		return equalityConstraints;
 	}
@@ -43,10 +54,13 @@ public class LandRegistryQueryConstraint {
 		rangeConstraints.add(new RangeConstraint("xsd:date", "transactionDate", isMax ? "<" : ">", "\"" + date.toString() + "\""));
 	}
 
-	public void setMaxDate(LocalDate date) {
-		setDateConstraint(true, date);
-	}
-
+	/**
+	 * Get a range constraint stored in this instance.
+	 * 
+	 * @param name       of the variable that is being constrained
+	 * @param comparator that is being used to constrain the variable
+	 * @return the constraint if one exists in the instance
+	 */
 	public RangeConstraint getRangeConstraint(String name, String comparator) {
 		for (RangeConstraint constraint : rangeConstraints) {
 			if (constraint.getName().equals(name) && constraint.getComparator().equals(comparator)) {
@@ -56,6 +70,20 @@ public class LandRegistryQueryConstraint {
 		return null;
 	}
 
+	/**
+	 * Set the maximum date that entries can have.
+	 * 
+	 * @param date to set
+	 */
+	public void setMaxDate(LocalDate date) {
+		setDateConstraint(true, date);
+	}
+
+	/**
+	 * Set the minimum date that entries can have.
+	 * 
+	 * @param date to set
+	 */
 	public void setMinDate(LocalDate date) {
 		setDateConstraint(false, date);
 	}
@@ -65,43 +93,74 @@ public class LandRegistryQueryConstraint {
 		rangeConstraints.add(new RangeConstraint(null, "pricePaid", isMax ? "<" : ">", price + ""));
 	}
 
+	/**
+	 * Set the maximum transaction price that entries can have.
+	 * 
+	 * @param price to set
+	 */
 	public void setMaxPricePaid(int price) {
 		setPriceConstraint(true, price);
 	}
 
+	/**
+	 * Set the minimum transaction price that entries can have.
+	 * 
+	 * @param price to set
+	 */
 	public void setMinPricePaid(int price) {
 		setPriceConstraint(false, price);
 	}
 
 
 
-	/* QUERY GENERATION */
+	/* POSTCODE */
 
 
-
+	/**
+	 * Get all post codes that entries can have.
+	 * 
+	 * @return all post codes that entries can have
+	 */
 	public ArrayList<String> getPostcodes() {
 		return postcodes;
 	}
 
+	/**
+	 * Set all post codes that entries may have.
+	 * 
+	 * @param postcodes to set
+	 */
 	public void setPostcodes(ArrayList<String> postcodes) {
 		this.postcodes = postcodes;
 	}
 
+	/**
+	 * Set all post codes that entries may have.
+	 * 
+	 * @param postcodes to set
+	 */
 	public void setPostcodes(String... postcodes) {
 		setPostcodes(new ArrayList<>(Arrays.asList(postcodes)));
 	}
 
+	/* QUERY GENERATION */
+
+	/**
+	 * Builds and returns the WHERE section of the query.
+	 * 
+	 * @return the WHERE section of the query
+	 */
 	public String buildQueryWhere() {
 		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
 		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
 	}
 
 	private String buildQuerySelection() {
-		
+
 		ArrayList<EqualityConstraint> constraintList = new ArrayList<>(equalityConstraints.getAllConstraints().values());
 		// order by type
 		Collections.sort(constraintList);
-		
+
 		StringBuilder whereStringBuilder = new StringBuilder();
 		for (EqualityConstraint constraint : constraintList) {
 			whereStringBuilder.append(constraint.toString() + " \n");
@@ -147,17 +206,21 @@ public class LandRegistryQueryConstraint {
 	}
 
 	private String buildQueryAddressColumns() {
-		return "OPTIONAL {?addr lrcommon:paon ?paon} \n" + "OPTIONAL {?addr lrcommon:saon ?saon} \n"
-				+ "OPTIONAL {?addr lrcommon:street ?street} \n" + "OPTIONAL {?addr lrcommon:locality ?locality} \n" + "OPTIONAL {?addr lrcommon:town ?town} \n"
-				+ "OPTIONAL {?addr lrcommon:district ?district} \n" + "OPTIONAL {?addr lrcommon:county ?county} \n" + "OPTIONAL {?addr lrcommon:postcode ?postcode}";
+		return "OPTIONAL {?addr lrcommon:paon ?paon} \n" + "OPTIONAL {?addr lrcommon:saon ?saon} \n" + "OPTIONAL {?addr lrcommon:street ?street} \n"
+				+ "OPTIONAL {?addr lrcommon:locality ?locality} \n" + "OPTIONAL {?addr lrcommon:town ?town} \n" + "OPTIONAL {?addr lrcommon:district ?district} \n"
+				+ "OPTIONAL {?addr lrcommon:county ?county} \n" + "OPTIONAL {?addr lrcommon:postcode ?postcode}";
 	}
 
+	/**
+	 * Builds and returns the GROUP section of the query.
+	 * 
+	 * @return the GROUP section of the query
+	 */
 	public String buildUniqueGrouping() {
 		return "GROUP BY ?paon ?saon ?street ?postcode";
 	}
 
 	/* TYPE DECLARATIONS */
-
 
 
 
@@ -187,6 +250,11 @@ public class LandRegistryQueryConstraint {
 			return value;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 */
 		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof RangeConstraint) {
@@ -199,6 +267,11 @@ public class LandRegistryQueryConstraint {
 			}
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#toString()
+		 */
 		@Override
 		public String toString() {
 			return "?" + name + " " + comparator + " " + value + (type != null ? "^^" + type : "");

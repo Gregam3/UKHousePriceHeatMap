@@ -9,15 +9,27 @@ import java.util.EnumSet;
  */
 public class LandRegistryQuerySelect {
 
-	// list used instead of hashset, as it allows custom ordering of output request
-	// data
 	private ArrayList<Selectable> selectableMap;
 
+	/**
+	 * Initialise the LandRegistryQuerySelect with specified {@link Selectable
+	 * selectable's}.
+	 * 
+	 * @param selectables to initialise the code
+	 */
 	public LandRegistryQuerySelect(Selectable... selectables) {
 		selectableMap = new ArrayList<Selectable>();
 		select(selectables);
 	}
 
+	/**
+	 * Initialise the LandRegistryQuerySelect to contain all {@link Selectable
+	 * selectable's}, except the specified exceptions.
+	 * 
+	 * @param selectAll  If true the query will be initialised to contain all
+	 *                   values, if false the query will be initialised to be empty
+	 * @param exceptions Any exceptions to the specified rule.
+	 */
 	public LandRegistryQuerySelect(boolean selectAll, Selectable... exceptions) {
 		selectableMap = new ArrayList<Selectable>();
 		if (selectAll) {
@@ -28,6 +40,11 @@ public class LandRegistryQuerySelect {
 		}
 	}
 
+	/**
+	 * Select the specified {@link Selectable selectable's}.
+	 * 
+	 * @param selectables to select
+	 */
 	public void select(Selectable... selectables) {
 		for (Selectable selectable : selectables) {
 			if (!selectableMap.contains(selectable)) {
@@ -36,24 +53,47 @@ public class LandRegistryQuerySelect {
 		}
 	}
 
+	/**
+	 * Select all {@link Selectable selectable's}.
+	 */
 	public void selectAll() {
 		EnumSet.allOf(Selectable.class).forEach(v -> selectableMap.add(v));
 	}
 
+	/**
+	 * Deselect the specified {@link Selectable selectable's}.
+	 * 
+	 * @param selectables to deselect
+	 */
 	public void deselect(Selectable... selectables) {
 		for (Selectable selectable : selectables) {
 			selectableMap.remove(selectable);
 		}
 	}
 
+	/**
+	 * Deselect all {@link Selectable selectable's}.
+	 */
 	public void deselectAll() {
 		selectableMap.clear();
 	}
 
+	/**
+	 * Check if the specified {@link Selectable} is selected.
+	 * 
+	 * @param selectable to check
+	 * @return true, if the specified selectable is selected
+	 */
 	public boolean hasSelectable(Selectable selectable) {
 		return selectableMap.contains(selectable);
 	}
 
+	/**
+	 * Toggle the specified {@link Selectable}. If the specified value is selected,
+	 * it will be deselected. Otherwise it will be selected.
+	 * 
+	 * @param selectable to toggle
+	 */
 	public void toggleSelectable(Selectable selectable) {
 		if (hasSelectable(selectable)) {
 			deselect(selectable);
@@ -67,7 +107,11 @@ public class LandRegistryQuerySelect {
 		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode;
 	}
 
-
+	/**
+	 * Builds and returns the SELECT section of the query.
+	 * 
+	 * @return the SELECT section of the query
+	 */
 	public String buildQuerySelect() {
 		StringBuilder selectStringBuilder = new StringBuilder("SELECT ");
 		for (Selectable selectable : selectableMap) {
@@ -77,11 +121,12 @@ public class LandRegistryQuerySelect {
 	}
 
 	/**
-	 * The following selectables will be auto selected paon, saon, street, postcode,
-	 * transactionDate
+	 * Builds and returns the SELECT section of the query. This should be used in
+	 * conjunction with {@link LandRegistryQueryConstraint#buildUniqueGrouping()}.
+	 * The following {@link Selectable selectable's} will be auto selected paon,
+	 * saon, street, postcode, transactionDate.
 	 * 
-	 * @param getUnique
-	 * @return
+	 * @return the SELECT section of the query
 	 */
 	public String buildQuerySelectUnique() {
 
