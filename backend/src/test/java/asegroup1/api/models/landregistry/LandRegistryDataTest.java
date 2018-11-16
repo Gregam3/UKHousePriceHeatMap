@@ -20,10 +20,10 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.EstateType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.TransactionCategory;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
 /**
  * @author Richousrick

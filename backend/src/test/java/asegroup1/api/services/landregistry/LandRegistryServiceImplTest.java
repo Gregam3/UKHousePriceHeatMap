@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
 
 /**
  * @author Greg Mitten
@@ -66,7 +66,7 @@ class LandRegistryServiceImplTest {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
-            List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(constraint, true);
+			List<LandRegistryData> addressByPostCode = landRegistryService.getLatestTransactions(constraint);
 
             //Checking not only if results are returned but that results contain valid data
             if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {

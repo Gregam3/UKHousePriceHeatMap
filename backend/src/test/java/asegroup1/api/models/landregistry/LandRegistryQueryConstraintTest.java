@@ -14,9 +14,10 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.RangeConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
+
 
 /**
  * @author Richousrick

@@ -117,7 +117,7 @@ public class LandRegistryServiceImpl {
 	}
 
 	public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
-		return getLatestTransactions(new ArrayList(), constraint);
+		return getLatestTransactions(new ArrayList<Selectable>(), constraint);
 	}
 
     public List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {

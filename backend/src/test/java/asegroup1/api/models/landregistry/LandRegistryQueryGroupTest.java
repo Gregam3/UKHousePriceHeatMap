@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -15,13 +14,14 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+
 
 /**
  * @author Richousrick
  *
  */
-class LandRegistryQuerySelectTest {
+class LandRegistryQueryGroupTest {
 
 	private EnumSet<Selectable> selectables;
 	private LandRegistryQueryGroup querySelect;
@@ -227,66 +227,18 @@ class LandRegistryQuerySelectTest {
 		regexBuilder.append("))+");
 		regex = regexBuilder.toString();
 
-		assertTrue(querySelect.buildQuerySelect().matches(regex));
+		assertTrue(querySelect.buildGroupSelect().matches(regex));
 	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#buildQuerySelectUnique()}.
-	 */
-	@Test
-	public void testBuildQuerySelectUniqueFilled() {
-		ArrayList<Selectable> usedSelectables = new ArrayList<>(
-				Arrays.asList(new Selectable[] { Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode, Selectable.transactionDate }));
-		selectables.removeAll(usedSelectables);
-		List<Selectable> initial = fillWithRandomData();
-		testBuildQuerySelectUnique(initial);
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#buildQuerySelectUnique()}.
-	 */
-	@Test
-	public void testBuildQuerySelectUniqueEmpty() {
-		testBuildQuerySelectUnique(new ArrayList<>());
-	}
-
-
-	private void testBuildQuerySelectUnique(List<Selectable> initial) {
-		String regex = buildQuerySelectRegex(initial);
-
-		System.out.println(querySelect.buildQuerySelectUnique());
-
-		assertTrue(querySelect.buildQuerySelectUnique().matches(regex));
-	}
-
-
 
 	private String buildQuerySelectRegex(List<Selectable> selectables) {
-		StringBuilder select = new StringBuilder("SELECT \\?paon \\?saon \\?street \\?postcode \\(max\\(\\?transactionDate\\) AS \\?TransactionDate\\)");
-
-
-
-		if (!selectables.isEmpty()) {
-			StringBuilder extention = new StringBuilder();
-			StringBuilder sample = new StringBuilder("SAMPLE\\(\\?");
-			StringBuilder variableLower = new StringBuilder();
-			StringBuilder variableUpper = new StringBuilder();
-			selectables.forEach(v -> {
-				variableLower.append("(" + v.toString() + ")|");
-				variableUpper.append("(" + v.toString().substring(0, 1).toUpperCase() + v.toString().substring(1) + ")|");
-			});
-			variableLower.deleteCharAt(variableLower.length() - 1);
-			variableUpper.deleteCharAt(variableUpper.length() - 1);
-
-			sample.append("(" + variableLower + ")\\) AS \\?(" + variableUpper + ")");
-			System.out.println(sample);
-
-			extention.append("(\\(" + sample + "\\)\\s*)+");
-			select.append("\\s*" + extention);
+		StringBuilder group = new StringBuilder("GROUP BY (\\?");
+		for (Selectable selectable : selectables) {
+			group.append("(" + selectable.toString() + ")|");
 		}
-		
-		return select.toString();
+		group.deleteCharAt(group.length() - 1);
+		group.append(")+");
+
+		return group.toString();
 
 	}
 }
