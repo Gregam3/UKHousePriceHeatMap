@@ -45,7 +45,7 @@ public class LandRegistryController {
 
         try {
 			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getAddressesForPostCode(postCode)), HttpStatus.OK);
-        } catch (UnirestException | IOException e) {
+        } catch (UnirestException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
 	}
