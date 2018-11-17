@@ -62,6 +62,5 @@ export function getUserKey(){
 	if(!userKey){
 		throw "UserKey is not loaded";
 	}
-
 	return userKey;
 }

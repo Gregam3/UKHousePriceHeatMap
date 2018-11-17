@@ -1,15 +1,4 @@
-# Server Running Instructions
-
-## Without Docker
-
-1. Install Maven
-	1. Download maven: https://maven.apache.org/download.cgi
-	2. Install maven: https://maven.apache.org/install.html
-2. Call `mvn spring-boot:run` in the backend folder
-3. Launch Swagger UI: http://localhost:8080/swagger-ui.html#/
-
 ## With Docker
-
 1. Install Maven (See Above)
 2. Install Docker 
 	1. For Windows
@@ -21,11 +10,8 @@
 5. Call `docker build -t <<tagName>>:<<tagVersion>> .` replacing `<<tagName>>:<<tagVersion>>` with Somthing relevant.
 6. Call `docker run -p 8080:8080 <<tagName>>:<<tagVersion>>` This will run the application on port http://localhost:8080
 
-
 ## Launching to server example
-
-## ~~Without Docker~~ (Deprecated)
-1. Fill in the enviroment variable details in the `\backend\src\main\resources\application.properties`
+1. Fill in the environment variable details in the `\backend\src\main\resources\application.properties`
 2. Call `mvn package` in the backend folder
 3. Copy the .jar file from the target folder to the server
 4. install the app as a service `sudo ln -s /home/ec2-user/development/locationReciever-3.0.jar /etc/init.d/locationReciever` https://docs.spring.io/spring-boot/docs/1.3.0.BUILD-SNAPSHOT/reference/htmlsingle/#deployment-initd-service
@@ -40,3 +26,4 @@
 5. Copy the tar file to the server
 6. Load the application to the servers docker application using `docker image load -i backend-<<BranchName>>:<BranchVersion>>.tar`
 7. Run the image in a container using `docker run -p <<portNo>>:8080 backend/<<BranchName>>:<BranchVersion>>` Replacing `<<portNo>>` with the port you wish to expose the application on. Note only three ports are available 80(Reserved for the master launches), 8080(reserved for development launches) and 8000(For testing out branches on the server).
+6. Start the server using `sudo /etc/init.d/locationReciever start`
