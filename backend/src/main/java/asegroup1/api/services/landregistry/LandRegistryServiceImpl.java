@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
@@ -139,6 +140,10 @@ public class LandRegistryServiceImpl {
     }
 
     public List<Double> normaliseValues(List<Long> prices) {
+        if(prices.isEmpty()) {
+            return null;
+        }
+
         List<Double> normalisedValues = new ArrayList<>();
 
         long min, max;
@@ -149,24 +154,20 @@ public class LandRegistryServiceImpl {
             if (prices.get(i) < min) min = prices.get(i);
         }
 
-        for (Long price : prices)
-            normalisedValues.add((double) (price - min) /  (double) (max - min));
+        if(max == min) {
+            return prices.stream().map(p -> 0.0).collect(Collectors.toList());
+        }
+
+        for (Long price : prices) {
+            normalisedValues.add((double) (price - min) / (double) (max - min));
+        }
 
         return normalisedValues;
     }
 
     public List<Colour> getColoursForNormalisedValues(List<Double> normalisedValues) {
-        List<Colour> colours = new ArrayList<>();
-
-        for (Double normalisedValue : normalisedValues) {
-            int red = 255 - (int) (normalisedValue * 200);
-
-            colours.add(new Colour(
-                    red
-            ));
-        }
-
-        return colours;
+        //The higher the normalised value the darker the red will appear
+        return normalisedValues.stream().map(v -> new Colour(255 - (int) (v * 200))).collect(Collectors.toList());
     }
 
     private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
