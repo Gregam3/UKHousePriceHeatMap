@@ -32,7 +32,7 @@ public class LandRegistryController {
 	public LandRegistryController(LandRegistryServiceImpl landRegistryService) {
 		this.landRegistryService = landRegistryService;
 	}
->
+
 	@GetMapping("get-addresses/{post-code}")
 	public ResponseEntity<?> getAddressDataForPostCode(@PathVariable("post-code") String postCode) {
 		try {
