@@ -43,6 +43,9 @@ public class LandRegistryQuerySelect {
 		return selectValues.get(selectable);
 	}
 
+	public LinkedHashMap<Selectable, Aggrigation> getSelectValues() {
+		return selectValues;
+	}
 
 	/**
 	 * Builds and returns the SELECT section of the query.
@@ -63,7 +66,7 @@ public class LandRegistryQuerySelect {
 		}
 		String structure = null;
 		if(ignoreAggrigation) {
-			return structure = "?%s";
+			structure = "?%s";
 		}else {
 
 			switch (selectValues.get(selectable)) {

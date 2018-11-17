@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +24,6 @@ class LandRegistryQueryGroupTest {
 
 	private EnumSet<Selectable> selectables;
 	private LandRegistryQueryGroup querySelect;
-
-	private static long randomSeed = 8312595207343625996L;
 
 
 	@BeforeEach
@@ -61,15 +58,7 @@ class LandRegistryQueryGroupTest {
 	}
 
 	private List<Selectable> genRandomSelectables() {
-		Random r = new Random(randomSeed);
-		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
-		ArrayList<Selectable> selected = new ArrayList<>();
-		int reps = r.nextInt(selectables.size() - 1) + 1;
-		for (int i = 0; i < reps; i++) {
-			selected.add(unSelected.remove(r.nextInt(unSelected.size())));
-		}
-
-		return selected;
+		return LandRegistryQueryTestUtils.genRandomSelectables(selectables);
 	}
 
 	private Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
@@ -221,20 +210,9 @@ class LandRegistryQueryGroupTest {
 
 		String buildGroup = querySelect.buildGroup();
 
-		String regex = buildQuerySelectRegex(initial);
+		String regex = LandRegistryQueryTestUtils.buildQueryGroupRegex(initial);
 
 		assertTrue(buildGroup.matches(regex));
 	}
 
-	private String buildQuerySelectRegex(List<Selectable> selectables) {
-		StringBuilder group = new StringBuilder("GROUP BY( \\?(");
-		for (Selectable selectable : selectables) {
-			group.append("(" + selectable.toString() + ")|");
-		}
-		group.deleteCharAt(group.length() - 1);
-		group.append("))+");
-
-		return group.toString();
-
-	}
 }
