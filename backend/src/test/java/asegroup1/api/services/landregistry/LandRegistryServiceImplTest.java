@@ -155,7 +155,7 @@ class LandRegistryServiceImplTest {
     }
 
     @Test
-    void testIfPositionOfAddressesIdentifiedBySaonAreFetched() {
+    void testIfPositionOfAddressesForFlatsAreFetched() {
         try {
             List<LandRegistryData> addressesForPostCode = landRegistryService.getAddressesForPostCode("BN20 7LH");
 
@@ -181,4 +181,5 @@ class LandRegistryServiceImplTest {
         assert address != null;
         assert address.getLatitude() == null && address.getLongitude() == null;
     }
+
 }
