@@ -48,3 +48,10 @@ buildNumber.properties
 
 # Intelij
 .idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+=======
+.idea/
