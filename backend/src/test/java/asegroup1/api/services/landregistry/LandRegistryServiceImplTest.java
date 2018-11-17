@@ -1,13 +1,19 @@
 package asegroup1.api.services.landregistry;
 
+import static java.lang.Double.NaN;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import asegroup1.api.models.heatmap.Colour;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -139,5 +145,49 @@ class LandRegistryServiceImplTest {
 
         assert address != null;
         assert address.getLatitude() == null && address.getLongitude() == null;
+    }
+
+    @Test
+    void testIfPriceValuesAreNormalisedCorrectly() {
+        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
+
+        assert normalisedValues.get(0) == 1.0 &&
+                normalisedValues.get(2) == 0.5 &&
+                normalisedValues.get(1) == 0.0;
+
+    }
+
+    @Test
+    void testIfNormalisedValuesConvertToCorrectColours() {
+        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
+
+        List<Colour> coloursForNormalisedValues = landRegistryService.getColoursForNormalisedValues(normalisedValues);
+
+        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
+        assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
+                && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
+    }
+
+    @Test
+    void testHowNormaliseValuesReturns0ValueForOnlyOneDistinctValue() {
+        for (Double normalisedValue : landRegistryService.normaliseValues(Arrays.asList(5L, 5L, 5L))) {
+            assert normalisedValue == 0.0;
+        }
+    }
+
+    @Test
+    void testHowNormaliseValuesHandlesEmptyList() {
+        assert landRegistryService.normaliseValues(new ArrayList<>()) == null;
+    }
+
+    @Test
+    void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
+        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(-5L, -15L, -10L));
+
+        List<Colour> coloursForNormalisedValues = landRegistryService.getColoursForNormalisedValues(normalisedValues);
+
+        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
+        assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
+                && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
     }
 }
