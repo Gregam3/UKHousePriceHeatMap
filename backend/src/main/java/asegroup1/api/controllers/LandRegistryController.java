@@ -32,7 +32,7 @@ public class LandRegistryController {
 	public LandRegistryController(LandRegistryServiceImpl landRegistryService) {
 		this.landRegistryService = landRegistryService;
 	}
-
+>
 	@GetMapping("get-addresses/{post-code}")
 	public ResponseEntity<?> getAddressDataForPostCode(@PathVariable("post-code") String postCode) {
 		try {
@@ -50,8 +50,8 @@ public class LandRegistryController {
 
 		try {
 			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(constraint, true)), HttpStatus.OK);
-		} catch (IOException | UnirestException | ParseException e) {
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		} catch (IOException | UnirestException e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
 

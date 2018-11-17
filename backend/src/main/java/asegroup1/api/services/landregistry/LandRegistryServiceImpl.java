@@ -2,7 +2,6 @@ package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,8 +37,8 @@ public class LandRegistryServiceImpl {
 
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
-    private static final String OPEN_STREET_MAP_URL_PREFIX = "https://nominatim.openstreetmap.org/search/";
-    private static final String OPEN_STREET_MAP_URL_SUFFIX = "?format=json&addressdetails=1&limit=1&polygon_svg=1";
+    private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
+    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -81,7 +80,8 @@ public class LandRegistryServiceImpl {
         return getPositionForAddresses(transactionsList);
     }
 
-    public List<LandRegistryData> getTransactions(LandRegistryQueryConstraint values, boolean latestOnly) throws IOException, UnirestException, ParseException {
+
+    public List<LandRegistryData> getTransactions(LandRegistryQueryConstraint values, boolean latestOnly) throws IOException, UnirestException {
         return getTransactionsForPostCode(values, new LandRegistryQuerySelect(true), latestOnly);
     }
 
@@ -94,21 +94,29 @@ public class LandRegistryServiceImpl {
 
         for (LandRegistryData address : addresses) {
             addressUriBuilder
-                    .append(OPEN_STREET_MAP_URL_PREFIX)
-                    .append(address.getConstraintNotNull(Selectable.paon))
-                    .append(" ")
-                    .append(address.getConstraintNotNull(Selectable.street))
-                    .append(" ")
-                    .append(address.getConstraintNotNull(Selectable.town));
-            addressUriBuilder.append(OPEN_STREET_MAP_URL_SUFFIX);
+
+                    .append(GOOGLE_MAPS_URL)
+                    .append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
+                    .append("+")
+                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+"))
+                    .append("+")
+                    .append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
+                    .append("&key=")
+                    .append(GOOGLE_MAPS_API_KEY);
 
             try {
-                JSONObject response = Unirest.get(
-                        addressUriBuilder.toString()
-                ).asJson().getBody().getArray().getJSONObject(0);
+                JSONObject response = Unirest.get(addressUriBuilder.toString())
+                        .asJson()
+                        .getBody()
+                        .getArray()
+                        .getJSONObject(0)
+                        .getJSONArray("results")
+                        .getJSONObject(0)
+                        .getJSONObject("geometry")
+                        .getJSONObject("location");
 
                 address.setLatitude(response.getDouble("lat"));
-                address.setLongitude(response.getDouble("lon"));
+                address.setLongitude(response.getDouble("lng"));
 
             } catch (UnirestException | JSONException e) {
                 e.printStackTrace();
