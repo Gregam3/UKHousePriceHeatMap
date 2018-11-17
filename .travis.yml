@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 addons:
   sonarcloud:
-    organization: ase
+    organization: gregam3-github
     token: 
       secure: cb2b9dac3519804ea78eed74401990020f5e28c6
 script:
