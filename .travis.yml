@@ -1,7 +1,18 @@
+language: java
+jdk:
+  - oraclejdk8
+addons:
+  sonarcloud:
+    organization: ase
+    token: 
+      secure: cb2b9dac3519804ea78eed74401990020f5e28c6
+script:
+  # other script steps might be done before running the actual analysis
+  - sonar-scanner
 ---
 language: node_js
 node_js:
-  - node
+#  - node
   - lts/*
 cache:
   directories:
@@ -20,4 +31,4 @@ jobs:
         - npx expo login -u briso -p asegroup1
         - npx expo publish --non-interactive
         - expo build:android
-        # - expo build:ios
+      #  - expo build:ios
