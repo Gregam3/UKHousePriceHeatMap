@@ -20,4 +20,4 @@ jobs:
         - npx expo login -u briso -p asegroup1
         - npx expo publish --non-interactive
         - expo build:android
-        - expo build:ios
+        # - expo build:ios
