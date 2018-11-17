@@ -77,7 +77,7 @@ class LandRegistryServiceImplTest {
             }
 
             assert true;
-        } catch (IOException | UnirestException | ParseException | NumberFormatException e) {
+        } catch (IOException | UnirestException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }
@@ -110,7 +110,7 @@ class LandRegistryServiceImplTest {
         LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //lat 50.824190 for address
-        assert (address.getLatitude() > 50.822 && address.getLatitude() < 50.824);
+        assert (address.getLatitude() > 50.824 && address.getLatitude() < 50.825);
     }
 
     @Test
@@ -127,7 +127,7 @@ class LandRegistryServiceImplTest {
         LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //long -0.378000 for address
-        assert (address.getLongitude() > -0.37700 && address.getLongitude() < -0.37500);
+        assert (address.getLongitude() > -0.37900 && address.getLongitude() < -0.37800);
     }
 
     @Test
@@ -180,10 +180,5 @@ class LandRegistryServiceImplTest {
 
         assert address != null;
         assert address.getLatitude() == null && address.getLongitude() == null;
-    }
-
-    @Test
-    void testApi() {
-
     }
 }
