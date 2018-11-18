@@ -34,28 +34,7 @@ class LandRegistryServiceImplTest {
 
     @BeforeAll
     private static void setUpService() {
-        Random random = new Random(RANDOM_SEED);
-
-        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
-
-        for (int i = 0; i < validPostCodeEnds.length; i++) {
-            LandRegistryData landRegistryData = new LandRegistryData();
-            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
-            landRegistryData.setLatitude(random.nextDouble());
-            landRegistryData.setLatitude(random.nextDouble());
-
-            postCodeLocationData.add(landRegistryData);
-        }
-
-        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
-        when(landRegistryDataDaoMock.getAllPostcodes(
-                "WHERE postcode = 'BN14 9PH' OR \n" +
-                        "\t postcode = 'BN14 9PJ' OR \n" +
-                        "\t postcode = 'BN14 9PL' OR \n" +
-                        "\t postcode = 'BN14 9PN'"
-        )).thenReturn(postCodeLocationData);
-
-        landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+        landRegistryService = new LandRegistryServiceImpl(null);
     }
 
     @Test
@@ -209,6 +188,29 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfLargeAddressListIsAggregatedCorrectly() {
+        Random random = new Random(RANDOM_SEED);
+
+        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
+
+        for (int i = 0; i < validPostCodeEnds.length; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+            landRegistryData.setLatitude(random.nextDouble());
+            landRegistryData.setLatitude(random.nextDouble());
+
+            postCodeLocationData.add(landRegistryData);
+        }
+
+        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+        when(landRegistryDataDaoMock.getAllPostcodes(
+                "WHERE postcode = 'BN14 9PH' OR \n" +
+                        "\t postcode = 'BN14 9PJ' OR \n" +
+                        "\t postcode = 'BN14 9PL' OR \n" +
+                        "\t postcode = 'BN14 9PN'"
+        )).thenReturn(postCodeLocationData);
+
+        landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
         List<LandRegistryData> addresses = new ArrayList<>();
 
         for (int i = 0; i < 100; i++) {

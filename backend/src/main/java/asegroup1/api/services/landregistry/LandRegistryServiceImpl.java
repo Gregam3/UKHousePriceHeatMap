@@ -26,8 +26,14 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 
 
-@Service
+/**
+ * @author Greg Mitten, Rikkey Paal
+ * gregoryamitten@gmail.com
+ */
+
 //Does not need to extend ServiceImpl as does not use a Dao
+
+@Service
 public class LandRegistryServiceImpl {
 
     private LandRegistryDaoImpl postCodeCoordinatesDao;
