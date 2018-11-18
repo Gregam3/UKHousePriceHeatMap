@@ -97,7 +97,25 @@ public class LandRegistryServiceImpl {
         return getTransactionsForPostCode(values, new LandRegistryQuerySelect(true), latestOnly);
     }
 
-    public List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
+    public List<LandRegistryData> fetchLandRegistryDataInsideCoordinateBox(double top, double right, double bottom, double left) throws UnirestException {
+        LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect();
+
+        //TODO group by postcode (?)
+        landRegistryQuerySelect.select(Selectable.postcode);
+        //TODO count addresses
+        landRegistryQuerySelect.select(Selectable.pricePaid);
+
+        LandRegistryQueryConstraint landRegistryQueryConstraint = new LandRegistryQueryConstraint();
+
+        landRegistryQueryConstraint.setPostcodes((String[]) fetchPostCodesInsideCoordinateBox(top, right, bottom, left).toArray());
+
+        JSONObject jsonObject = executeSPARQLQuery(buildQuery(landRegistryQuerySelect, landRegistryQueryConstraint));
+
+        //TODO convert jsonObject to List<LandRegistryData> and return it
+        return null;
+    }
+
+    private List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
         return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
     }
 

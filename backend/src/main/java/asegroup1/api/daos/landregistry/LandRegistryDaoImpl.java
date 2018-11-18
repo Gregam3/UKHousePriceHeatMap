@@ -58,11 +58,11 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                 "SELECT postcode, latitude, longitude FROM " + TABLE_NAME + "\n" +
                         postcodeConstraints)
                 .getResultList().stream().map(r -> {
-            LandRegistryData landRegistryData = new LandRegistryData();
+                    LandRegistryData landRegistryData = new LandRegistryData();
 
 //                    landRegistryData.setPostCode();
 
-            return landRegistryData;
-        }).collect(Collectors.toList());
+                    return landRegistryData;
+                }).collect(Collectors.toList());
     }
 }
