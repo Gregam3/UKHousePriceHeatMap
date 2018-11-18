@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,7 +77,7 @@ class LandRegistryServiceImplTest {
             }
 
             assert true;
-        } catch (IOException | UnirestException | ParseException | NumberFormatException e) {
+        } catch (IOException | UnirestException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }
@@ -108,7 +110,7 @@ class LandRegistryServiceImplTest {
         LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //lat 50.824190 for address
-        assert (address.getLatitude() > 50.822 && address.getLatitude() < 50.824);
+        assert (address.getLatitude() > 50.824 && address.getLatitude() < 50.825);
     }
 
     @Test
@@ -125,7 +127,46 @@ class LandRegistryServiceImplTest {
         LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //long -0.378000 for address
-        assert (address.getLongitude() > -0.37700 && address.getLongitude() < -0.37500);
+        assert (address.getLongitude() > -0.37900 && address.getLongitude() < -0.37800);
+    }
+
+    @Test
+    void testIfPositionsVaryBetweenAddressesInStreet() {
+        try {
+            List<LandRegistryData> addressesForPostCode = landRegistryService.getAddressesForPostCode("BH9 2SL");
+
+            Map<Double, Double> alreadyAccessedCoordinates = new HashMap<>();
+
+            for (LandRegistryData landRegistryData : addressesForPostCode) {
+                if (alreadyAccessedCoordinates.get(landRegistryData.getLatitude()) != null)
+                    if (alreadyAccessedCoordinates.get(landRegistryData.getLatitude()).equals(landRegistryData.getLongitude())) {
+                        System.err.println("Duplicate addresses coordinates found in street in which no duplicate addresses should appear");
+                        assert false;
+                    }
+
+                alreadyAccessedCoordinates.put(landRegistryData.getLatitude(), landRegistryData.getLongitude());
+            }
+
+            assert true;
+        } catch (UnirestException e) {
+            e.printStackTrace();
+            assert false;
+        }
+    }
+
+    @Test
+    void testIfPositionOfAddressesForFlatsAreFetched() {
+        try {
+            List<LandRegistryData> addressesForPostCode = landRegistryService.getAddressesForPostCode("BN20 7LH");
+
+            for (LandRegistryData landRegistryData : addressesForPostCode) {
+                assert landRegistryData.getLatitude() != null &&
+                        landRegistryData.getLongitude() != null;
+            }
+        } catch (UnirestException e) {
+            e.printStackTrace();
+            assert false;
+        }
     }
 
     @Test
@@ -140,4 +181,5 @@ class LandRegistryServiceImplTest {
         assert address != null;
         assert address.getLatitude() == null && address.getLongitude() == null;
     }
+
 }
