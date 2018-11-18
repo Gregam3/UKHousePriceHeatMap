@@ -1,27 +1,27 @@
 package asegroup1.api.services.landregistry;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.LinkedList;
-import java.util.List;
-
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -42,8 +42,9 @@ public class LandRegistryServiceImpl {
     private static final String LR_SPACE = "%20";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
-        List<LandRegistryData> landRegistryDataList = new LinkedList<>();
+
+	public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
+		List<LandRegistryData> landRegistryDataList = new LinkedList<>();
         JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", LR_SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
@@ -94,7 +95,6 @@ public class LandRegistryServiceImpl {
 
         for (LandRegistryData address : addresses) {
             addressUriBuilder
-
                     .append(GOOGLE_MAPS_URL)
                     .append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
                     .append("+")
@@ -139,6 +139,37 @@ public class LandRegistryServiceImpl {
                 .asJson()
                 .getBody()
                 .getObject();
+    }
+
+    public List<Double> normaliseValues(List<Long> prices) {
+        if(prices.isEmpty()) {
+            return null;
+        }
+
+        List<Double> normalisedValues = new ArrayList<>();
+
+        long min, max;
+        min = max = prices.get(0);
+
+        for (int i = 1; i < prices.size(); i++) {
+            if (prices.get(i) > max) max = prices.get(i);
+            if (prices.get(i) < min) min = prices.get(i);
+        }
+
+        if(max == min) {
+            return prices.stream().map(p -> 0.0).collect(Collectors.toList());
+        }
+
+        for (Long price : prices) {
+            normalisedValues.add((double) (price - min) / (double) (max - min));
+        }
+
+        return normalisedValues;
+    }
+
+    public List<Colour> getColoursForNormalisedValues(List<Double> normalisedValues) {
+        //The higher the normalised value the darker the red will appear
+        return normalisedValues.stream().map(v -> new Colour(255 - (int) (v * 200))).collect(Collectors.toList());
     }
 
     private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {
