@@ -5,7 +5,7 @@ addons:
   sonarcloud:
     organization: gregam3-github
     token: 
-      secure: cb2b9dac3519804ea78eed74401990020f5e28c6
+      secure: $Sonar_token
 script:
   # other script steps might be done before running the actual analysis
   - sonar-scanner
@@ -28,7 +28,7 @@ jobs:
       node_js: lts/*
       script:
         - npm ci
-        - npx expo login -u briso -p asegroup1
+        - npx expo login -u $Expo_User -p $Expo_password
         - npx expo publish --non-interactive
         - expo build:android
       #  - expo build:ios

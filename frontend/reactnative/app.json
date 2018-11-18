@@ -28,7 +28,7 @@
     "package": "asegroup1.android",
     "config": {
       "googleMaps": {
-        "apiKey": "AIzaSyB9PX7BMHpuZypWHk7DeZ9udQxFgz_fVyc"
+        "apiKey": "$Maps_key"
         }
       }
     }
