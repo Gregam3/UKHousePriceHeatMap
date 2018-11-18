@@ -1,15 +1,15 @@
 package asegroup1.api.services.landregistry;
 
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -28,9 +28,34 @@ class LandRegistryServiceImplTest {
 
     private static LandRegistryServiceImpl landRegistryService;
 
+    private static final long RANDOM_SEED = 8312595207343625996L;
+
+    private static final String[] validPostCodeEnds = {"9PH", "9PJ", "9PL", "9PN"};
+
     @BeforeAll
     private static void setUpService() {
-        landRegistryService = new LandRegistryServiceImpl(null);
+        Random random = new Random(RANDOM_SEED);
+
+        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
+
+        for (int i = 0; i < validPostCodeEnds.length; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+            landRegistryData.setLatitude(random.nextDouble());
+            landRegistryData.setLatitude(random.nextDouble());
+
+            postCodeLocationData.add(landRegistryData);
+        }
+
+        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+        when(landRegistryDataDaoMock.getAllPostcodes(
+                "WHERE postcode = 'BN14 9PH' OR \n" +
+                        "\t postcode = 'BN14 9PJ' OR \n" +
+                        "\t postcode = 'BN14 9PL' OR \n" +
+                        "\t postcode = 'BN14 9PN'"
+        )).thenReturn(postCodeLocationData);
+
+        landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
     }
 
     @Test
@@ -182,4 +207,17 @@ class LandRegistryServiceImplTest {
         assert address.getLatitude() == null && address.getLongitude() == null;
     }
 
+    @Test
+    void testIfLargeAddressListIsAggregatedCorrectly() {
+        List<LandRegistryData> addresses = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+
+            addresses.add(landRegistryData);
+        }
+
+        assert landRegistryService.getPositionForLocations(addresses).size() == 4;
+    }
 }
