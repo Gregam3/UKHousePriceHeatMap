@@ -3,8 +3,9 @@
  */
 package asegroup1.api.models.landregistry;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -13,19 +14,28 @@ import org.junit.jupiter.api.Test;
  */
 class LandRegistryQueryTest {
 
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuery#LandRegistryQuery(asegroup1.api.models.landregistry.LandRegistryQueryBody, asegroup1.api.models.landregistry.LandRegistryQueryGroup, asegroup1.api.models.landregistry.LandRegistryQuerySelect)}.
-	 */
-	@Test
-	void testLandRegistryQueryLandRegistryQueryBodyLandRegistryQueryGroupLandRegistryQuerySelect() {
-		fail("Not yet implemented");
+	LandRegistryQuery query;
+
+	@BeforeEach
+	public void initSelect() {
+		query = new LandRegistryQuery();
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuery#LandRegistryQuery()}.
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuery#LandRegistryQuery()}.
 	 */
 	@Test
 	void testLandRegistryQuery() {
+
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuery#LandRegistryQuery(asegroup1.api.models.landregistry.LandRegistryQueryBody, asegroup1.api.models.landregistry.LandRegistryQueryGroup, asegroup1.api.models.landregistry.LandRegistryQuerySelect)}.
+	 */
+	@Test
+	void testLandRegistryQueryLandRegistryQueryBodyLandRegistryQueryGroupLandRegistryQuerySelect() {
 		fail("Not yet implemented");
 	}
 

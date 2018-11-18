@@ -98,19 +98,19 @@ public class LandRegistryServiceImpl {
 		LandRegistryQueryGroup group = new LandRegistryQueryGroup(Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode);
 
 		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
-		select.setSelectValue(Selectable.paon, Aggrigation.NONE);
+		select.addSelectValue(Selectable.paon, Aggrigation.NONE);
 		values.remove(Selectable.paon);
-		select.setSelectValue(Selectable.saon, Aggrigation.NONE);
+		select.addSelectValue(Selectable.saon, Aggrigation.NONE);
 		values.remove(Selectable.saon);
-		select.setSelectValue(Selectable.street, Aggrigation.NONE);
+		select.addSelectValue(Selectable.street, Aggrigation.NONE);
 		values.remove(Selectable.street);
-		select.setSelectValue(Selectable.postcode, Aggrigation.NONE);
+		select.addSelectValue(Selectable.postcode, Aggrigation.NONE);
 		values.remove(Selectable.postcode);
-		select.setSelectValue(Selectable.transactionDate, Aggrigation.MAX);
+		select.addSelectValue(Selectable.transactionDate, Aggrigation.MAX);
 		values.remove(Selectable.transactionDate);
 
 		for (Selectable selectable : values) {
-			select.setSelectValue(selectable, Aggrigation.SAMPLE);
+			select.addSelectValue(selectable, Aggrigation.SAMPLE);
 		}
 
 		return getTransactions(select, constraint, group);
