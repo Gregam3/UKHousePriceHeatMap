@@ -1,5 +1,7 @@
 package asegroup1.api.models.landregistry;
 
+import java.util.List;
+
 public class LandRegistryQuery implements LandRegistryQueryBody {
 
 	private LandRegistryQueryBody body;
@@ -20,8 +22,6 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		groupConstraint = new LandRegistryQueryGroup();
 		select = new LandRegistryQuerySelect();
 	}
-
-
 
 	public LandRegistryQueryBody getBody() {
 		return body;
@@ -47,18 +47,34 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		this.select = select;
 	}
 
+	public void addVarToGroup(String varname, boolean addToSelect) {
+		getGroupConstraint().select(varname);
+		if (addToSelect) {
+			getSelect().addSelectValue(varname);
+		}
+	}
+
+	public void addVarToGroup(String varname) {
+		addVarToGroup(varname, false);
+	}
+
+	public void addVarToSelect(String referenceName, Aggrigation aggrigation, String aggrigationResult) {
+		getSelect().addSelectValue(referenceName, aggrigation, aggrigationResult);
+	}
+
 	@Override
 	public String buildQueryContent() {
 		boolean grouping = !(groupConstraint == null || groupConstraint.getSelectables().isEmpty());
 		StringBuilder queryBuilder = new StringBuilder(select.buildQuerySelect(!grouping));
-		queryBuilder.append("\n\t");
-		queryBuilder.append(body.buildQueryContent().replaceAll("\n", "\n\t"));
+		queryBuilder.append("\n");
+		queryBuilder.append("WHERE { \n\t" + body.buildQueryContent().replace("\n", "\n\t") + "\n}");
 		if (grouping) {
 			queryBuilder.append("\n");
 			queryBuilder.append(groupConstraint.buildGroup());
 		}
 		return queryBuilder.toString().trim();
 	}
+
 
 	public String buildQuery() {
 		return getQueryPrefixDeclarations() + "\n" + buildQueryContent();
@@ -71,6 +87,40 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 				+ "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" + "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
 				+ "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>";
 	}
+
+	public static LandRegistryQuery buildQueryLatestSalesOnly(LandRegistryQueryConstraint body, List<Selectable> selectables) {
+
+		LandRegistryQueryGroup group = new LandRegistryQueryGroup("paon", "saon", "street", "postcode");
+
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		select.addSelectValue(Selectable.paon, Aggrigation.NONE);
+		selectables.remove(Selectable.paon);
+		select.addSelectValue(Selectable.saon, Aggrigation.NONE);
+		selectables.remove(Selectable.saon);
+		select.addSelectValue(Selectable.street, Aggrigation.NONE);
+		selectables.remove(Selectable.street);
+		select.addSelectValue(Selectable.postcode, Aggrigation.NONE);
+		selectables.remove(Selectable.postcode);
+		select.addSelectValue(Selectable.transactionDate, Aggrigation.MAX);
+		selectables.remove(Selectable.transactionDate);
+
+		for (Selectable selectable : selectables) {
+			select.addSelectValue(selectable, Aggrigation.SAMPLE);
+		}
+		
+		return new LandRegistryQuery(body, group, select);
+	}
+
+	public static LandRegistryQuery buildQueryAggrigatePostCode(LandRegistryQueryBody body, String postCodeName, String pricePaidName, String pricePaidFieldName) {
+
+		LandRegistryQueryGroup groupConstraint = new LandRegistryQueryGroup(postCodeName);
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		select.addSelectValue(postCodeName, Aggrigation.NONE, "");
+		select.addSelectValue(pricePaidName, Aggrigation.AVG, pricePaidFieldName);
+
+		return new LandRegistryQuery(body, groupConstraint, select);
+	}
+
 
 
 	public enum Selectable {
@@ -94,5 +144,7 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 	public enum Aggrigation {
 		COUNT, SUM, AVG, MIN, MAX, SAMPLE, NONE;
 	}
+	
+	
 
 }

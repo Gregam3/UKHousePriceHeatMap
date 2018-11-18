@@ -1,7 +1,6 @@
 package asegroup1.api.models.landregistry;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
@@ -11,7 +10,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
  */
 public class LandRegistryQueryGroup {
 
-	private ArrayList<Selectable> selectableMap;
+	private ArrayList<String> selectableMap;
 
 	/**
 	 * Initialise the LandRegistryQuerySelect with specified {@link Selectable
@@ -19,27 +18,9 @@ public class LandRegistryQueryGroup {
 	 * 
 	 * @param selectables to initialise the code
 	 */
-	public LandRegistryQueryGroup(Selectable... selectables) {
-		selectableMap = new ArrayList<Selectable>();
+	public LandRegistryQueryGroup(String... selectables) {
+		selectableMap = new ArrayList<String>();
 		select(selectables);
-	}
-
-	/**
-	 * Initialise the LandRegistryQuerySelect to contain all {@link Selectable
-	 * selectable's}, except the specified exceptions.
-	 * 
-	 * @param selectAll  If true the query will be initialised to contain all
-	 *                   values, if false the query will be initialised to be empty
-	 * @param exceptions Any exceptions to the specified rule.
-	 */
-	public LandRegistryQueryGroup(boolean selectAll, Selectable... exceptions) {
-		selectableMap = new ArrayList<Selectable>();
-		if (selectAll) {
-			selectAll();
-			deselect(exceptions);
-		} else {
-			select(exceptions);
-		}
 	}
 
 	/**
@@ -47,8 +28,8 @@ public class LandRegistryQueryGroup {
 	 * 
 	 * @param selectables to select
 	 */
-	public void select(Selectable... selectables) {
-		for (Selectable selectable : selectables) {
+	public void select(String... selectables) {
+		for (String selectable : selectables) {
 			if (!selectableMap.contains(selectable)) {
 				selectableMap.add(selectable);
 			}
@@ -56,19 +37,12 @@ public class LandRegistryQueryGroup {
 	}
 
 	/**
-	 * Select all {@link Selectable selectable's}.
-	 */
-	public void selectAll() {
-		EnumSet.allOf(Selectable.class).forEach(v -> selectableMap.add(v));
-	}
-
-	/**
 	 * Deselect the specified {@link Selectable selectable's}.
 	 * 
 	 * @param selectables to deselect
 	 */
-	public void deselect(Selectable... selectables) {
-		for (Selectable selectable : selectables) {
+	public void deselect(String... selectables) {
+		for (String selectable : selectables) {
 			selectableMap.remove(selectable);
 		}
 	}
@@ -86,7 +60,7 @@ public class LandRegistryQueryGroup {
 	 * @param selectable to check
 	 * @return true, if the specified selectable is selected
 	 */
-	public boolean hasSelectable(Selectable selectable) {
+	public boolean hasSelectable(String selectable) {
 		return selectableMap.contains(selectable);
 	}
 
@@ -96,7 +70,7 @@ public class LandRegistryQueryGroup {
 	 * 
 	 * @param selectable to toggle
 	 */
-	public void toggleSelectable(Selectable selectable) {
+	public void toggleSelectable(String selectable) {
 		if (hasSelectable(selectable)) {
 			deselect(selectable);
 		} else {
@@ -109,13 +83,13 @@ public class LandRegistryQueryGroup {
 	 * 
 	 * @return all selectables stored
 	 */
-	public ArrayList<Selectable> getSelectables() {
+	public ArrayList<String> getSelectables() {
 		return selectableMap;
 	}
 
 	public String buildGroup() {
 		StringBuilder groupBuilder = new StringBuilder("GROUP BY ");
-		for (Selectable selectable : selectableMap) {
+		for (String selectable : selectableMap) {
 			groupBuilder.append("?");
 			groupBuilder.append(selectable.toString());
 			groupBuilder.append(" ");

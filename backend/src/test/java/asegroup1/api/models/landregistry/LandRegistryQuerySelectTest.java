@@ -10,9 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,22 +26,8 @@ class LandRegistryQuerySelectTest {
 
 	LandRegistryQuerySelect select;
 
-	private LinkedHashMap<Selectable, Aggrigation> fillWithRandomData() {
-		ArrayList<Selectable> selectableSet = new ArrayList<>(EnumSet.allOf(Selectable.class));
-		ArrayList<Aggrigation> aggrigationSet = new ArrayList<>(EnumSet.allOf(Aggrigation.class));
-		Random rand = new Random(LandRegistryQueryTestUtils.randomSeed);
 
-		LinkedHashMap<Selectable, Aggrigation> map = new LinkedHashMap<>();
 
-		int iterations = rand.nextInt(selectableSet.size() - 4) + 3;
-		for (int i = 0; i < iterations; i++) {
-			Selectable selectable = selectableSet.remove(rand.nextInt(selectableSet.size()));
-			Aggrigation aggrigation = aggrigationSet.get(rand.nextInt(aggrigationSet.size()));
-			select.addSelectValue(selectable, aggrigation);
-			map.put(selectable, aggrigation);
-		}
-		return map;
-	}
 
 	@BeforeEach
 	public void initSelect() {
@@ -66,7 +50,7 @@ class LandRegistryQuerySelectTest {
 	 */
 	@Test
 	void testLandRegistryQuerySelectSelectable() {
-		List<Selectable> selectables = LandRegistryQueryTestUtils.genRandomSelectableSelection();
+		List<Selectable> selectables = LandRegistryQueryTestUtils.genRandomSelectables();
 		select = new LandRegistryQuerySelect(selectables.toArray(new Selectable[selectables.size()]));
 		assertEquals(selectables.size(), select.getSelectValues().size());
 		for (Selectable selectable : selectables) {
@@ -108,7 +92,7 @@ class LandRegistryQuerySelectTest {
 	 */
 	@Test
 	void testBuildQuerySelectIgnoreAggrigation() {
-		fillWithRandomData();
+		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
 
 		String buildGroup = select.buildQuerySelect(true);
 
@@ -123,7 +107,7 @@ class LandRegistryQuerySelectTest {
 	 */
 	@Test
 	void testBuildQuerySelect() {
-		fillWithRandomData();
+		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
 
 		String buildGroup = select.buildQuerySelect(false);
 

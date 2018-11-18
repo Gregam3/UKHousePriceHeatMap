@@ -1,11 +1,15 @@
 package asegroup1.api.models.landregistry;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
@@ -19,6 +23,10 @@ public class LandRegistryQueryTestUtils {
 		return "Random: " + new Random(randomSeed).nextLong();
 	}
 
+	static LandRegistryQuery genLandRegistryQuery(boolean constraintContent) {
+		return new LandRegistryQuery(constraintContent ? genLandRegistryQueryConstraint() : genLandRegistryQuery(true), genLandRegistryQueryGroup(), genLandRegistryQuerySelect());
+	}
+
 	static LandRegistryData genLandRegistryData() {
 		LandRegistryData data = new LandRegistryData();
 		data.setNewBuild(true);
@@ -30,15 +38,48 @@ public class LandRegistryQueryTestUtils {
 		return data;
 	}
 
+	static LandRegistryQueryConstraint genLandRegistryQueryConstraint() {
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint(genLandRegistryData());
+		constraint.setMaxDate(LocalDate.now());
+		constraint.setMinDate(LocalDate.now().minusYears(5));
+		constraint.setMinPricePaid(150000);
+		constraint.setPostcodes(getRandomPostCodes());
+		return constraint;
+	}
+
+	static LandRegistryQuerySelect genLandRegistryQuerySelect() {
+		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
+		for (Entry<Selectable, Aggrigation> entry : genRandomSelectableAggrigations().entrySet()) {
+			select.addSelectValue(entry.getKey(), entry.getValue());
+		}
+		return select;
+	}
+
+	static LinkedHashMap<Selectable, Aggrigation> genRandomSelectableAggrigations() {
+		ArrayList<Selectable> selectableSet = new ArrayList<>(EnumSet.allOf(Selectable.class));
+		ArrayList<Aggrigation> aggrigationSet = new ArrayList<>(EnumSet.allOf(Aggrigation.class));
+		Random rand = new Random(LandRegistryQueryTestUtils.randomSeed);
+
+		LinkedHashMap<Selectable, Aggrigation> map = new LinkedHashMap<>();
+
+		int iterations = rand.nextInt(selectableSet.size() - 4) + 3;
+		for (int i = 0; i < iterations; i++) {
+			Selectable selectable = selectableSet.remove(rand.nextInt(selectableSet.size()));
+			Aggrigation aggrigation = aggrigationSet.get(rand.nextInt(aggrigationSet.size()));
+			map.put(selectable, aggrigation);
+		}
+		return map;
+	}
+
 	static String[] getRandomPostCodes() {
 		return new String[] { "OX14 1WH", "L18 9SN", "TN27 8JG", "PL8 2EE" };
 	}
 
-	static List<Selectable> genRandomSelectables(Set<Selectable> selectables) {
+	static List<Selectable> genRandomSelectables(Set<Selectable> options) {
 		Random r = new Random(LandRegistryQueryTestUtils.randomSeed);
-		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
+		ArrayList<Selectable> unSelected = new ArrayList<>(options);
 		ArrayList<Selectable> selected = new ArrayList<>();
-		int reps = r.nextInt(selectables.size() - 1) + 1;
+		int reps = r.nextInt(options.size() - 1) + 1;
 		for (int i = 0; i < reps; i++) {
 			selected.add(unSelected.remove(r.nextInt(unSelected.size())));
 		}
@@ -46,11 +87,17 @@ public class LandRegistryQueryTestUtils {
 		return selected;
 	}
 
-	static List<Selectable> genRandomSelectableSelection() {
+	static List<Selectable> genRandomSelectables() {
 		return genRandomSelectables(EnumSet.allOf(Selectable.class));
 	}
 
+	static String[] buildRandomSelectablesArray(List<Selectable> select) {
+		return select.stream().map(v -> v.toString()).collect(Collectors.toList()).toArray(new String[select.size()]);
+	}
 
+	static LandRegistryQueryGroup genLandRegistryQueryGroup() {
+		return new LandRegistryQueryGroup(buildRandomSelectablesArray(genRandomSelectables()));
+	}
 
 	/* REGEX */
 
@@ -93,7 +140,7 @@ public class LandRegistryQueryTestUtils {
 		return list;
 	}
 	
-	static String buildQueryRegex() {
+	static String buildQueryConstraintRegex() {
 		String delimeter = "\\s*";
 		// value regex parts
 		String valueReference = "\\?\\w+";
@@ -152,10 +199,20 @@ public class LandRegistryQueryTestUtils {
 		String filter = regexAddWithDelim(delimeter, "FILTER", "\\(", "(" + filterOptionList + ")?", "\\)");
 		String optionalFilter = "(" + filter + ")?";
 
-		String queryRegex = regexAddWithDelim(delimeter, "WHERE", "\\{", declarationList, optionalFilter, "\\}");
+		String queryRegex = regexAddWithDelim(delimeter, declarationList, optionalFilter);
 
 
 		return queryRegex;
+	}
+
+	static String buildQueryRegexInternal(int depth) {
+		if (depth > 0) {
+			return regexAddWithDelim("\\s*", buildQuerySelectRegex(false), "WHERE", "\\{", buildQueryRegexInternal(depth - 1), "\\}",
+					"(" + buildQueryGroupRegex(new ArrayList<>(EnumSet.allOf(Selectable.class))) + ")?");
+		} else {
+			return regexAddWithDelim("\\s*", buildQuerySelectRegex(false), "WHERE", "\\{", buildQueryConstraintRegex(), "\\}",
+					"(" + buildQueryGroupRegex(new ArrayList<>(EnumSet.allOf(Selectable.class))) + ")?");
+		}
 	}
 
 	private static String regexAddWithDelim(String delimeter, String... parts) {

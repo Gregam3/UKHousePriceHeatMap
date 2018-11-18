@@ -151,8 +151,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 	 * @return the WHERE section of the query
 	 */
 	public String buildQueryContent() {
-		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
-		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
+		return buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
 	}
 
 	private String buildQuerySelection() {

@@ -23,25 +23,24 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 class LandRegistryQueryGroupTest {
 
 	private EnumSet<Selectable> selectables;
-	private LandRegistryQueryGroup querySelect;
+	private LandRegistryQueryGroup group;
 
+	private List<Selectable> fillWithRandomData() {
+		List<Selectable> select = LandRegistryQueryTestUtils.genRandomSelectables();
+		group.select(LandRegistryQueryTestUtils.buildRandomSelectablesArray(select));
+		return select;
+	}
 
 	@BeforeEach
 	public void initTests() {
-		querySelect = new LandRegistryQueryGroup();
+		group = new LandRegistryQueryGroup();
 		selectables = EnumSet.allOf(Selectable.class);
 	}
 
 
 	private void testQuerySelectEmpty() {
 		selectables.forEach(v -> {
-			assertFalse(querySelect.hasSelectable(v));
-		});
-	}
-
-	private void testQuerySelectFull() {
-		selectables.forEach(v -> {
-			assertTrue(querySelect.hasSelectable(v));
+			assertFalse(group.hasSelectable(v.toString()));
 		});
 	}
 
@@ -49,27 +48,12 @@ class LandRegistryQueryGroupTest {
 		ArrayList<Selectable> nonExistant = new ArrayList<>(selectables);
 		nonExistant.removeAll(selected);
 		for (Selectable select : selected) {
-			assertTrue(querySelect.hasSelectable(select));
+			assertTrue(group.hasSelectable(select.toString()));
 		}
 
 		for (Selectable select : nonExistant) {
-			assertFalse(querySelect.hasSelectable(select));
+			assertFalse(group.hasSelectable(select.toString()));
 		}
-	}
-
-	private List<Selectable> genRandomSelectables() {
-		return LandRegistryQueryTestUtils.genRandomSelectables(selectables);
-	}
-
-	private Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
-		return select.toArray(new Selectable[select.size()]);
-	}
-
-	private List<Selectable> fillWithRandomData() {
-		List<Selectable> select = genRandomSelectables();
-		Selectable[] selectArr = buildRandomSelectablesArray(select);
-		querySelect.select(selectArr);
-		return select;
 	}
 
 
@@ -89,26 +73,9 @@ class LandRegistryQueryGroupTest {
 	 */
 	@Test
 	public void testLandRegistryQuerySelectSelectableArray() {
-		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQueryGroup(buildRandomSelectablesArray(select));
+		List<Selectable> select = LandRegistryQueryTestUtils.genRandomSelectables();
+		group = new LandRegistryQueryGroup(LandRegistryQueryTestUtils.buildRandomSelectablesArray(select));
 		testQuerySelectMatches(select);
-	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#LandRegistryQuerySelect(boolean, asegroup1.api.models.landregistry.LandRegistryQueryGroup.Selectable[])}.
-	 */
-	@Test
-	public void testLandRegistryQuerySelectBooleanSelectableArray() {
-		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQueryGroup(false, buildRandomSelectablesArray(select));
-		testQuerySelectMatches(select);
-
-
-		select = genRandomSelectables();
-		ArrayList<Selectable> inverse = new ArrayList<>(selectables);
-		inverse.removeAll(select);
-		querySelect = new LandRegistryQueryGroup(true, buildRandomSelectablesArray(select));
-		testQuerySelectMatches(inverse);
 	}
 
 	/**
@@ -116,12 +83,12 @@ class LandRegistryQueryGroupTest {
 	 */
 	@Test
 	public void testSelectDeselectOne() {
-		List<Selectable> select = genRandomSelectables();
+		List<Selectable> select = LandRegistryQueryTestUtils.genRandomSelectables();
 		for (Selectable selectable : select) {
-			querySelect.select(selectable);
-			assertTrue(querySelect.hasSelectable(selectable));
-			querySelect.deselect(selectable);
-			assertFalse(querySelect.hasSelectable(selectable));
+			group.select(selectable.toString());
+			assertTrue(group.hasSelectable(selectable.toString()));
+			group.deselect(selectable.toString());
+			assertFalse(group.hasSelectable(selectable.toString()));
 		}
 	}
 
@@ -135,45 +102,7 @@ class LandRegistryQueryGroupTest {
 	public void testSelectDeselectMany() {
 		List<Selectable> select = fillWithRandomData();
 		testQuerySelectMatches(select);
-		querySelect.deselect(buildRandomSelectablesArray(select));
-		testQuerySelectEmpty();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#selectAll()}
-	 * and
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#deselectAll()}.
-	 */
-	@Test
-	public void testSelectDeselectAllEmpty() {
-		querySelect.selectAll();
-		testQuerySelectFull();
-		querySelect.deselectAll();
-		testQuerySelectEmpty();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#selectAll()}
-	 * when there is some data in select
-	 */
-	@Test
-	public void testSelectAllMixed() {
-		fillWithRandomData();
-		querySelect.selectAll();
-		testQuerySelectFull();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryGroup#deselectAll()}
-	 * when there is some data in select
-	 */
-	@Test
-	public void testDeselectAllMixed() {
-		fillWithRandomData();
-		querySelect.deselectAll();
+		group.deselect(LandRegistryQueryTestUtils.buildRandomSelectablesArray(select));
 		testQuerySelectEmpty();
 	}
 
@@ -183,7 +112,7 @@ class LandRegistryQueryGroupTest {
 	@Test
 	public void testToggleSelectable() {
 		List<Selectable> initial = fillWithRandomData();
-		List<Selectable> toToggle = genRandomSelectables();
+		List<Selectable> toToggle = LandRegistryQueryTestUtils.genRandomSelectables();
 		List<Selectable> expected = new ArrayList<Selectable>(initial);
 		toToggle.forEach(v -> {
 			if (expected.contains(v)) {
@@ -194,7 +123,7 @@ class LandRegistryQueryGroupTest {
 		});
 
 		for (Selectable selectable : toToggle) {
-			querySelect.toggleSelectable(selectable);
+			group.toggleSelectable(selectable.toString());
 		}
 
 		testQuerySelectMatches(expected);
@@ -208,7 +137,7 @@ class LandRegistryQueryGroupTest {
 	public void testBuildQuerySelect() {
 		List<Selectable> initial = fillWithRandomData();
 
-		String buildGroup = querySelect.buildGroup();
+		String buildGroup = group.buildGroup();
 
 		String regex = LandRegistryQueryTestUtils.buildQueryGroupRegex(initial);
 
