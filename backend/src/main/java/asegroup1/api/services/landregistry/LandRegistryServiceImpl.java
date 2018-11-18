@@ -1,32 +1,28 @@
 package asegroup1.api.services.landregistry;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service

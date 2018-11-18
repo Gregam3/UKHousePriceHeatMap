@@ -36,7 +36,7 @@ public class Colour {
     }
 
     public String getColourAsHex() {
-        return "#" + toHexColourString(red) +  toHexColourString(getGreen()) + toHexColourString(getBlue());
+        return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
     }
 
     private String toHexColourString(int value) {

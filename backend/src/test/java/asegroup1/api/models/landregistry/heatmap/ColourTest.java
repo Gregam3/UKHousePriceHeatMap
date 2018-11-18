@@ -1,5 +1,6 @@
-package asegroup1.api.models.heatmap;
+package asegroup1.api.models.landregistry.heatmap;
 
+import asegroup1.api.models.heatmap.Colour;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
