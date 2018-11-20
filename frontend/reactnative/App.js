@@ -129,7 +129,6 @@ export default class App extends Component {
                         }}
                     >
 
-                        //Uses Array.map function to construct and display every marker using the data in the markers array
                         {this.state.markers.map(marker => (
                             <MapView.Marker
                                 key={marker.id}
