@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
 /**
@@ -54,13 +54,13 @@ class LandRegistryQuerySelectTest {
 		select = new LandRegistryQuerySelect(selectables.toArray(new Selectable[selectables.size()]));
 		assertEquals(selectables.size(), select.getSelectValues().size());
 		for (Selectable selectable : selectables) {
-			assertEquals(Aggrigation.SAMPLE, select.getSelectValueAggrigation(selectable.toString()));
+			assertEquals(Aggregation.SAMPLE, select.getSelectValueAggregation(selectable.toString()));
 		}
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#addSelectValue(asegroup1.api.models.landregistry.LandRegistryQuery.Selectable, asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation)}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#addSelectValue(asegroup1.api.models.landregistry.LandRegistryQuery.Selectable, asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation)}
 	 * ,
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#hasValue(java.lang.String)},
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#removeValue(java.lang.String)}
@@ -68,20 +68,20 @@ class LandRegistryQuerySelectTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#getSelectValues(java.lang.String)}.
 	 */
 	@Test
-	void testAddSelectValueSelectableAggrigation() {
+	void testAddSelectValueSelectableAggregation() {
 		ArrayList<Selectable> selectableSet = new ArrayList<>(EnumSet.allOf(Selectable.class));
-		ArrayList<Aggrigation> aggrigationSet = new ArrayList<>(EnumSet.allOf(Aggrigation.class));
+		ArrayList<Aggregation> aggregationSet = new ArrayList<>(EnumSet.allOf(Aggregation.class));
 		
-		assert selectableSet.size() > aggrigationSet.size();
+		assert selectableSet.size() > aggregationSet.size();
 
-		for (int i = 0; i < aggrigationSet.size(); i++) {
+		for (int i = 0; i < aggregationSet.size(); i++) {
 			Selectable selectable = selectableSet.get(i);
-			Aggrigation aggrigation = aggrigationSet.get(i);
+			Aggregation aggregation = aggregationSet.get(i);
 
 			assertNull(select.getSelectValues(selectable.toString()));
-			select.addSelectValue(selectable, aggrigation);
+			select.addSelectValue(selectable, aggregation);
 			assertTrue(select.hasValue(selectable.toString()));
-			assertEquals(aggrigation.toString(), select.getSelectValues(selectable.toString())[1]);
+			assertEquals(aggregation.toString(), select.getSelectValues(selectable.toString())[1]);
 			select.removeValue(selectable.toString());
 			assertNull(select.getSelectValues(selectable.toString()));
 		}
@@ -91,7 +91,7 @@ class LandRegistryQuerySelectTest {
 	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect(boolean)}.
 	 */
 	@Test
-	void testBuildQuerySelectIgnoreAggrigation() {
+	void testBuildQuerySelectIgnoreAggregation() {
 		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
 
 		String buildGroup = select.buildQuerySelect(true);

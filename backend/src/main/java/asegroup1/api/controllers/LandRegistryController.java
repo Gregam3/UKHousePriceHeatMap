@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,7 +78,7 @@ public class LandRegistryController {
 		LandRegistryQueryConstraint body = new LandRegistryQueryConstraint();
 		body.setPostcodes(postCode);
 		body.setMinDate(LocalDate.now().minusYears(5));
-		List<Selectable> selectables = Arrays.asList(new Selectable[] { Selectable.pricePaid });
+		List<Selectable> selectables = Collections.singletonList(Selectable.pricePaid);
 
 		LandRegistryQuery query = LandRegistryQuery.buildQueryAggrigatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(body, selectables), "postcode", "PricePaid",
 				"AveragePrice");

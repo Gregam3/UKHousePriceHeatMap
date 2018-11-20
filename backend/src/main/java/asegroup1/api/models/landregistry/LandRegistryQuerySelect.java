@@ -2,7 +2,7 @@ package asegroup1.api.models.landregistry;
 
 import java.util.LinkedHashMap;
 
-import asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
 public class LandRegistryQuerySelect {
@@ -12,20 +12,20 @@ public class LandRegistryQuerySelect {
 	public LandRegistryQuerySelect(Selectable... selectables) {
 		selectValues = new LinkedHashMap<String, SelectObj>();
 		for (Selectable selectable : selectables) {
-			addSelectValue(selectable, Aggrigation.SAMPLE);
+			addSelectValue(selectable, Aggregation.SAMPLE);
 		}
 	}
 
-	public void addSelectValue(String referenceName, Aggrigation aggrigation, String aggrigationResult) {
-		selectValues.put(referenceName, new SelectObj(referenceName, aggrigationResult, aggrigation));
+	public void addSelectValue(String referenceName, Aggregation aggregation, String aggregationResult) {
+		selectValues.put(referenceName, new SelectObj(referenceName, aggregationResult, aggregation));
 	}
 
 	public void addSelectValue(String referenceName) {
-		addSelectValue(referenceName, Aggrigation.NONE, null);
+		addSelectValue(referenceName, Aggregation.NONE, null);
 	}
 
-	public void addSelectValue(Selectable reference, Aggrigation aggrigation) {
-		addSelectValue(reference.toString(), aggrigation, capitalise(reference.toString()));
+	public void addSelectValue(Selectable reference, Aggregation aggregation) {
+		addSelectValue(reference.toString(), aggregation, capitalise(reference.toString()));
 	}
 
 	private String capitalise(String str) {
@@ -51,29 +51,29 @@ public class LandRegistryQuerySelect {
 
 	public String[] getSelectValues(String reference) {
 		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : new String[] { obj.referenceName, obj.aggrigation.toString(), obj.aggrigationName };
+		return obj == null ? null : new String[] { obj.referenceName, obj.aggregation.toString(), obj.aggregationName };
 	}
 
-	public String getSelectValueAggrigationName(String reference) {
+	public String getSelectValueAggregationName(String reference) {
 		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggrigationName(obj);
+		return obj == null ? null : getSelectValueAggregationName(obj);
 	}
 
-	public Aggrigation getSelectValueAggrigation(String reference) {
+	public Aggregation getSelectValueAggregation(String reference) {
 		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggrigation(obj);
+		return obj == null ? null : getSelectValueAggregation(obj);
 	}
 
-	public static String getSelectValueAggrigationName(SelectObj reference) {
-		return reference.aggrigationName;
+	public static String getSelectValueAggregationName(SelectObj reference) {
+		return reference.aggregationName;
 	}
 
 	public static String getSelectValueReferencenName(SelectObj reference) {
 		return reference.referenceName;
 	}
 
-	public static Aggrigation getSelectValueAggrigation(SelectObj reference) {
-		return reference.aggrigation;
+	public static Aggregation getSelectValueAggregation(SelectObj reference) {
+		return reference.aggregation;
 	}
 
 	public LinkedHashMap<String, SelectObj> getSelectValues() {
@@ -85,10 +85,10 @@ public class LandRegistryQuerySelect {
 	 * 
 	 * @return the SELECT section of the query
 	 */
-	public String buildQuerySelect(boolean ignoreAggrigation) {
+	public String buildQuerySelect(boolean ignoreAggregation) {
 		StringBuilder selectStringBuilder = new StringBuilder("SELECT ");
 		for (SelectObj selectable : selectValues.values()) {
-			selectStringBuilder.append(selectable.toString(ignoreAggrigation) + " ");
+			selectStringBuilder.append(selectable.toString(ignoreAggregation)).append(" ");
 		}
 		return selectStringBuilder.toString().trim();
 	}
@@ -97,23 +97,23 @@ public class LandRegistryQuerySelect {
 
 	private class SelectObj {
 		String referenceName;
-		String aggrigationName;
-		Aggrigation aggrigation;
+		String aggregationName;
+		Aggregation aggregation;
 
 
-		public SelectObj(String referenceName, String aggrigationName, Aggrigation aggrigation) {
+		public SelectObj(String referenceName, String aggregationName, Aggregation aggregation) {
 			this.referenceName = referenceName;
-			this.aggrigationName = aggrigationName;
-			this.aggrigation = aggrigation;
+			this.aggregationName = aggregationName;
+			this.aggregation = aggregation;
 		}
 
-		public String toString(boolean ignoreAggrigation) {
+		public String toString(boolean ignoreAggregation) {
 			String structure = null;
-			if (ignoreAggrigation) {
+			if (ignoreAggregation) {
 				structure = "?%s";
 			} else {
 
-				switch (aggrigation) {
+				switch (aggregation) {
 					case AVG:
 						structure = "(AVG(?%s) AS ?%s)";
 						break;
@@ -139,7 +139,7 @@ public class LandRegistryQuerySelect {
 						throw new IllegalArgumentException("Unexpected enum");
 				}
 			}
-			return String.format(structure, referenceName, aggrigationName);
+			return String.format(structure, referenceName, aggregationName);
 
 		}
 

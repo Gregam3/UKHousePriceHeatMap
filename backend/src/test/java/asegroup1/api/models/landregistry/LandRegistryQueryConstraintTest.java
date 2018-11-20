@@ -115,7 +115,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	public void testSetPostcodesArrayListOfString() {
-		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(LandRegistryQueryTestUtils.getRandomPostCodes()));
+		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(LandRegistryQueryTestUtils.getPostCodes()));
 		constraint.setPostcodes(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
 	}
@@ -125,7 +125,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	public void testSetPostcodesStringArray() {
-		String[] postcodes = LandRegistryQueryTestUtils.getRandomPostCodes();
+		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
 		constraint.setPostcodes(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
 	}
@@ -139,7 +139,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getRandomPostCodes());
+		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
@@ -153,7 +153,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getRandomPostCodes());
+		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}

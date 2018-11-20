@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import asegroup1.api.models.landregistry.LandRegistryQuery.Aggrigation;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
@@ -43,35 +43,35 @@ public class LandRegistryQueryTestUtils {
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinDate(LocalDate.now().minusYears(5));
 		constraint.setMinPricePaid(150000);
-		constraint.setPostcodes(getRandomPostCodes());
+		constraint.setPostcodes(getPostCodes());
 		return constraint;
 	}
 
 	static LandRegistryQuerySelect genLandRegistryQuerySelect() {
 		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
-		for (Entry<Selectable, Aggrigation> entry : genRandomSelectableAggrigations().entrySet()) {
+		for (Entry<Selectable, Aggregation> entry : genRandomSelectableAggregations().entrySet()) {
 			select.addSelectValue(entry.getKey(), entry.getValue());
 		}
 		return select;
 	}
 
-	static LinkedHashMap<Selectable, Aggrigation> genRandomSelectableAggrigations() {
+	static LinkedHashMap<Selectable, Aggregation> genRandomSelectableAggregations() {
 		ArrayList<Selectable> selectableSet = new ArrayList<>(EnumSet.allOf(Selectable.class));
-		ArrayList<Aggrigation> aggrigationSet = new ArrayList<>(EnumSet.allOf(Aggrigation.class));
+		ArrayList<Aggregation> aggregationSet = new ArrayList<>(EnumSet.allOf(Aggregation.class));
 		Random rand = new Random(LandRegistryQueryTestUtils.randomSeed);
 
-		LinkedHashMap<Selectable, Aggrigation> map = new LinkedHashMap<>();
+		LinkedHashMap<Selectable, Aggregation> map = new LinkedHashMap<>();
 
 		int iterations = rand.nextInt(selectableSet.size() - 4) + 3;
 		for (int i = 0; i < iterations; i++) {
 			Selectable selectable = selectableSet.remove(rand.nextInt(selectableSet.size()));
-			Aggrigation aggrigation = aggrigationSet.get(rand.nextInt(aggrigationSet.size()));
-			map.put(selectable, aggrigation);
+			Aggregation aggregation = aggregationSet.get(rand.nextInt(aggregationSet.size()));
+			map.put(selectable, aggregation);
 		}
 		return map;
 	}
 
-	static String[] getRandomPostCodes() {
+	static String[] getPostCodes() {
 		return new String[] { "OX14 1WH", "L18 9SN", "TN27 8JG", "PL8 2EE" };
 	}
 
@@ -92,7 +92,7 @@ public class LandRegistryQueryTestUtils {
 	}
 
 	static String[] buildRandomSelectablesArray(List<Selectable> select) {
-		return select.stream().map(v -> v.toString()).collect(Collectors.toList()).toArray(new String[select.size()]);
+		return select.stream().map(Enum::toString).collect(Collectors.toList()).toArray(new String[select.size()]);
 	}
 
 	static LandRegistryQueryGroup genLandRegistryQueryGroup() {
@@ -101,7 +101,7 @@ public class LandRegistryQueryTestUtils {
 
 	/* REGEX */
 
-	static String buildQuerySelectRegex(boolean ignoreAggrigation) {
+	static String buildQuerySelectRegex(boolean ignoreAggregation) {
 		String start = "SELECT";
 
 		List<String> options = new ArrayList<>();
@@ -114,22 +114,22 @@ public class LandRegistryQueryTestUtils {
 		String optionList = regexOptionalList(options);
 		String option = "\\?" + optionList;
 
-		ArrayList<Aggrigation> aggrigations = new ArrayList<Aggrigation>(EnumSet.allOf(Aggrigation.class));
-		aggrigations.remove(Aggrigation.NONE);
+		ArrayList<Aggregation> aggregations = new ArrayList<Aggregation>(EnumSet.allOf(Aggregation.class));
+		aggregations.remove(Aggregation.NONE);
 		
-		String aggrigationList = regexOptionalList(runOnList(aggrigations, v -> v.toString()));
+		String aggregationList = regexOptionalList(runOnList(aggregations, Enum::toString));
 
-		String aggrigationOption = regexAddWithDelim("\\s*", "\\(", aggrigationList, "\\(", option, "\\)", "AS", option, "\\)");
-		String aggrigationOptions = regexOptionalList(option, aggrigationOption);
+		String aggregationOption = regexAddWithDelim("\\s*", "\\(", aggregationList, "\\(", option, "\\)", "AS", option, "\\)");
+		String aggregationOptions = regexOptionalList(option, aggregationOption);
 
-		String regex = regexAddWithDelim("\\s*", start, "(", (ignoreAggrigation ? option : aggrigationOptions), ")+");
+		String regex = regexAddWithDelim("\\s*", start, "(", (ignoreAggregation ? option : aggregationOptions), ")+");
 		
 		return regex;
 	}
 
 	static String buildQueryGroupRegex(List<Selectable> selectables) {
 		String start = "GROUP BY";
-		String groupOptions = regexOptionalList(runOnList(selectables, v -> v.toString()));
+		String groupOptions = regexOptionalList(runOnList(selectables, Enum::toString));
 		String groupOption = "\\?" + groupOptions;
 		return regexAddWithDelim("\\s*", start, "(", groupOption, ")+");
 	}
@@ -141,7 +141,7 @@ public class LandRegistryQueryTestUtils {
 	}
 	
 	static String buildQueryConstraintRegex() {
-		String delimeter = "\\s*";
+		String delimiter = "\\s*";
 		// value regex parts
 		String valueReference = "\\?\\w+";
 		String valueString = "\"[^\"]*\"";
@@ -159,25 +159,25 @@ public class LandRegistryQueryTestUtils {
 		String advancedNameSpace = namespace + "(/" + namespace + ")?";
 
 		// declaration
-		String partialDeclaration = regexAddWithDelim(delimeter, advancedNameSpace, value);
+		String partialDeclaration = regexAddWithDelim(delimiter, advancedNameSpace, value);
 
 
-		String partialDeclarationListStart = regexAddWithDelim(delimeter, partialDeclaration, ";");
-		String partialDeclarationList = regexAddWithDelim(delimeter, "(", partialDeclarationListStart, ")*", partialDeclaration);
+		String partialDeclarationListStart = regexAddWithDelim(delimiter, partialDeclaration, ";");
+		String partialDeclarationList = regexAddWithDelim(delimiter, "(", partialDeclarationListStart, ")*", partialDeclaration);
 
 
 
 		String declaration = regexAddWithDelim("\\s+", valueReference, partialDeclarationList);
-		String fullDeclaration = regexAddWithDelim(delimeter, declaration, "\\.");
+		String fullDeclaration = regexAddWithDelim(delimiter, declaration, "\\.");
 
-		String optionalDeclaration = regexAddWithDelim(delimeter, "OPTIONAL", "\\{", declaration, "\\}");
+		String optionalDeclaration = regexAddWithDelim(delimiter, "OPTIONAL", "\\{", declaration, "\\}");
 
 
 
 		// declaration list
 
 		String declarationListOptions = regexOptionalList(fullDeclaration, optionalDeclaration);
-		String declarationList = regexAddWithDelim(delimeter, "(", declarationListOptions, ")+");
+		String declarationList = regexAddWithDelim(delimiter, "(", declarationListOptions, ")+");
 
 
 		// FILTER
@@ -186,20 +186,20 @@ public class LandRegistryQueryTestUtils {
 		String filterConstraint = "[<>]";
 		String filterCast = "\\^\\^" + namespace;
 		String filterValue = value + "(" + filterCast + ")?";
-		String rangeFilter = regexAddWithDelim(delimeter, valueReference, filterConstraint, filterValue);
+		String rangeFilter = regexAddWithDelim(delimiter, valueReference, filterConstraint, filterValue);
 
 		// regex filter
 		String regexFilterValue = "\".*\"";
-		String regexFilter = regexAddWithDelim(delimeter, "REGEX", "\\(", valueReference, ",", regexFilterValue, "\\)");
+		String regexFilter = regexAddWithDelim(delimiter, "REGEX", "\\(", valueReference, ",", regexFilterValue, "\\)");
 
 		String filterOption = regexOptionalList(rangeFilter, regexFilter);
-		String filterOptionListStart = regexAddWithDelim(delimeter, "(", filterOption, "&&)*");
-		String filterOptionList = regexAddWithDelim(delimeter, filterOptionListStart, filterOption);
+		String filterOptionListStart = regexAddWithDelim(delimiter, "(", filterOption, "&&)*");
+		String filterOptionList = regexAddWithDelim(delimiter, filterOptionListStart, filterOption);
 
-		String filter = regexAddWithDelim(delimeter, "FILTER", "\\(", "(" + filterOptionList + ")?", "\\)");
+		String filter = regexAddWithDelim(delimiter, "FILTER", "\\(", "(" + filterOptionList + ")?", "\\)");
 		String optionalFilter = "(" + filter + ")?";
 
-		String queryRegex = regexAddWithDelim(delimeter, declarationList, optionalFilter);
+		String queryRegex = regexAddWithDelim(delimiter, declarationList, optionalFilter);
 
 
 		return queryRegex;
@@ -215,10 +215,10 @@ public class LandRegistryQueryTestUtils {
 		}
 	}
 
-	private static String regexAddWithDelim(String delimeter, String... parts) {
+	private static String regexAddWithDelim(String delimiter, String... parts) {
 		StringBuilder str = new StringBuilder();
 		for (int i = 0; i < parts.length - 1; i++) {
-			str.append(parts[i] + delimeter);
+			str.append(parts[i]).append(delimiter);
 		}
 		str.append(parts[parts.length - 1]);
 		return str.toString();

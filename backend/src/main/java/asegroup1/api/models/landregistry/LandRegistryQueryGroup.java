@@ -91,7 +91,7 @@ public class LandRegistryQueryGroup {
 		StringBuilder groupBuilder = new StringBuilder("GROUP BY ");
 		for (String selectable : selectableMap) {
 			groupBuilder.append("?");
-			groupBuilder.append(selectable.toString());
+			groupBuilder.append(selectable);
 			groupBuilder.append(" ");
 		}
 		return groupBuilder.toString().trim();
