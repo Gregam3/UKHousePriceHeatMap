@@ -2,6 +2,7 @@ package asegroup1.api.services.landregistry;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
@@ -18,14 +19,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
-@Service
+/**
+ * @author Greg Mitten, Rikkey Paal
+ * gregoryamitten@gmail.com
+ */
+
 //Does not need to extend ServiceImpl as does not use a Dao
+
+@Service
 public class LandRegistryServiceImpl {
 
     private LandRegistryDaoImpl postCodeCoordinatesDao;
@@ -35,16 +43,20 @@ public class LandRegistryServiceImpl {
         this.postCodeCoordinatesDao = postCodeCoordinatesDao;
     }
 
+    //API CONSTANTS
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
+
+    //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final int[] AGGREGATION_LEVELS = new int[]{100};
 
 
-	public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
-		List<LandRegistryData> landRegistryDataList = new LinkedList<>();
+    public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
+        List<LandRegistryData> landRegistryDataList = new LinkedList<>();
         JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", LR_SPACE).toUpperCase())
                 .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
 
@@ -86,11 +98,61 @@ public class LandRegistryServiceImpl {
         return getTransactionsForPostCode(values, new LandRegistryQuerySelect(true), latestOnly);
     }
 
-    public List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
+    private List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
         return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
     }
 
+    private List<LandRegistryData> getLandRegistryDataForPostcodes(List<String> postcodes) {
+        StringBuilder constraintQueryBuilder = new StringBuilder("WHERE ");
+
+        for (String postcode : postcodes) {
+            constraintQueryBuilder
+                    .append("postcode = '")
+                    .append(postcode)
+                    .append("' OR \n\t ");
+        }
+
+        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
+    }
+
+    public List<?> getPositionForLocations(JSONObject mapPosition) throws UnirestException {
+        List<LandRegistryData> fetchedData = new ArrayList<>();
+
+        List<String> postCodes = fetchPostCodesInsideCoordinateBox(
+                mapPosition.getDouble("top"),
+                mapPosition.getDouble("right"),
+                mapPosition.getDouble("bottom"),
+                mapPosition.getDouble("left")
+        );
+
+        List<LandRegistryData> landRegistryDataForPostcodes = getLandRegistryDataForPostcodes(postCodes);
+
+        int postcodesContained = landRegistryDataForPostcodes.size();
+
+        if (postcodesContained > 1000) {
+            return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
+        } else if (postcodesContained > 4) {
+            return landRegistryDataForPostcodes;
+        } else {
+            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+
+//            constraint.setMinDate(LocalDate.now().minusYears(5));
+
+            for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
+//                constraint.getEqualityConstraints().setPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
+                fetchedData.addAll(getAddressesForPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode)));
+            }
+        }
+
+        return fetchedData;
+    }
+
+
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
+        if (addresses.size() >= 100) {
+            throw new InvalidParameterException("This method should never be passed more than 100 addresses");
+        }
+
         StringBuilder addressUriBuilder = new StringBuilder();
 
         for (LandRegistryData address : addresses) {
@@ -141,35 +203,45 @@ public class LandRegistryServiceImpl {
                 .getObject();
     }
 
-    public List<Double> normaliseValues(List<Long> prices) {
-        if(prices.isEmpty()) {
+    private List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
+        if (landRegistryDataList.isEmpty()) {
             return null;
         }
 
-        List<Double> normalisedValues = new ArrayList<>();
-
+        //Find the minimum and maximum price, this is needed to normalise the values
         long min, max;
-        min = max = prices.get(0);
+        min = max = Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
 
-        for (int i = 1; i < prices.size(); i++) {
-            if (prices.get(i) > max) max = prices.get(i);
-            if (prices.get(i) < min) min = prices.get(i);
+        for (int i = 1; i < landRegistryDataList.size(); i++) {
+            long pricePaid = Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid));
+
+            if (pricePaid > max) max = pricePaid;
+            if (pricePaid < min) min = pricePaid;
         }
 
-        if(max == min) {
-            return prices.stream().map(p -> 0.0).collect(Collectors.toList());
+        //Convert list of LandRegistryData to list of HeatMapDataPoints
+        List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.parallelStream().map(lr ->
+                new HeatMapDataPoint(
+                        lr.getLatitude(),
+                        lr.getLongitude(),
+                        null
+                )).collect(Collectors.toList());
+
+        for (int i = 0; i < landRegistryDataList.size() && i < heatMapDataPoints.size(); i++) {
+            //Pass in the normalised value and receive a Colour object
+            heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
+                            //Normalise the values between 0 and 1.0
+                            (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
+                    )
+            );
         }
 
-        for (Long price : prices) {
-            normalisedValues.add((double) (price - min) / (double) (max - min));
-        }
-
-        return normalisedValues;
+        return heatMapDataPoints;
     }
 
-    public List<Colour> getColoursForNormalisedValues(List<Double> normalisedValues) {
+    private Colour getColoursForNormalisedValues(Double normalisedValue) {
         //The higher the normalised value the darker the red will appear
-        return normalisedValues.stream().map(v -> new Colour(255 - (int) (v * 200))).collect(Collectors.toList());
+        return new Colour(255 - (int) (normalisedValue * 200));
     }
 
     private String buildQuery(LandRegistryQuerySelect select, LandRegistryQueryConstraint values) {

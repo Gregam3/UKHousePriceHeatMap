@@ -1,10 +1,22 @@
 package asegroup1.api.services.landregistry;
 
+<<<<<<< HEAD
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 import com.mashape.unirest.http.exceptions.UnirestException;
+=======
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.*;
+
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+>>>>>>> gm-146-AutoAggregateData100
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +34,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 class LandRegistryServiceImplTest {
 
     private static LandRegistryServiceImpl landRegistryService;
+
+    private static final long RANDOM_SEED = 8312595207343625996L;
+
+    private static final String[] validPostCodeEnds = {"9PH", "9PJ", "9PL", "9PN"};
 
     @BeforeAll
     private static void setUpService() {
@@ -219,5 +235,43 @@ class LandRegistryServiceImplTest {
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
         assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
                 && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
+
+    }
+
+
+    void testIfLargeAddressListIsAggregatedCorrectly() {
+        Random random = new Random(RANDOM_SEED);
+
+        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
+
+        for (int i = 0; i < validPostCodeEnds.length; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+            landRegistryData.setLatitude(random.nextDouble());
+            landRegistryData.setLatitude(random.nextDouble());
+
+            postCodeLocationData.add(landRegistryData);
+        }
+
+        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+        when(landRegistryDataDaoMock.getLandRegistryDataByPostcode(
+                "WHERE postcode = 'BN14 9PH' OR \n" +
+                        "\t postcode = 'BN14 9PJ' OR \n" +
+                        "\t postcode = 'BN14 9PL' OR \n" +
+                        "\t postcode = 'BN14 9PN'"
+        )).thenReturn(postCodeLocationData);
+
+        landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+        List<LandRegistryData> addresses = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+
+            addresses.add(landRegistryData);
+        }
+
+//        assert landRegistryService.getPositionForLocations(addresses).size() == 4;
     }
 }

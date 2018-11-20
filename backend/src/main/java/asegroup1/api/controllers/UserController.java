@@ -7,6 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @author Greg Mitten
+ * gregoryamitten@gmail.com
+ */
+
 @RestController
 @RequestMapping("/user/")
 public class UserController {
