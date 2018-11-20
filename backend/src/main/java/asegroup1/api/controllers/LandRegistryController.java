@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 
 @RestController
@@ -49,8 +51,9 @@ public class LandRegistryController {
 		constraint.setMinDate(LocalDate.now().minusYears(5));
 
 		try {
-			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(constraint, true)), HttpStatus.OK);
-		} catch (IOException | UnirestException e) {
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
+					HttpStatus.OK);
+		} catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
