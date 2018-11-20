@@ -1,20 +1,18 @@
 package asegroup1.api.controllers;
 
 import java.io.IOException;
-import java.text.ParseException;
+import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 
@@ -44,6 +42,25 @@ public class LandRegistryController {
         } catch (UnirestException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("")
+    public ResponseEntity<?> getDataToDisplayOnMap(@RequestBody JSONObject mapPosition) {
+        try {
+            for (String jsonKey : new String[]{"top", "bottom", "left", "right"}) {
+                if (mapPosition.isNull(jsonKey))
+                    throw new InvalidParameterException("Value " + jsonKey + " could not be found, please ensure requestbody contains this value as a top level node");
+            }
+
+            landRegistryService.getPositionForLocations(mapPosition);
+        } catch (Exception e) {
+            return new ResponseEntity("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
+        }
+
+
+
+
+        return null;
     }
 
     @GetMapping("get-transactions/{post-code}")

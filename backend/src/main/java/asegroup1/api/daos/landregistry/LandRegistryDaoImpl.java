@@ -53,7 +53,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<LandRegistryData> getAllPostcodes(String postcodeConstraints) {
+    public List<LandRegistryData> getLandRegistryDataByPostcode(String postcodeConstraints) {
         return (List<LandRegistryData>) getEntityManager().createNativeQuery(
                 "SELECT postcode, latitude, longitude FROM " + TABLE_NAME + "\n" +
                         postcodeConstraints)

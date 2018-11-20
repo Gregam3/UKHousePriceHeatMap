@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.util.*;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
@@ -202,7 +201,7 @@ class LandRegistryServiceImplTest {
         }
 
         LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
-        when(landRegistryDataDaoMock.getAllPostcodes(
+        when(landRegistryDataDaoMock.getLandRegistryDataByPostcode(
                 "WHERE postcode = 'BN14 9PH' OR \n" +
                         "\t postcode = 'BN14 9PJ' OR \n" +
                         "\t postcode = 'BN14 9PL' OR \n" +

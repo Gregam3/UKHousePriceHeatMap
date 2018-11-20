@@ -2,7 +2,6 @@ package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -119,12 +118,41 @@ public class LandRegistryServiceImpl {
         return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
     }
 
-    public List<LandRegistryData> getPositionForLocations(List<LandRegistryData> addresses) {
-        if (addresses.size() >= AGGREGATION_LEVELS[0]) {
-            return getPositionsForPostCodes(addresses);
+    public List<LandRegistryData> getPositionForLocations(JSONObject mapPosition) {
+        List<String> postCodes = fetchPostCodesInsideCoordinateBox(
+                mapPosition.getDouble("top"),
+                mapPosition.getDouble("bottom"),
+                mapPosition.getDouble("left"),
+                mapPosition.getDouble("right")
+        );
+
+        List<LandRegistryData> landRegistryDataForPostcodes = getLandRegistryDataForPostcodes(postCodes);
+
+        int postcodesContained = landRegistryDataForPostcodes.size();
+
+        if(postcodesContained > 1000)
+            //TODO IMPLEMENT RETURNING OF HEATMAP DATA
+            throw new AssertionError("Not yet implemented for over 1000 postcodes");
+        else if(postcodesContained > 3)
+
+
+
+        return null;
+    }
+
+    private List<LandRegistryData> getLandRegistryDataForPostcodes(List<String> postcodes) {
+        StringBuilder constraintQueryBuilder = new StringBuilder("WHERE ");
+
+        for (String postcode : postcodes) {
+            constraintQueryBuilder
+                    .append("postcode = '")
+                    .append(postcode)
+                    .append("' OR \n\t ");
         }
 
-        return getPositionForAddresses(addresses);
+        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.toString());
+
+
     }
 
     private List<LandRegistryData> getPositionsForPostCodes(List<LandRegistryData> addresses) {
@@ -141,7 +169,7 @@ public class LandRegistryServiceImpl {
             }
 
         //substring removes final OR and new line value
-        return postCodeCoordinatesDao.getAllPostcodes(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
+        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
