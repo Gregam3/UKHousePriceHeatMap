@@ -44,23 +44,18 @@ public class LandRegistryController {
         }
     }
 
-    @GetMapping("")
-    public ResponseEntity<?> getDataToDisplayOnMap(@RequestBody JSONObject mapPosition) {
+    @GetMapping("get-display-data")
+    public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
         try {
             for (String jsonKey : new String[]{"top", "bottom", "left", "right"}) {
                 if (mapPosition.isNull(jsonKey))
                     throw new InvalidParameterException("Value " + jsonKey + " could not be found, please ensure requestbody contains this value as a top level node");
             }
 
-            landRegistryService.getPositionForLocations(mapPosition);
+            return new ResponseEntity<>(landRegistryService.getPositionForLocations(mapPosition), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }
-
-
-
-
-        return null;
     }
 
     @GetMapping("get-transactions/{post-code}")

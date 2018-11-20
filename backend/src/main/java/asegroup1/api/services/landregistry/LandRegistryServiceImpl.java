@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,48 +97,37 @@ public class LandRegistryServiceImpl {
         return getTransactionsForPostCode(values, new LandRegistryQuerySelect(true), latestOnly);
     }
 
-    public List<LandRegistryData> fetchLandRegistryDataInsideCoordinateBox(double top, double right, double bottom, double left) throws UnirestException {
-        LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect();
-
-        //TODO group by postcode (?)
-        landRegistryQuerySelect.select(Selectable.postcode);
-        //TODO count addresses
-        landRegistryQuerySelect.select(Selectable.pricePaid);
-
-        LandRegistryQueryConstraint landRegistryQueryConstraint = new LandRegistryQueryConstraint();
-
-        landRegistryQueryConstraint.setPostcodes((String[]) fetchPostCodesInsideCoordinateBox(top, right, bottom, left).toArray());
-
-        JSONObject jsonObject = executeSPARQLQuery(buildQuery(landRegistryQuerySelect, landRegistryQueryConstraint));
-
-        //TODO convert jsonObject to List<LandRegistryData> and return it
-        return null;
-    }
-
     private List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
         return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
     }
 
-    public List<LandRegistryData> getPositionForLocations(JSONObject mapPosition) {
+    public List<LandRegistryData> getPositionForLocations(JSONObject mapPosition) throws UnirestException {
+        List<LandRegistryData> fetchedData = new ArrayList<>();
+
         List<String> postCodes = fetchPostCodesInsideCoordinateBox(
                 mapPosition.getDouble("top"),
+                mapPosition.getDouble("right"),
                 mapPosition.getDouble("bottom"),
-                mapPosition.getDouble("left"),
-                mapPosition.getDouble("right")
+                mapPosition.getDouble("left")
         );
 
         List<LandRegistryData> landRegistryDataForPostcodes = getLandRegistryDataForPostcodes(postCodes);
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if(postcodesContained > 1000)
+        if (postcodesContained > 1000)
             //TODO IMPLEMENT RETURNING OF HEATMAP DATA
             throw new AssertionError("Not yet implemented for over 1000 postcodes");
-        else if(postcodesContained > 3)
+        else if (postcodesContained > 4) {
+            //TODO IMPLEMENT RETURNING OF AGGREGATED POSTCODE DATA
+            throw new AssertionError("Not yet implemented for over 4 postcodes");
+        } else {
+            for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
+                fetchedData.addAll(getAddressesForPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode)));
+            }
+        }
 
-
-
-        return null;
+        return fetchedData;
     }
 
     private List<LandRegistryData> getLandRegistryDataForPostcodes(List<String> postcodes) {
@@ -151,8 +141,6 @@ public class LandRegistryServiceImpl {
         }
 
         return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.toString());
-
-
     }
 
     private List<LandRegistryData> getPositionsForPostCodes(List<LandRegistryData> addresses) {
