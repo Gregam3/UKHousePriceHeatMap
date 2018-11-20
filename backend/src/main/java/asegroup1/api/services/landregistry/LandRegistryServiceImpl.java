@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,41 +107,28 @@ public class LandRegistryServiceImpl {
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
-//        StringBuilder addressUriBuilder = new StringBuilder();
-//
-//        for (LandRegistryData address : addresses) {
-//            addressUriBuilder
-//                    .append(GOOGLE_MAPS_URL)
-//                    .append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
-//                    .append("+")
-//                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+"))
-//                    .append("+")
-//                    .append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-//                    .append("&key=")
-//                    .append(GOOGLE_MAPS_API_KEY);
-//
-//            try {
-//                JSONObject response = Unirest.get(addressUriBuilder.toString())
-//                        .asJson()
-//                        .getBody()
-//                        .getArray()
-//                        .getJSONObject(0)
-//                        .getJSONArray("results")
-//                        .getJSONObject(0)
-//                        .getJSONObject("geometry")
-//                        .getJSONObject("location");
-//
-//                address.setLatitude(response.getDouble("lat"));
-//                address.setLongitude(response.getDouble("lng"));
-//
-//            } catch (UnirestException | JSONException e) {
-//                e.printStackTrace();
-//                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-//            }
-//
-//            //Clear the StringBuilder buffer
-//            addressUriBuilder.delete(0, addressUriBuilder.length());
-//        }
+		StringBuilder addressUriBuilder = new StringBuilder();
+
+		for (LandRegistryData address : addresses) {
+			addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
+					.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
+					.append("&key=").append(GOOGLE_MAPS_API_KEY);
+
+			try {
+				JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
+						.getJSONObject("geometry").getJSONObject("location");
+
+				address.setLatitude(response.getDouble("lat"));
+				address.setLongitude(response.getDouble("lng"));
+
+			} catch (UnirestException | JSONException e) {
+				e.printStackTrace();
+				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+			}
+
+			// Clear the StringBuilder buffer
+			addressUriBuilder.delete(0, addressUriBuilder.length());
+		}
 
         return addresses;
 	}
