@@ -7,7 +7,7 @@ import * as Auth from './lib/Auth.js';
 
 
 /**
- * @author Greg Mitten, Rikkey Paal, Josh Hasan
+ * @author Greg Mitten, Rikkey Paal, Josh Hasan, Antonis Droussiotis
  * gregoryamitten@gmail.com
  */
 
@@ -129,6 +129,15 @@ export default class App extends Component {
                         }}
                     >
 
+                      {this.state.markers.map(marker => (
+                          <MapView.Circle
+                            key={marker.id}
+                            center={{longitude:marker.longitude, latitude:marker.latitude}}
+                            radius={100}
+                            fillColor= { '#FF0000'}
+                            strokeColor= {'#FF0000'}
+                      />
+                       ))}
                         {this.state.markers.map(marker => (
                             <MapView.Marker
                                 key={marker.id}
