@@ -1,18 +1,26 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 /**
  * @author Greg Mitten
@@ -63,7 +71,8 @@ class LandRegistryServiceImplTest {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
-            List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(constraint, true);
+
+			List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(new LandRegistryQuerySelect(Selectable.pricePaid), constraint);
 
             //Checking not only if results are returned but that results contain valid data
             if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
@@ -72,7 +81,7 @@ class LandRegistryServiceImplTest {
             }
 
             assert true;
-        } catch (IOException | UnirestException | NumberFormatException e) {
+		} catch (IOException | UnirestException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }

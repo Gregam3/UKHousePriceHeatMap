@@ -13,7 +13,7 @@ import asegroup1.api.models.landregistry.LandRegistryData.EqualityConstraint;
  * 
  * @author Rikkey Paal
  */
-public class LandRegistryQueryConstraint {
+public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 
 	private HashSet<RangeConstraint> rangeConstraints;
 	private LandRegistryData equalityConstraints;
@@ -150,9 +150,8 @@ public class LandRegistryQueryConstraint {
 	 * 
 	 * @return the WHERE section of the query
 	 */
-	public String buildQueryWhere() {
-		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
-		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
+	public String buildQueryContent() {
+		return buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
 	}
 
 	private String buildQuerySelection() {
@@ -222,8 +221,6 @@ public class LandRegistryQueryConstraint {
 
 	/* TYPE DECLARATIONS */
 
-
-
 	class RangeConstraint {
 		private String type, name, comparator, value;
 
@@ -279,20 +276,5 @@ public class LandRegistryQueryConstraint {
 
 
 	}
-
-	public enum PropertyType {
-		detached, semi_detached, terraced, flat_maisonette, other;
-
-	}
-
-	public enum EstateType {
-		freehold, leasehold;
-
-	}
-
-	public enum TransactionCategory {
-		standard_price_paid_transaction, additional_price_paid_transaction;
-	}
-
 
 }

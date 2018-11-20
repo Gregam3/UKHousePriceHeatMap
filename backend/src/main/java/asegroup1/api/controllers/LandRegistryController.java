@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 
 @RestController
@@ -49,11 +53,45 @@ public class LandRegistryController {
 		constraint.setMinDate(LocalDate.now().minusYears(5));
 
 		try {
-			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(constraint, true)), HttpStatus.OK);
-		} catch (IOException | UnirestException e) {
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
+					HttpStatus.OK);
+		} catch (IOException | UnirestException | ParseException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	@GetMapping("get-transactionsPC/{post-code}")
+	public ResponseEntity<?> getTransactionDataForPostCodePC(@PathVariable("post-code") String postCode) {
+		LandRegistryQueryConstraint body = new LandRegistryQueryConstraint();
+		body.setPostcodes(postCode);
+		body.setMinDate(LocalDate.now().minusYears(5));
+		List<Selectable> selectables = Collections.singletonList(Selectable.pricePaid);
+
+		LandRegistryQuery query = LandRegistryQuery.buildQueryAggrigatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(body, selectables), "postcode", "PricePaid",
+				"AveragePrice");
+
+		try {
+
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(query)), HttpStatus.OK);
+		} catch (IOException | UnirestException e) {
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	@GetMapping("get-transactionsTown/{town}")
+	public ResponseEntity<?> getTransactionFromTown(@PathVariable("town") String town) {
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		constraint.getEqualityConstraints().setTownName(town);
+		constraint.setMinDate(LocalDate.now().minusYears(5));
+
+		try {
+			return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(constraint)),
+					HttpStatus.OK);
+		} catch (IOException | UnirestException | ParseException e) {
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		}
+	}
+
 
 	private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
 		List<HashMap<String, String>> keys = new ArrayList<>();

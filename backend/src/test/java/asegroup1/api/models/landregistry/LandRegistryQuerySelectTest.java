@@ -3,19 +3,20 @@
  */
 package asegroup1.api.models.landregistry;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
 /**
  * @author Richousrick
@@ -23,270 +24,96 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
  */
 class LandRegistryQuerySelectTest {
 
-	private EnumSet<Selectable> selectables;
-	private LandRegistryQuerySelect querySelect;
+	LandRegistryQuerySelect select;
 
-	private static long randomSeed = 8312595207343625996L;
+
 
 
 	@BeforeEach
-	public void initTests() {
-		querySelect = new LandRegistryQuerySelect();
-		selectables = EnumSet.allOf(Selectable.class);
+	public void initSelect() {
+		select = new LandRegistryQuerySelect();
 	}
-
-
-	private void testQuerySelectEmpty() {
-		selectables.forEach(v -> {
-			assertFalse(querySelect.hasSelectable(v));
-		});
-	}
-
-	private void testQuerySelectFull() {
-		selectables.forEach(v -> {
-			assertTrue(querySelect.hasSelectable(v));
-		});
-	}
-
-	private void testQuerySelectMatches(List<Selectable> selected) {
-		ArrayList<Selectable> nonExistant = new ArrayList<>(selectables);
-		nonExistant.removeAll(selected);
-		for (Selectable select : selected) {
-			assertTrue(querySelect.hasSelectable(select));
-		}
-
-		for (Selectable select : nonExistant) {
-			assertFalse(querySelect.hasSelectable(select));
-		}
-	}
-
-	private List<Selectable> genRandomSelectables() {
-		Random r = new Random(randomSeed);
-		ArrayList<Selectable> unSelected = new ArrayList<>(selectables);
-		ArrayList<Selectable> selected = new ArrayList<>();
-		int reps = r.nextInt(selectables.size() - 1) + 1;
-		for (int i = 0; i < reps; i++) {
-			selected.add(unSelected.remove(r.nextInt(unSelected.size())));
-		}
-
-		return selected;
-	}
-
-	private Selectable[] buildRandomSelectablesArray(List<Selectable> select) {
-		return select.toArray(new Selectable[select.size()]);
-	}
-
-	private List<Selectable> fillWithRandomData() {
-		List<Selectable> select = genRandomSelectables();
-		Selectable[] selectArr = buildRandomSelectablesArray(select);
-		querySelect.select(selectArr);
-		return select;
-	}
-
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
-	 * with no parameters provided.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(Selectable)}.
 	 */
 	@Test
-	public void testLandRegistryQuerySelect() {
-		testQuerySelectEmpty();
-	}
-
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
-	 */
-	@Test
-	public void testLandRegistryQuerySelectSelectableArray() {
-		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQuerySelect(buildRandomSelectablesArray(select));
-		testQuerySelectMatches(select);
+	void testLandRegistryQuerySelectEmpty() {
+		assertNotNull(select.getSelectValues());
+		assertEquals(true, select.getSelectValues().isEmpty());
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(boolean, asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#LandRegistryQuerySelect(Selectable)}.
 	 */
 	@Test
-	public void testLandRegistryQuerySelectBooleanSelectableArray() {
-		List<Selectable> select = genRandomSelectables();
-		querySelect = new LandRegistryQuerySelect(false, buildRandomSelectablesArray(select));
-		testQuerySelectMatches(select);
-
-
-		select = genRandomSelectables();
-		ArrayList<Selectable> inverse = new ArrayList<>(selectables);
-		inverse.removeAll(select);
-		querySelect = new LandRegistryQuerySelect(true, buildRandomSelectablesArray(select));
-		testQuerySelectMatches(inverse);
-	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#select(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
-	 */
-	@Test
-	public void testSelectDeselectOne() {
-		List<Selectable> select = genRandomSelectables();
-		for (Selectable selectable : select) {
-			querySelect.select(selectable);
-			assertTrue(querySelect.hasSelectable(selectable));
-			querySelect.deselect(selectable);
-			assertFalse(querySelect.hasSelectable(selectable));
+	void testLandRegistryQuerySelectSelectable() {
+		List<Selectable> selectables = LandRegistryQueryTestUtils.genRandomSelectables();
+		select = new LandRegistryQuerySelect(selectables.toArray(new Selectable[selectables.size()]));
+		assertEquals(selectables.size(), select.getSelectValues().size());
+		for (Selectable selectable : selectables) {
+			assertEquals(Aggregation.SAMPLE, select.getSelectValueAggregation(selectable.toString()));
 		}
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#select(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#addSelectValue(asegroup1.api.models.landregistry.LandRegistryQuery.Selectable, asegroup1.api.models.landregistry.LandRegistryQuery.Aggregation)}
+	 * ,
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#hasValue(java.lang.String)},
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#removeValue(java.lang.String)}
 	 * and
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselect(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable[])}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#getSelectValues(java.lang.String)}.
 	 */
 	@Test
-	public void testSelectDeselectMany() {
-		List<Selectable> select = fillWithRandomData();
-		testQuerySelectMatches(select);
-		querySelect.deselect(buildRandomSelectablesArray(select));
-		testQuerySelectEmpty();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#selectAll()}
-	 * and
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselectAll()}.
-	 */
-	@Test
-	public void testSelectDeselectAllEmpty() {
-		querySelect.selectAll();
-		testQuerySelectFull();
-		querySelect.deselectAll();
-		testQuerySelectEmpty();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#selectAll()}
-	 * when there is some data in select
-	 */
-	@Test
-	public void testSelectAllMixed() {
-		fillWithRandomData();
-		querySelect.selectAll();
-		testQuerySelectFull();
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#deselectAll()}
-	 * when there is some data in select
-	 */
-	@Test
-	public void testDeselectAllMixed() {
-		fillWithRandomData();
-		querySelect.deselectAll();
-		testQuerySelectEmpty();
-	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#toggleSelectable(asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable)}.
-	 */
-	@Test
-	public void testToggleSelectable() {
-		List<Selectable> initial = fillWithRandomData();
-		List<Selectable> toToggle = genRandomSelectables();
-		List<Selectable> expected = new ArrayList<Selectable>(initial);
-		toToggle.forEach(v -> {
-			if (expected.contains(v)) {
-				expected.remove(v);
-			} else {
-				expected.add(v);
-			}
-		});
-
-		for (Selectable selectable : toToggle) {
-			querySelect.toggleSelectable(selectable);
-		}
-
-		testQuerySelectMatches(expected);
-
-	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect()}.
-	 */
-	@Test
-	public void testBuildQuerySelect() {
-		List<Selectable> initial = fillWithRandomData();
-		String regex;
-		StringBuilder regexBuilder = new StringBuilder("SELECT(\\s\\?(");
-		initial.forEach(v -> {
-			regexBuilder.append("(" + v.toString() + ")|");
-		});
-		regexBuilder.deleteCharAt(regexBuilder.length() - 1);
-		regexBuilder.append("))+");
-		regex = regexBuilder.toString();
-
-		assertTrue(querySelect.buildQuerySelect().matches(regex));
-	}
-
-	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
-	 */
-	@Test
-	public void testBuildQuerySelectUniqueFilled() {
-		ArrayList<Selectable> usedSelectables = new ArrayList<>(
-				Arrays.asList(new Selectable[] { Selectable.paon, Selectable.saon, Selectable.street, Selectable.postcode, Selectable.transactionDate }));
-		selectables.removeAll(usedSelectables);
-		List<Selectable> initial = fillWithRandomData();
-		testBuildQuerySelectUnique(initial);
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelectUnique()}.
-	 */
-	@Test
-	public void testBuildQuerySelectUniqueEmpty() {
-		testBuildQuerySelectUnique(new ArrayList<>());
-	}
-
-
-	private void testBuildQuerySelectUnique(List<Selectable> initial) {
-		String regex = buildQuerySelectRegex(initial);
-
-		System.out.println(querySelect.buildQuerySelectUnique());
-
-		assertTrue(querySelect.buildQuerySelectUnique().matches(regex));
-	}
-
-
-
-	private String buildQuerySelectRegex(List<Selectable> selectables) {
-		StringBuilder select = new StringBuilder("SELECT \\?paon \\?saon \\?street \\?postcode \\(max\\(\\?transactionDate\\) AS \\?TransactionDate\\)");
-
-
-
-		if (!selectables.isEmpty()) {
-			StringBuilder extention = new StringBuilder();
-			StringBuilder sample = new StringBuilder("SAMPLE\\(\\?");
-			StringBuilder variableLower = new StringBuilder();
-			StringBuilder variableUpper = new StringBuilder();
-			selectables.forEach(v -> {
-				variableLower.append("(" + v.toString() + ")|");
-				variableUpper.append("(" + v.toString().substring(0, 1).toUpperCase() + v.toString().substring(1) + ")|");
-			});
-			variableLower.deleteCharAt(variableLower.length() - 1);
-			variableUpper.deleteCharAt(variableUpper.length() - 1);
-
-			sample.append("(" + variableLower + ")\\) AS \\?(" + variableUpper + ")");
-			System.out.println(sample);
-
-			extention.append("(\\(" + sample + "\\)\\s*)+");
-			select.append("\\s*" + extention);
-		}
+	void testAddSelectValueSelectableAggregation() {
+		ArrayList<Selectable> selectableSet = new ArrayList<>(EnumSet.allOf(Selectable.class));
+		ArrayList<Aggregation> aggregationSet = new ArrayList<>(EnumSet.allOf(Aggregation.class));
 		
-		return select.toString();
+		assert selectableSet.size() > aggregationSet.size();
 
+		for (int i = 0; i < aggregationSet.size(); i++) {
+			Selectable selectable = selectableSet.get(i);
+			Aggregation aggregation = aggregationSet.get(i);
+
+			assertNull(select.getSelectValues(selectable.toString()));
+			select.addSelectValue(selectable, aggregation);
+			assertTrue(select.hasValue(selectable.toString()));
+			assertEquals(aggregation.toString(), select.getSelectValues(selectable.toString())[1]);
+			select.removeValue(selectable.toString());
+			assertNull(select.getSelectValues(selectable.toString()));
+		}
 	}
+
+	/**
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect(boolean)}.
+	 */
+	@Test
+	void testBuildQuerySelectIgnoreAggregation() {
+		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
+
+		String buildGroup = select.buildQuerySelect(true);
+
+		String regex = LandRegistryQueryTestUtils.buildQuerySelectRegex(true);
+
+		assertTrue(buildGroup.matches(regex));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect(boolean)}.
+	 */
+	@Test
+	void testBuildQuerySelect() {
+		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
+
+		String buildGroup = select.buildQuerySelect(false);
+
+		String regex = LandRegistryQueryTestUtils.buildQuerySelectRegex(false);
+
+		assertTrue(buildGroup.matches(regex));
+	}
+
 }
