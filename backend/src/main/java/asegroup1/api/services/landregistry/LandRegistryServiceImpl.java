@@ -140,7 +140,7 @@ public class LandRegistryServiceImpl {
                     .append("' OR \n\t ");
         }
 
-        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.toString());
+        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
     }
 
     private List<LandRegistryData> getPositionsForPostCodes(List<LandRegistryData> addresses) {

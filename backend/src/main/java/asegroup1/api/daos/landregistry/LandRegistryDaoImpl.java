@@ -58,9 +58,13 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                 "SELECT postcode, latitude, longitude FROM " + TABLE_NAME + "\n" +
                         postcodeConstraints)
                 .getResultList().stream().map(r -> {
-                    LandRegistryData landRegistryData = new LandRegistryData();
+                    Object[] currentItem = (Object[]) r;
 
-//                    landRegistryData.setPostCode();
+                    LandRegistryData landRegistryData = new LandRegistryData();
+                    landRegistryData.setPostCode(String.valueOf(currentItem[0]));
+                    landRegistryData.setLatitude(Double.valueOf(String.valueOf(currentItem[1])));
+                    landRegistryData.setLongitude(Double.valueOf(String.valueOf(currentItem[2])));
+                    //TODO get average price when its implemented
 
                     return landRegistryData;
                 }).collect(Collectors.toList());
