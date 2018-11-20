@@ -7,14 +7,38 @@ import * as Auth from './lib/Auth.js';
 
 
 /**
- * @author Greg Mitten, Rikkey Paal
+ * @author Greg Mitten, Rikkey Paal, Josh Hasan
  * gregoryamitten@gmail.com
  */
 
 export default class App extends Component {
     state = {
         location: null,
-        errorMessage: null
+        errorMessage: null,
+        //Markers array filled with dummy data for display
+        markers: [
+            {
+                id:0,
+                longitude:-0.13104971498263165,
+                latitude:50.84609893155363,
+                title:'£100,000',
+                description:'1 Brighton Street \n BN1 1AB \n Brighton'
+            },
+            {
+                id:1,
+                longitude:-0.14,
+                latitude:51,
+                title:'Hello',
+                description:'World'
+            },
+            {
+                id:2,
+                longitude:-0.16,
+                latitude:50.88,
+                title:'Another',
+                description:'One'
+            }
+        ]
     };
 
     constructor(props) {
@@ -66,7 +90,6 @@ export default class App extends Component {
         NetLib.postJSON('location/add-location-data/', locationData);
     };
 
-
     render() {
         let displayedText = 'Fetching position...';
 
@@ -103,7 +126,20 @@ export default class App extends Component {
                             latitude: latitude,
                             latitudeDelta: 0.0006,
                             longitudeDelta: 0.002
-                        }}/>
+                        }}
+                    >
+
+                        //Uses Array.map function to construct and display every marker using the data in the markers array
+                        {this.state.markers.map(marker => (
+                            <MapView.Marker
+                                key={marker.id}
+                                coordinate={{longitude:marker.longitude, latitude:marker.latitude}}
+                                title={marker.title}
+                                description={marker.description}
+                            />
+                         ))}
+
+                    </MapView>
                 </View> :
                 <Text style={styles.centerText}>{displayedText}</Text>
         );
