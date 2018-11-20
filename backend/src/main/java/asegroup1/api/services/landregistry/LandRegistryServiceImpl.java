@@ -2,6 +2,7 @@ package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,14 +116,20 @@ public class LandRegistryServiceImpl {
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > 1000)
-            //TODO IMPLEMENT RETURNING OF HEATMAP DATA
-            throw new AssertionError("Not yet implemented for over 1000 postcodes");
-        else if (postcodesContained > 4) {
-            //TODO IMPLEMENT RETURNING OF AGGREGATED POSTCODE DATA
-            throw new AssertionError("Not yet implemented for over 4 postcodes");
-        } else {
+        if (postcodesContained > 1000) {
             for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
+
+            }
+            throw new AssertionError("Not yet implemented for over 1000 postcodes");
+        } else if (postcodesContained > 4) {
+            return landRegistryDataForPostcodes;
+        } else {
+            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+
+//            constraint.setMinDate(LocalDate.now().minusYears(5));
+
+            for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
+//                constraint.getEqualityConstraints().setPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
                 fetchedData.addAll(getAddressesForPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode)));
             }
         }
@@ -140,23 +147,6 @@ public class LandRegistryServiceImpl {
                     .append("' OR \n\t ");
         }
 
-        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
-    }
-
-    private List<LandRegistryData> getPositionsForPostCodes(List<LandRegistryData> addresses) {
-        List<String> postcodeLocationDataList = new ArrayList<>();
-        StringBuilder constraintQueryBuilder = new StringBuilder("WHERE ");
-
-        for (LandRegistryData address : addresses)
-            if (!postcodeLocationDataList.contains(address.getConstraint(Selectable.postcode))) {
-                postcodeLocationDataList.add(address.getConstraint(Selectable.postcode));
-                constraintQueryBuilder
-                        .append("postcode = '")
-                        .append(address.getConstraint(Selectable.postcode))
-                        .append("' OR \n\t ");
-            }
-
-        //substring removes final OR and new line value
         return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
     }
 

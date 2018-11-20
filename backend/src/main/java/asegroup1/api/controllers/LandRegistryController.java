@@ -29,6 +29,7 @@ import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 public class LandRegistryController {
 
     private LandRegistryServiceImpl landRegistryService;
+    private static final int YEARS_TO_FETCH = 5;
 
     @Autowired
     public LandRegistryController(LandRegistryServiceImpl landRegistryService) {
@@ -62,7 +63,7 @@ public class LandRegistryController {
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
         constraint.getEqualityConstraints().setPostCode(formatPostCode(postCode));
-        constraint.setMinDate(LocalDate.now().minusYears(5));
+        constraint.setMinDate(LocalDate.now().minusYears(YEARS_TO_FETCH));
 
         try {
             return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getTransactions(constraint, true)), HttpStatus.OK);
