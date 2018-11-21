@@ -142,6 +142,9 @@ public class LandRegistryQueryTestUtils {
 	
 	static String buildQueryConstraintRegex() {
 		String delimiter = "\\s*";
+
+
+
 		// value regex parts
 		String valueReference = "\\?\\w+";
 		String valueString = "\"[^\"]*\"";
@@ -157,6 +160,10 @@ public class LandRegistryQueryTestUtils {
 		String namespace = "\\w+:\\w+";
 		String value = regexOptionalList(valueReference, valueString, valueInteger, valueCalendar, namespace, valueBoolean);
 		String advancedNameSpace = namespace + "(/" + namespace + ")?";
+
+		String valuesOption = regexAddWithDelim(delimiter, "\\(", value, "\\)");
+		String valuesRegex = regexAddWithDelim(delimiter, "VALUES", "\\(", valueReference, "\\)", "\\{(", valuesOption, ")+\\}");
+		String valuesList = regexAddWithDelim(delimiter, "(", valuesRegex, ")*");
 
 		// declaration
 		String partialDeclaration = regexAddWithDelim(delimiter, advancedNameSpace, value);
@@ -199,7 +206,7 @@ public class LandRegistryQueryTestUtils {
 		String filter = regexAddWithDelim(delimiter, "FILTER", "\\(", "(" + filterOptionList + ")?", "\\)");
 		String optionalFilter = "(" + filter + ")?";
 
-		String queryRegex = regexAddWithDelim(delimiter, declarationList, optionalFilter);
+		String queryRegex = regexAddWithDelim(delimiter, valuesList, declarationList, optionalFilter);
 
 
 		return queryRegex;

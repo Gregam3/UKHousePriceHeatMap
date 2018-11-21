@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,32 @@ class LandRegistryQueryConstraintTest {
 	public void testLandRegistryQueryConstraint() {
 		assertEquals(0, constraint.getEqualityConstraints().getAllConstraints().size());
 		testFiltersEmpty();
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintSingle() {
+		String str;
+		for (Selectable s : new Selectable[] { Selectable.county, Selectable.paon, Selectable.saon, Selectable.town }) {
+			str = LandRegistryQueryTestUtils.generateRandomString();
+			assertTrue(constraint.setEqualityConstraint(s, str));
+			assertEquals(str.toUpperCase(), constraint.getEqualityConstraints().getConstraint(s));
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintMultiple() {
+		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
+		assertTrue(constraint.setEqualityConstraint(Selectable.postcode, postcodes));
+
+		assertEquals(Arrays.asList(postcodes).stream().map(v -> "\"" + v + "\"").collect(Collectors.toList()), constraint.getValueList(Selectable.postcode.toString()).getValues());
 	}
 
 	/**

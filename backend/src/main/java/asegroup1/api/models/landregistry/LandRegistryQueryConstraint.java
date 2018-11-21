@@ -52,15 +52,20 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 	}
 
 	/* EQUALITY CONSTRAINTS */
-	public void setEqualityConstraint(Selectable name, String... constraints) {
+	public boolean setEqualityConstraint(Selectable name, String... constraints) {
 		if (constraints.length == 1) {
-			getEqualityConstraints().setConstraint(name.toString(), constraints[0]);
+			return getEqualityConstraints().setConstraint(name.toString(), constraints[0]);
 		} else {
 			String varName = name.toString().toUpperCase() + "CONSTRAINTS";
 			LandRegistryQueryValues value = new LandRegistryQueryValues(varName, LandRegistryData.processConstraintList(name, constraints));
 			values.put(name.toString(), value);
 			getEqualityConstraints().setConstraintVar(name, varName);
+			return true;
 		}
+	}
+
+	public LandRegistryQueryValues getValueList(String varName) {
+		return values.get(varName);
 	}
 
 
