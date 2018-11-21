@@ -258,7 +258,7 @@ class LandRegistryServiceImplTest {
     }
 
     @Test
-    void testIfLargeAddressListIsAggregatedCorrectly() {
+    void testIfCorrectLandRegistryDataIsFetchedForPostcode() {
         Random random = new Random(RANDOM_SEED);
 
         List<LandRegistryData> postCodeLocationData = new ArrayList<>();

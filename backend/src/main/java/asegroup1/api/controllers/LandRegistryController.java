@@ -49,13 +49,23 @@ public class LandRegistryController {
 
     @GetMapping("get-display-data")
     public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
+        long timer = System.nanoTime();
+
         try {
             for (String jsonKey : new String[]{"top", "bottom", "left", "right"}) {
                 if (mapPosition.isNull(jsonKey))
                     throw new InvalidParameterException("Value " + jsonKey + " could not be found, please ensure requestbody contains this value as a top level node");
             }
 
-            return new ResponseEntity<>(landRegistryService.getPositionInsideBounds(mapPosition), HttpStatus.OK);
+            List<?> positionsInsideBounds = landRegistryService.getPositionInsideBounds(mapPosition);
+
+            System.out.println(
+                    "\n-----------------------------------------------------------------------------------------------------\n" +
+                            "\t\t\t\t\t\t\tRequest took " + (System.nanoTime() - timer) / 1000000 + "ms to fetch " + positionsInsideBounds.size() + " elements \n " +
+                            "-----------------------------------------------------------------------------------------------------"
+            );
+
+            return new ResponseEntity<>(positionsInsideBounds, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }

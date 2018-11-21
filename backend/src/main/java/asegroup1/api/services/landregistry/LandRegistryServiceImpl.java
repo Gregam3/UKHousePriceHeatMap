@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -125,7 +126,7 @@ public class LandRegistryServiceImpl {
         return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
     }
 
-    public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException {
+    public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
         List<LandRegistryData> fetchedData = new ArrayList<>();
 
         List<String> postCodes = fetchPostCodesInsideCoordinateBox(
@@ -144,17 +145,22 @@ public class LandRegistryServiceImpl {
         } else if (postcodesContained > 4) {
             return landRegistryDataForPostcodes;
         } else {
+            LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect();
+            landRegistryQuerySelect.addSelectValue(Selectable.paon.toString());
+            landRegistryQuerySelect.addSelectValue(Selectable.pricePaid.toString());
+
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
 
-//            constraint.setMinDate(LocalDate.now().minusYears(5));
+            constraint.setPostcodes(Selectable.postcode.toString());
+            constraint.setMinDate(LocalDate.now().minusYears(5));
 
             for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
-//                constraint.getEqualityConstraints().setPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
-                fetchedData.addAll(getAddressesForPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode)));
+                constraint.getEqualityConstraints().setPostCode(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
+                fetchedData.addAll(getTransactions(landRegistryQuerySelect, constraint));
             }
         }
 
-        return fetchedData;
+        return getPositionForAddresses(fetchedData);
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
@@ -221,7 +227,7 @@ public class LandRegistryServiceImpl {
 
         return addresses;
 	}
-  
+
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
