@@ -40,6 +40,7 @@ public class DaoImpl<T> implements Dao<T> {
         if (entityManagerFactory == null)
             entityManagerFactory = entityManager.getEntityManagerFactory();
 
+        //the EntityManager will automatically be flushed on transaction completion
         return entityManagerFactory.createEntityManager();
     }
 

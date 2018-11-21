@@ -75,83 +75,64 @@ public class LandRegistryServiceImpl {
         return getPositionForAddresses(landRegistryDataList);
     }
 
-	public List<LandRegistryData> getTransactions(LandRegistryQuery query)
-			throws IOException, UnirestException {
-		List<LandRegistryData> transactionsList = new LinkedList<>();
+    public List<LandRegistryData> getTransactions(LandRegistryQuery query)
+            throws IOException, UnirestException {
+        List<LandRegistryData> transactionsList = new LinkedList<>();
 
-		String queryStr = query.buildQuery();
+        String queryStr = query.buildQuery();
 
-		JSONObject queryResponse = executeSPARQLQuery(queryStr);
+        JSONObject queryResponse = executeSPARQLQuery(queryStr);
 
-		ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
+        ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
 
-		for (JsonNode jsonNode : transactionListResponse) {
-			transactionsList.add(new LandRegistryData(jsonNode));
-		}
-
-		return getPositionForAddresses(transactionsList);
-	}
-
-	public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint, LandRegistryQueryGroup group)
-			throws IOException, UnirestException {
-		return getTransactions(new LandRegistryQuery(constraint, group, select));
-	}
-
-	public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint) throws IOException, UnirestException {
-		return getTransactions(new LandRegistryQuery(constraint, null, select));
-	}
-
-	public List<LandRegistryData> getLatestTransactions(List<Selectable> values, LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
-		return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
-	}
-
-	public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
-		return getLatestTransactions(new ArrayList<Selectable>(), constraint);
-	}
-
-    private List<String> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
-        return postCodeCoordinatesDao.searchForPostCodesInBoundaries(top, right, bottom, left);
-    }
-
-    private List<LandRegistryData> getLandRegistryDataForPostcodes(List<String> postcodes) {
-        StringBuilder constraintQueryBuilder = new StringBuilder("WHERE ");
-
-        for (String postcode : postcodes) {
-            constraintQueryBuilder
-                    .append("postcode = '")
-                    .append(postcode)
-                    .append("' OR \n\t ");
+        for (JsonNode jsonNode : transactionListResponse) {
+            transactionsList.add(new LandRegistryData(jsonNode));
         }
 
-        return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
+        return getPositionForAddresses(transactionsList);
+    }
+
+    public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint, LandRegistryQueryGroup group)
+            throws IOException, UnirestException {
+        return getTransactions(new LandRegistryQuery(constraint, group, select));
+    }
+
+    public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint) throws IOException, UnirestException {
+        return getTransactions(new LandRegistryQuery(constraint, null, select));
+    }
+
+    public List<LandRegistryData> getLatestTransactions(List<Selectable> values, LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
+        return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
+    }
+
+    public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
+        return getLatestTransactions(new ArrayList<Selectable>(), constraint);
+    }
+
+    private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
+        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left);
     }
 
     public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
         List<LandRegistryData> fetchedData = new ArrayList<>();
 
-        List<String> postCodes = fetchPostCodesInsideCoordinateBox(
+        List<LandRegistryData> landRegistryDataForPostcodes = fetchPostCodesInsideCoordinateBox(
                 mapPosition.getDouble("top"),
                 mapPosition.getDouble("right"),
                 mapPosition.getDouble("bottom"),
                 mapPosition.getDouble("left")
         );
 
-        List<LandRegistryData> landRegistryDataForPostcodes = getLandRegistryDataForPostcodes(postCodes);
-
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > 1000) {
+        if (postcodesContained > 10000) {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
         } else if (postcodesContained > 4) {
             return landRegistryDataForPostcodes;
         } else {
-            LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect();
-            landRegistryQuerySelect.addSelectValue(Selectable.paon.toString());
-            landRegistryQuerySelect.addSelectValue(Selectable.pricePaid.toString());
+            LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect(Selectable.paon, Selectable.pricePaid);
 
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-
-            constraint.setPostcodes(Selectable.postcode.toString());
             constraint.setMinDate(LocalDate.now().minusYears(5));
 
             for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
@@ -204,29 +185,29 @@ public class LandRegistryServiceImpl {
             addressUriBuilder.delete(0, addressUriBuilder.length());
         }
 
-		for (LandRegistryData address : addresses) {
-			addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
-					.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-					.append("&key=").append(GOOGLE_MAPS_API_KEY);
+        for (LandRegistryData address : addresses) {
+            addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
+                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
+                    .append("&key=").append(GOOGLE_MAPS_API_KEY);
 
-			try {
-				JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
-						.getJSONObject("geometry").getJSONObject("location");
+            try {
+                JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
+                        .getJSONObject("geometry").getJSONObject("location");
 
-				address.setLatitude(response.getDouble("lat"));
-				address.setLongitude(response.getDouble("lng"));
+                address.setLatitude(response.getDouble("lat"));
+                address.setLongitude(response.getDouble("lng"));
 
-			} catch (UnirestException | JSONException e) {
-				e.printStackTrace();
-				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-			}
+            } catch (UnirestException | JSONException e) {
+                e.printStackTrace();
+                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+            }
 
-			// Clear the StringBuilder buffer
-			addressUriBuilder.delete(0, addressUriBuilder.length());
-		}
+            // Clear the StringBuilder buffer
+            addressUriBuilder.delete(0, addressUriBuilder.length());
+        }
 
         return addresses;
-	}
+    }
 
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
@@ -266,8 +247,8 @@ public class LandRegistryServiceImpl {
         for (int i = 0; i < landRegistryDataList.size() && i < heatMapDataPoints.size(); i++) {
             //Pass in the normalised value and receive a Colour object
             heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
-                            //Normalise the values between 0 and 1.0
-                            (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
+                    //Normalise the values between 0 and 1.0
+                    (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
                     )
             );
         }
