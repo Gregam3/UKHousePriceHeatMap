@@ -53,7 +53,7 @@ public class LandRegistryController {
                     throw new InvalidParameterException("Value " + jsonKey + " could not be found, please ensure requestbody contains this value as a top level node");
             }
 
-            return new ResponseEntity<>(landRegistryService.getPositionForLocations(mapPosition), HttpStatus.OK);
+            return new ResponseEntity<>(landRegistryService.getPositionInsideBounds(mapPosition), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }

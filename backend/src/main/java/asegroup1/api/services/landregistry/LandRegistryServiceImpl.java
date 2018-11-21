@@ -115,7 +115,7 @@ public class LandRegistryServiceImpl {
         return postCodeCoordinatesDao.getLandRegistryDataByPostcode(constraintQueryBuilder.substring(0, constraintQueryBuilder.length() - 7));
     }
 
-    public List<?> getPositionForLocations(JSONObject mapPosition) throws UnirestException {
+    public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException {
         List<LandRegistryData> fetchedData = new ArrayList<>();
 
         List<String> postCodes = fetchPostCodesInsideCoordinateBox(
@@ -146,7 +146,6 @@ public class LandRegistryServiceImpl {
 
         return fetchedData;
     }
-
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
         if (addresses.size() >= 100) {
@@ -203,7 +202,7 @@ public class LandRegistryServiceImpl {
                 .getObject();
     }
 
-    private List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
+    public List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
         if (landRegistryDataList.isEmpty()) {
             return null;
         }

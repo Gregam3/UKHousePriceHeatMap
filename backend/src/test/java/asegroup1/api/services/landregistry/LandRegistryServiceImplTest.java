@@ -1,12 +1,12 @@
 package asegroup1.api.services.landregistry;
 
-<<<<<<< HEAD
-import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.exceptions.UnirestException;
-=======
+
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,13 +16,10 @@ import java.security.InvalidParameterException;
 import java.util.*;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
->>>>>>> gm-146-AutoAggregateData100
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -37,7 +34,7 @@ class LandRegistryServiceImplTest {
 
     private static final long RANDOM_SEED = 8312595207343625996L;
 
-    private static final String[] validPostCodeEnds = {"9PH", "9PJ", "9PL", "9PN"};
+    private static final String[] validPostCodeEnds = {"4AA", "4BL", "1RQ", "1AN"};
 
     @BeforeAll
     private static void setUpService() {
@@ -195,50 +192,75 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfPriceValuesAreNormalisedCorrectly() {
-        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
+        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
 
-        assert normalisedValues.get(0) == 1.0 &&
-                normalisedValues.get(2) == 0.5 &&
-                normalisedValues.get(1) == 0.0;
+        for (int i = 0; i < 3; ) {
+            LandRegistryData landRegistryData = new LandRegistryData();
 
+            landRegistryData.setPricePaid(++i * 5L);
+            landRegistryData.setLongitude(0);
+            landRegistryData.setLatitude(0);
+            landRegistryDataList.add(landRegistryData);
+        }
+
+        List<HeatMapDataPoint> heatMapDataPoints = landRegistryService.convertLandRegistryDataListToHeatMapList(landRegistryDataList);
+
+        assert heatMapDataPoints.get(0).getColour().getRed() == 255 &&
+                heatMapDataPoints.get(1).getColour().getRed() == 155 &&
+                heatMapDataPoints.get(2).getColour().getRed() == 55;
+
+    }
+
+    private List<HeatMapDataPoint> getHeatMapTestData(long... values) {
+        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
+
+        for (int i = 0; i < values.length; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+
+            landRegistryData.setPricePaid(values[i]);
+            landRegistryData.setLongitude(0);
+            landRegistryData.setLatitude(0);
+            landRegistryDataList.add(landRegistryData);
+        }
+
+        return landRegistryService.convertLandRegistryDataListToHeatMapList(landRegistryDataList);
     }
 
     @Test
     void testIfNormalisedValuesConvertToCorrectColours() {
-        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(15L, 5L, 10L));
-
-        List<Colour> coloursForNormalisedValues = landRegistryService.getColoursForNormalisedValues(normalisedValues);
+        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
 
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-        assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
-                && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
+        assert heatMapDataPoints.get(0).getColour().getRed() > heatMapDataPoints.get(1).getColour().getRed()
+                && heatMapDataPoints.get(1).getColour().getRed() > heatMapDataPoints.get(2).getColour().getRed();
     }
 
     @Test
     void testHowNormaliseValuesReturns0ValueForOnlyOneDistinctValue() {
-        for (Double normalisedValue : landRegistryService.normaliseValues(Arrays.asList(5L, 5L, 5L))) {
-            assert normalisedValue == 0.0;
+        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
+
+        for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
+            assert heatMapDataPoint.getColour().getRed() == 255;
         }
     }
 
     @Test
     void testHowNormaliseValuesHandlesEmptyList() {
-        assert landRegistryService.normaliseValues(new ArrayList<>()) == null;
+        assert landRegistryService.convertLandRegistryDataListToHeatMapList(new ArrayList<>()) == null;
     }
 
     @Test
     void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
-        List<Double> normalisedValues = landRegistryService.normaliseValues(Arrays.asList(-5L, -15L, -10L));
+        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(-5L, -15L, -10L);
 
-        List<Colour> coloursForNormalisedValues = landRegistryService.getColoursForNormalisedValues(normalisedValues);
 
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-        assert coloursForNormalisedValues.get(0).getRed() < coloursForNormalisedValues.get(2).getRed()
-                && coloursForNormalisedValues.get(2).getRed() < coloursForNormalisedValues.get(1).getRed();
+        assert heatMapDataPoints.get(0).getColour().getRed() < heatMapDataPoints.get(2).getColour().getRed()
+                && heatMapDataPoints.get(2).getColour().getRed() < heatMapDataPoints.get(1).getColour().getRed();
 
     }
 
-
+    @Test
     void testIfLargeAddressListIsAggregatedCorrectly() {
         Random random = new Random(RANDOM_SEED);
 
@@ -246,32 +268,43 @@ class LandRegistryServiceImplTest {
 
         for (int i = 0; i < validPostCodeEnds.length; i++) {
             LandRegistryData landRegistryData = new LandRegistryData();
-            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+            landRegistryData.setPostCode("BN11 " + validPostCodeEnds[i]);
             landRegistryData.setLatitude(random.nextDouble());
             landRegistryData.setLatitude(random.nextDouble());
 
             postCodeLocationData.add(landRegistryData);
         }
 
-        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
-        when(landRegistryDataDaoMock.getLandRegistryDataByPostcode(
-                "WHERE postcode = 'BN14 9PH' OR \n" +
-                        "\t postcode = 'BN14 9PJ' OR \n" +
-                        "\t postcode = 'BN14 9PL' OR \n" +
-                        "\t postcode = 'BN14 9PN'"
-        )).thenReturn(postCodeLocationData);
+        JSONObject mockRequest = new JSONObject();
 
-        landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+        try {
+            mockRequest.put("top", 50.814);
+            mockRequest.put("right", -0.376);
+            mockRequest.put("bottom", 50.8135);
+            mockRequest.put("left", -0.378);
 
-        List<LandRegistryData> addresses = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
-            LandRegistryData landRegistryData = new LandRegistryData();
-            landRegistryData.setPostCode("BN14 " + validPostCodeEnds[i % 4]);
+            LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+            when(landRegistryDataDaoMock.searchForPostCodesInBoundaries(
+                    mockRequest.getDouble("top"),
+                    mockRequest.getDouble("right"),
+                    mockRequest.getDouble("bottom"),
+                    mockRequest.getDouble("left")
+            )).thenReturn(Arrays.asList("BN11 4AA", "'BN11 4BL", "BN11 1RQ", "BN11 1AN"));
 
-            addresses.add(landRegistryData);
+            when(landRegistryDataDaoMock.getLandRegistryDataByPostcode(
+                    "WHERE postcode = 'BN11 4AA' OR \n" +
+                            "\t postcode = ''BN11 4BL' OR \n" +
+                            "\t postcode = 'BN11 1RQ' OR \n" +
+                            "\t postcode = 'BN11 1AN'"
+            )).thenReturn(postCodeLocationData);
+
+            landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+            assert landRegistryService.getPositionInsideBounds(mockRequest).size() == 5;
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false;
         }
-
-//        assert landRegistryService.getPositionForLocations(addresses).size() == 4;
     }
 }
