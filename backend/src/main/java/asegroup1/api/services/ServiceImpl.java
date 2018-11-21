@@ -5,7 +5,7 @@ import asegroup1.api.daos.Dao;
 import java.util.List;
 
 /**
- * @author Greg Mitten (i7676925)
+ * @author Greg Mitten 
  * gregoryamitten@gmail.com
  */
 
