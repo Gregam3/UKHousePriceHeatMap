@@ -98,6 +98,15 @@ export default class App extends Component {
 
         this.requestAndGetLocationAsync();
 
+        let longitudeDelta = this.state.longitudeDelta
+        let latitudeDelta = this.state.latitudeDelta
+
+        if (this.state.longitudeDelta && this.state.latitudeDelta <= 0.05 ){
+          return <ZoomLow/>;
+        }
+        else  if (this.state.longitudeDelta && this.state.latitudeDelta > 0.05){
+          return <ZoomMax/>
+        }
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
@@ -129,15 +138,16 @@ export default class App extends Component {
                         }}
                     >
 
-                      {this.state.markers.map(marker => (
-                          <MapView.Circle
-                            key={marker.id}
-                            center={{longitude:marker.longitude, latitude:marker.latitude}}
-                            radius={100}
-                            fillColor= { '#FF0000'}
-                            strokeColor= {'#FF0000'}
-                      />
-                       ))}
+                    {this.state.markers.map(marker => (
+                        <MapView.Circle
+                          key={marker.id}
+                          center={{longitude:marker.longitude, latitude:marker.latitude}}
+                          radius={100}
+                          fillColor=  {'rgba(255,0,0,0.3)'}
+                          strokeWidth= {0}
+                          />
+
+                     ))}}
                         {this.state.markers.map(marker => (
                             <MapView.Marker
                                 key={marker.id}
