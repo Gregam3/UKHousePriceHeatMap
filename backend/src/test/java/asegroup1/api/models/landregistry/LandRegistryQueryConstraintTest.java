@@ -111,22 +111,22 @@ class LandRegistryQueryConstraintTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.util.ArrayList)}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.util.ArrayList)}.
 	 */
 	@Test
 	public void testSetPostcodesArrayListOfString() {
 		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(LandRegistryQueryTestUtils.getPostCodes()));
-		constraint.setPostcodes(postcodes);
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.lang.String[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.lang.String[])}.
 	 */
 	@Test
 	public void testSetPostcodesStringArray() {
 		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
-		constraint.setPostcodes(postcodes);
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
 	}
 
@@ -139,7 +139,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
@@ -153,7 +153,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}

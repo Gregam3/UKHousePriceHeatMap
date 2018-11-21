@@ -43,7 +43,7 @@ public class LandRegistryQueryTestUtils {
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinDate(LocalDate.now().minusYears(5));
 		constraint.setMinPricePaid(150000);
-		constraint.setPostcodes(getPostCodes());
+		constraint.setPostcodeRegex(getPostCodes());
 		return constraint;
 	}
 

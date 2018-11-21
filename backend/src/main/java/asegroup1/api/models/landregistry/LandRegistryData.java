@@ -3,9 +3,12 @@ package asegroup1.api.models.landregistry;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,9 +44,14 @@ public class LandRegistryData {
 		parseResponse(json);
 	}
 
-	private void addAddrConstraint(Selectable selectable, String value) {
-		constraints.put(selectable, new AddrConstraint(selectable.toString(), value.toUpperCase()));
+	private void addAddrConstraint(Selectable selectable, String value, boolean isString) {
+		constraints.put(selectable, new AddrConstraint(selectable.toString(), value.toUpperCase(), isString));
 	}
+
+	private void addAddrConstraint(Selectable selectable, String value) {
+		addAddrConstraint(selectable, value, true);
+	}
+
 
 	/**
 	 * Set the primaryHouseName
@@ -349,6 +357,61 @@ public class LandRegistryData {
 		}
 	}
 
+	void setConstraintVar(Selectable constraint, String variableReference) {
+		variableReference = "?" + variableReference;
+
+		switch (constraint) {
+			case paon:
+			case saon:
+			case street:
+			case locality:
+			case town:
+			case district:
+			case county:
+			case postcode:
+			case transactionDate:
+				addAddrConstraint(constraint, variableReference, false);
+				break;
+			case propertyType:
+			case estateType:
+				addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrcommon:" + variableReference);
+				break;
+			case transactionCategory:
+				addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrppi:" + variableReference);
+				break;
+			case newBuild:
+			case pricePaid:
+				addTransConstraint(constraint, constraint.toString(), variableReference);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected enum");
+		}
+	}
+
+	static List<String> processConstraintList(Selectable type, String... constraints) {
+		switch (type) {
+			case paon:
+			case saon:
+			case street:
+			case locality:
+			case town:
+			case district:
+			case county:
+			case postcode:
+			case transactionDate:
+				return Arrays.asList(constraints).stream().map(v -> "\"" + v.toUpperCase() + "\"").collect(Collectors.toList());
+			case propertyType:
+			case estateType:
+				return Arrays.asList(constraints).stream().map(v -> "lrcommon:" + v).collect(Collectors.toList());
+			case transactionCategory:
+				return Arrays.asList(constraints).stream().map(v -> "lrppi:" + v).collect(Collectors.toList());
+			case newBuild:
+			case pricePaid:
+				return Arrays.asList(constraints);
+			default:
+				throw new IllegalArgumentException("Unexpected enum");
+		}
+	}
 	/**
 	 * Parses the JSON, and fills its self with the content.
 	 * 
@@ -495,8 +558,8 @@ public class LandRegistryData {
 	}
 
 	class AddrConstraint extends EqualityConstraint {
-		public AddrConstraint(String name, String value) {
-			super("addr", "lrcommon", name, value, true);
+		public AddrConstraint(String name, String value, boolean string) {
+			super("addr", "lrcommon", name, value, string);
 		}
 
 		@Override
