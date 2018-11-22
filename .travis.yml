@@ -22,11 +22,11 @@ matrix:
         - docker push asegroup1/backend-$DOCKER_BRANCH:latest
       jdk:
         - oraclejdk8
-      addons:
-        sonarcloud:
-          organization: gregam3-github
-          token: 
-            secure: $Sonar_token
+      #addons:
+      #  sonarcloud:
+      #    organization: gregam3-github
+      #    token: 
+      #      secure: $Sonar_token
       #script:
         # other script steps might be done before running the actual analysis
       #  - sonar-scanner 
