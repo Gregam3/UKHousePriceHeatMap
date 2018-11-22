@@ -1,28 +1,6 @@
 sudo: required
 matrix:
   include:
-    - language: node_js
-      node_js:
-        - node
-        - lts/*
-      cache:
-        directories:
-          - ~/.npm
-      before_script:
-        - cd frontend/reactnative/
-        - npm install -g npm@latest
-        - npm install
-      script:
-      jobs:
-        include:
-          - stage: deploy
-            node_js: lts/*
-            script:
-              - npm ci
-              - npx expo login -u briso -p asegroup1
-              - npx expo publish --non-interactive
-              - expo build:android
-              # - expo build:ios
     - language: java
       services:
         - docker
@@ -52,3 +30,46 @@ matrix:
       script:
         # other script steps might be done before running the actual analysis
         - sonar-scanner 
+    - language: node_js
+      node_js:
+        - node
+        - lts/*
+      cache:
+        directories:
+          - ~/.npm
+      before_script:
+        - cd frontend/reactnative/
+        - npm install -g npm@latest
+        - npm install
+      script:
+      jobs:
+        include:
+          - stage: deploy
+            node_js: lts/*
+            script:
+              - npm ci
+              - npx expo login -u briso -p asegroup1
+              - npx expo publish --non-interactive
+              - expo build:android
+              # - expo build:ios- language: node_js
+      node_js:
+        - node
+        - lts/*
+      cache:
+        directories:
+          - ~/.npm
+      before_script:
+        - cd frontend/reactnative/
+        - npm install -g npm@latest
+        - npm install
+      script:
+      jobs:
+        include:
+          - stage: deploy
+            node_js: lts/*
+            script:
+              - npm ci
+              - npx expo login -u briso -p asegroup1
+              - npx expo publish --non-interactive
+              - expo build:android
+              # - expo build:ios
