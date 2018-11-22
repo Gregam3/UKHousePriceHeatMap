@@ -90,7 +90,7 @@ public class LandRegistryServiceImpl {
             transactionsList.add(new LandRegistryData(jsonNode));
         }
 
-        return getPositionForAddresses(transactionsList);
+        return transactionsList;
     }
 
     public List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint, LandRegistryQueryGroup group)
@@ -134,18 +134,22 @@ public class LandRegistryServiceImpl {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(5));
 
-            List<String> fuckingPostcodes = new ArrayList<>();
+            List<String> postcodes = new ArrayList<>();
 
             for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes)
-                fuckingPostcodes.add(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
+                postcodes.add(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
 
+            constraint.setEqualityConstraint(Selectable.postcode, postcodes.toArray(new String[0]));
 
-            constraint.setEqualityConstraint(Selectable.postcode, fuckingPostcodes.toArray(new String[fuckingPostcodes.size()]));
-
-            JSONObject queryReponse = executeSPARQLQuery(
-                    LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(Selectable.paon, Selectable.pricePaid)).buildQuery()
-            );
-            return getPositionForAddresses(fetchedData);
+            return getPositionForAddresses(
+                    getTransactions(
+                            LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(
+                                    Selectable.paon,
+                                    Selectable.street,
+                                    Selectable.town,
+                                    Selectable.pricePaid
+                            ))
+                    ));
         } else {
             return new ArrayList<>();
         }
@@ -267,5 +271,4 @@ public class LandRegistryServiceImpl {
         //The higher the normalised value the darker the red will appear
         return new Colour(255 - (int) (normalisedValue * 200));
     }
-
 }
