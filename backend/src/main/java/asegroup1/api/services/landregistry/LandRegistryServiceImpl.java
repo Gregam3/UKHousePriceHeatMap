@@ -134,9 +134,13 @@ public class LandRegistryServiceImpl {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(5));
 
-            constraint.setEqualityConstraint(Selectable.postcode, ( String[]) landRegistryDataForPostcodes
-                    .stream().map(lr ->lr.getConstraint(Selectable.postcode)).toArray()
-            );
+            List<String> fuckingPostcodes = new ArrayList<>();
+
+            for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes)
+                fuckingPostcodes.add(landRegistryDataForPostcode.getConstraint(Selectable.postcode));
+
+
+            constraint.setEqualityConstraint(Selectable.postcode, fuckingPostcodes.toArray(new String[fuckingPostcodes.size()]));
 
             JSONObject queryReponse = executeSPARQLQuery(
                     LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(Selectable.paon, Selectable.pricePaid)).buildQuery()
