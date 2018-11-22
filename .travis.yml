@@ -8,6 +8,7 @@ matrix:
         - cd backend/
       script:
         - mvn package
+        - sonar-scanner 
       after_success:
         - docker login -u $DOCKER_USER -p $DOCKER_PASS
         - |
@@ -19,7 +20,6 @@ matrix:
           fi
         - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
         - docker push asegroup1/backend-$DOCKER_BRANCH:latest
-    #- language: java
       jdk:
         - oraclejdk8
       addons:
@@ -27,9 +27,9 @@ matrix:
           organization: gregam3-github
           token: 
             secure: $Sonar_token
-      script:
+      #script:
         # other script steps might be done before running the actual analysis
-        - sonar-scanner 
+      #  - sonar-scanner 
     - language: node_js
       node_js:
         - node
