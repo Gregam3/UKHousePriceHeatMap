@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,32 @@ class LandRegistryQueryConstraintTest {
 
 	/**
 	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintSingle() {
+		String str;
+		for (Selectable s : new Selectable[] { Selectable.county, Selectable.paon, Selectable.saon, Selectable.town }) {
+			str = LandRegistryQueryTestUtils.generateRandomString();
+			assertTrue(constraint.setEqualityConstraint(s, str));
+			assertEquals(str.toUpperCase(), constraint.getEqualityConstraints().getConstraint(s));
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintMultiple() {
+		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
+		assertTrue(constraint.setEqualityConstraint(Selectable.postcode, postcodes));
+
+		assertEquals(Arrays.asList(postcodes).stream().map(v -> "\"" + v + "\"").collect(Collectors.toList()), constraint.getValueList(Selectable.postcode.toString()).getValues());
+	}
+
+	/**
+	 * Test method for
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setMaxDate(java.time.LocalDate)}.
 	 */
 	@Test
@@ -111,22 +138,22 @@ class LandRegistryQueryConstraintTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.util.ArrayList)}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.util.ArrayList)}.
 	 */
 	@Test
 	public void testSetPostcodesArrayListOfString() {
 		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(LandRegistryQueryTestUtils.getPostCodes()));
-		constraint.setPostcodes(postcodes);
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.lang.String[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.lang.String[])}.
 	 */
 	@Test
 	public void testSetPostcodesStringArray() {
 		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
-		constraint.setPostcodes(postcodes);
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
 	}
 
@@ -139,7 +166,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
@@ -153,7 +180,7 @@ class LandRegistryQueryConstraintTest {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(LandRegistryQueryTestUtils.getPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
 		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}

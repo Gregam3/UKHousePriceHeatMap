@@ -17,6 +17,10 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		this.select = select;
 	}
 
+	public LandRegistryQuery(LandRegistryQueryBody body, Selectable... selectables) {
+		this(body, null, new LandRegistryQuerySelect(selectables));
+	}
+
 	public LandRegistryQuery() {
 		this(new LandRegistryQueryConstraint(), new LandRegistryQueryGroup(), new LandRegistryQuerySelect());
 	}
@@ -141,6 +145,4 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		COUNT, SUM, AVG, MIN, MAX, SAMPLE, NONE;
 	}
 	
-	
-
 }
