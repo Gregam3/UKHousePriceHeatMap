@@ -26,8 +26,8 @@ export default class App extends Component {
             },
             {
                 id:1,
-                longitude:-0.14,
-                latitude:51,
+                longitude:-0.133,
+                latitude:50.84609893155363,
                 title:'Hello',
                 description:'World'
             },
@@ -130,22 +130,21 @@ export default class App extends Component {
                     >
 
                       {this.state.markers.map(marker => (
-                          <MapView.Circle
-                            key={marker.id}
-                            center={{longitude:marker.longitude, latitude:marker.latitude}}
-                            radius={100}
-                            fillColor= { '#FF0000'}
-                            strokeColor= {'#FF0000'}
-                      />
-                       ))}
-                        {this.state.markers.map(marker => (
-                            <MapView.Marker
+                        false ? (
+                            <MapView.Circle
+                                key={marker.id}
+                                center={{longitude:marker.longitude, latitude:marker.latitude}}
+                                radius={100}
+                                strokeColor={'#FF0000'}
+                                fillColor={'rgba(255,0,0,0.5)'}
+                            />)
+                        : (<MapView.Marker
                                 key={marker.id}
                                 coordinate={{longitude:marker.longitude, latitude:marker.latitude}}
                                 title={marker.title}
                                 description={marker.description}
-                            />
-                         ))}
+                            />)
+                      ))}
 
                     </MapView>
                 </View> :
