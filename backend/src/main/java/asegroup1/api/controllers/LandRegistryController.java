@@ -67,6 +67,7 @@ public class LandRegistryController {
 
             return new ResponseEntity<>(positionsInsideBounds, HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity("{\"error\" :\"An error occurred whilst handling this request: " + e +"\"}", HttpStatus.BAD_REQUEST);
         }
     }

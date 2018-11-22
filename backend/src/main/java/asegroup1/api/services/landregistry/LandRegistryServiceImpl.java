@@ -21,6 +21,7 @@ import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -129,59 +130,21 @@ public class LandRegistryServiceImpl {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
         } else if (postcodesContained > 4) {
             return landRegistryDataForPostcodes;
-        } else {
-            LandRegistryQuerySelect landRegistryQuerySelect = new LandRegistryQuerySelect(Selectable.paon, Selectable.pricePaid);
-
+        } else if (postcodesContained > 0) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(5));
 
-            StringBuilder queryPrefix = new StringBuilder("prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                    "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                    "prefix owl: <http://www.w3.org/2002/07/owl#> \n" +
-                    "prefix xsd: <http://www.w3.org/2001/XMLSchema#> \n" +
-                    "prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n" +
-                    "prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n" +
-                    "prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n" +
-                    "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n" +
-                    "prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>\n" +
-                    "SELECT ?paon ?saon ?street ?postcode (MAX(?transactionDate) AS ?TransactionDate) (SAMPLE(?pricePaid) AS ?PricePaid)\n" +
-                    "WHERE { \n" +
-                    "      VALUES (?POSTCODE) {");
+            constraint.setEqualityConstraint(Selectable.postcode, ( String[]) landRegistryDataForPostcodes
+                    .stream().map(lr ->lr.getConstraint(Selectable.postcode)).toArray()
+            );
 
-            for (LandRegistryData landRegistryDataForPostcode : landRegistryDataForPostcodes) {
-                queryPrefix
-                        .append("(\"")
-                        .append(landRegistryDataForPostcode.getConstraint(Selectable.postcode))
-                        .append("\") ");
-            }
-
-            queryPrefix.append("} ?addr lrcommon:postcode ?POSTCODE.\n" +
-                    "    ?transx lrppi:propertyAddress ?addr ; \n" +
-                    "        lrppi:propertyType/skos:prefLabel ?propertyType ; \n" +
-                    "        lrppi:estateType/skos:prefLabel ?estateType ; \n" +
-                    "        lrppi:transactionDate ?transactionDate ; \n" +
-                    "        lrppi:pricePaid ?pricePaid ; \n" +
-                    "        lrppi:newBuild ?newBuild ; \n" +
-                    "        lrppi:transactionCategory/skos:prefLabel ?transactionCategory.\n" +
-                    "    OPTIONAL {?addr lrcommon:paon ?paon} \n" +
-                    "    OPTIONAL {?addr lrcommon:saon ?saon} \n" +
-                    "    OPTIONAL {?addr lrcommon:street ?street} \n" +
-                    "    OPTIONAL {?addr lrcommon:locality ?locality} \n" +
-                    "    OPTIONAL {?addr lrcommon:town ?town} \n" +
-                    "    OPTIONAL {?addr lrcommon:district ?district} \n" +
-                    "    OPTIONAL {?addr lrcommon:county ?county} \n" +
-                    "    OPTIONAL {?addr lrcommon:postcode ?postcode}\n" +
-                    "    \n" +
-                    "    FILTER (\n" +
-                    "        ?transactionDate > \"2013-11-21\"^^xsd:date\n" +
-                    "    )\n" +
-                    "}\n" +
-                    "GROUP BY ?paon ?saon ?street ?postcode");
-
-            executeSPARQLQuery(queryPrefix.toString());
+            JSONObject queryReponse = executeSPARQLQuery(
+                    LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(Selectable.paon, Selectable.pricePaid)).buildQuery()
+            );
+            return getPositionForAddresses(fetchedData);
+        } else {
+            return new ArrayList<>();
         }
-
-        return getPositionForAddresses(fetchedData);
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
