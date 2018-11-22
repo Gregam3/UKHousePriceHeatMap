@@ -42,6 +42,7 @@ matrix:
         - npm install -g npm@latest
         - npm install
       script:
+        - npm build
       jobs:
         include:
           - stage: deploy
