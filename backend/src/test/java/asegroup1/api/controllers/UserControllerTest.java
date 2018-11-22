@@ -1,4 +1,4 @@
-package asegroup1.api.services.user;
+package asegroup1.api.controllers;
 
 import asegroup1.api.controllers.UserController;
 import asegroup1.api.daos.user.UserDaoImpl;
@@ -12,7 +12,12 @@ import java.util.Objects;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class UserControllerImplTest {
+/**
+ * @author Greg Mitten
+ * gregoryamitten@gmail.com
+ */
+
+class UserControllerTest {
 
     @Test
     void testIfUserControllerSendsRequestThroughToDao() {

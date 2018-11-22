@@ -181,7 +181,7 @@ public class LandRegistryData {
 	 * 
 	 * @param pricePaid to set
 	 */
-	public void setPricePaid(int pricePaid) {
+	public void setPricePaid(long pricePaid) {
 		addTransConstraint(Selectable.pricePaid, "pricePaid", pricePaid + "");
 	}
 

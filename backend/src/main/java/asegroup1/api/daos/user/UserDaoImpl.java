@@ -7,6 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 
+/**
+ * @author Greg Mitten
+ * gregoryamitten@gmail.com
+ */
+
 @Transactional
 @Repository
 public class UserDaoImpl extends DaoImpl<UserData> {

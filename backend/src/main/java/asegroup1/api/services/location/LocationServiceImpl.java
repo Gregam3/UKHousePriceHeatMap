@@ -9,6 +9,11 @@ import asegroup1.api.models.UserData;
 import asegroup1.api.services.ServiceImpl;
 import asegroup1.api.services.user.UserServiceImpl;
 
+/**
+ * @author Greg Mitten
+ * gregoryamitten@gmail.com
+ */
+
 @Service
 public class LocationServiceImpl extends ServiceImpl<LocationData> {
 
