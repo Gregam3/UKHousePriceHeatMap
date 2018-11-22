@@ -98,6 +98,15 @@ export default class App extends Component {
 
         this.requestAndGetLocationAsync();
 
+        let longitudeDelta = this.state.longitudeDelta
+        let latitudeDelta = this.state.latitudeDelta
+
+        if (this.state.longitudeDelta && this.state.latitudeDelta <= 0.05 ){
+          return <ZoomLow/>;
+        }
+        else  if (this.state.longitudeDelta && this.state.latitudeDelta > 0.05){
+          return <ZoomMax/>
+        }
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
