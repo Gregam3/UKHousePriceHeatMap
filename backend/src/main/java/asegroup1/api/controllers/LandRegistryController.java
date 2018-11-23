@@ -81,7 +81,7 @@ public class LandRegistryController {
         try {
             return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
                     HttpStatus.OK);
-        } catch (IOException | UnirestException | ParseException e) {
+        } catch (IOException | UnirestException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }

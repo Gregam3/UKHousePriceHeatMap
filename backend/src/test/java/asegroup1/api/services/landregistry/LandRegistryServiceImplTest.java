@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -73,7 +74,7 @@ class LandRegistryServiceImplTest {
             constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
 
-			List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(new LandRegistryQuerySelect(Selectable.pricePaid), constraint);
+            List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(new LandRegistryQuerySelect(Selectable.pricePaid), constraint);
 
             //Checking not only if results are returned but that results contain valid data
             if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
@@ -82,7 +83,7 @@ class LandRegistryServiceImplTest {
             }
 
             assert true;
-		} catch (IOException | UnirestException | NumberFormatException e) {
+        } catch (IOException | UnirestException | NumberFormatException e) {
             e.printStackTrace();
             assert false;
         }
@@ -259,49 +260,141 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfCorrectLandRegistryDataIsFetchedForPostcode() {
-//        Random random = new Random(RANDOM_SEED);
-//
-//        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
-//
-//        for (int i = 0; i < validPostCodeEnds.length; i++) {
-//            LandRegistryData landRegistryData = new LandRegistryData();
-//            landRegistryData.setPostCode("BN11 " + validPostCodeEnds[i]);
-//            landRegistryData.setLatitude(random.nextDouble());
-//            landRegistryData.setLatitude(random.nextDouble());
-//
-//            postCodeLocationData.add(landRegistryData);
-//        }
-//
-//        JSONObject mockRequest = new JSONObject();
-//
-//        try {
-//            mockRequest.put("top", 50.814);
-//            mockRequest.put("right", -0.376);
-//            mockRequest.put("bottom", 50.8135);
-//            mockRequest.put("left", -0.378);
-//
-//
-//            LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
-//            when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
-//                    mockRequest.getDouble("top"),
-//                    mockRequest.getDouble("right"),
-//                    mockRequest.getDouble("bottom"),
-//                    mockRequest.getDouble("left")
-//            )).thenReturn(Arrays.asList("BN11 4AA", "'BN11 4BL", "BN11 1RQ", "BN11 1AN"));
-//
-//            when(landRegistryDataDaoMock.getLandRegistryDataByPostcode(
-//                    "WHERE postcode = 'BN11 4AA' OR \n" +
-//                            "\t postcode = ''BN11 4BL' OR \n" +
-//                            "\t postcode = 'BN11 1RQ' OR \n" +
-//                            "\t postcode = 'BN11 1AN'"
-//            )).thenReturn(postCodeLocationData);
-//
-//            landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
-//
-//            assert landRegistryService.getPositionInsideBounds(mockRequest).size() == 5;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            assert false;
-//        }
+        Random random = new Random(RANDOM_SEED);
+
+        List<String> postcodes = Collections.singletonList("BN11 4AA");
+
+        List<LandRegistryData> postCodeLocationData = new ArrayList<>();
+
+        for (String postcode1 : postcodes) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode(postcode1);
+            landRegistryData.setLatitude(random.nextDouble());
+            landRegistryData.setLatitude(random.nextDouble());
+
+            postCodeLocationData.add(landRegistryData);
+        }
+
+        List<LandRegistryData> postcodesFetchedMock = new ArrayList<>();
+
+        for (String postcode : postcodes) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode(postcode);
+            postcodesFetchedMock.add(landRegistryData);
+        }
+
+        JSONObject mockRequest = new JSONObject();
+
+        try {
+            mockRequest.put("top", 50.814);
+            mockRequest.put("right", -0.376);
+            mockRequest.put("bottom", 50.8135);
+            mockRequest.put("left", -0.378);
+
+
+            LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+            when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
+                    mockRequest.getDouble("top"),
+                    mockRequest.getDouble("right"),
+                    mockRequest.getDouble("bottom"),
+                    mockRequest.getDouble("left")
+            )).thenReturn(postcodesFetchedMock);
+
+            when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
+                    mockRequest.getDouble("top"),
+                    mockRequest.getDouble("right"),
+                    mockRequest.getDouble("bottom"),
+                    mockRequest.getDouble("left")
+            )).thenReturn(postCodeLocationData);
+
+            landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+            assert landRegistryService.getPositionInsideBounds(mockRequest).size() == 1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false;
+        }
     }
+
+    @Test
+    void testIfPostcodesAreAggregatedCorrectly() {
+        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+
+        String[] postcodes = {"BN14 7BH", "NW9 9PR", "NN12 8DT", "TW7 4QN", "L22 3YU", "RM17 6LJ", "RG14 7DF", "SE25 5RT"};
+
+
+        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
+
+        for (int i = 0; i < LandRegistryServiceImpl.getAggregationLevels()[1] + 1; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode(postcodes[i % postcodes.length]);
+
+            landRegistryDataList.add(landRegistryData);
+        }
+
+        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0))
+                .thenReturn(landRegistryDataList);
+
+        LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+        JSONObject mockRequest = new JSONObject();
+
+        try {
+            mockRequest.put("top", 0);
+            mockRequest.put("right", 0);
+            mockRequest.put("bottom", 0);
+            mockRequest.put("left", 0);
+            for (LandRegistryData positionInsideBound : (List<LandRegistryData>) landRegistryService.getPositionInsideBounds(mockRequest)) {
+                //If addresses are fetched constraint size will be greater than 1
+                assert positionInsideBound.getAllConstraints().size() == 1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            assert false;
+        }
+    }
+
+    @Test
+    void testIfHeatMapIsReturnedWhenThresholdIsPassed() {
+        Random random = new Random(RANDOM_SEED);
+
+        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+
+        String[] postcodes = {"BN14 7BH", "NW9 9PR", "NN12 8DT", "TW7 4QN", "L22 3YU", "RM17 6LJ", "RG14 7DF", "SE25 5RT"};
+
+
+        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
+
+        for (int i = 0; i < LandRegistryServiceImpl.getAggregationLevels()[2] + 1; i++) {
+            LandRegistryData landRegistryData = new LandRegistryData();
+            landRegistryData.setPostCode(postcodes[i % postcodes.length]);
+            landRegistryData.setLatitude(0);
+            landRegistryData.setLongitude(0);
+            landRegistryData.setPricePaid(random.nextInt(10000000));
+            landRegistryDataList.add(landRegistryData);
+        }
+
+        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0))
+                .thenReturn(landRegistryDataList);
+
+        LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+        JSONObject mockRequest = new JSONObject();
+
+        try {
+            mockRequest.put("top", 0);
+            mockRequest.put("right", 0);
+            mockRequest.put("bottom", 0);
+            mockRequest.put("left", 0);
+            List<?> positionsInsideBounds = landRegistryService.getPositionInsideBounds(mockRequest);
+
+            assert positionsInsideBounds.size() == postcodes.length && positionsInsideBounds.get(0) instanceof HeatMapDataPoint;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            assert false;
+        }
+    }
+
 }

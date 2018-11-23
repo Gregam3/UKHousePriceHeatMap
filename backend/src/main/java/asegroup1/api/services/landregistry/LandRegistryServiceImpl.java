@@ -21,6 +21,9 @@ import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -99,7 +102,7 @@ public class LandRegistryServiceImpl {
         return getTransactions(new LandRegistryQuery(constraint, null, select));
     }
 
-    public List<LandRegistryData> getLatestTransactions(List<Selectable> values, LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
+    public List<LandRegistryData> getLatestTransactions(List<Selectable> values, LandRegistryQueryConstraint constraint) throws IOException, UnirestException {
         return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
     }
 
@@ -217,6 +220,10 @@ public class LandRegistryServiceImpl {
         return addresses;
     }
 
+    public static int[] getAggregationLevels() {
+        return AGGREGATION_LEVELS;
+    }
+
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
@@ -232,6 +239,8 @@ public class LandRegistryServiceImpl {
         if (landRegistryDataList.isEmpty()) {
             return null;
         }
+
+        landRegistryDataList = landRegistryDataList.stream().filter(distinctByKey(lr -> lr.getConstraint(Selectable.postcode))).collect(Collectors.toList());
 
         Random random = new Random();
 
@@ -269,6 +278,11 @@ public class LandRegistryServiceImpl {
         }
 
         return heatMapDataPoints;
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
     }
 
     private Colour getColoursForNormalisedValues(Double normalisedValue) {
