@@ -132,7 +132,7 @@ public class LandRegistryServiceImpl {
             return landRegistryDataForPostcodes;
         } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-            constraint.setMinDate(LocalDate.now().minusYears(5));
+            constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 
             List<String> postcodes = new ArrayList<>();
 
@@ -239,8 +239,6 @@ public class LandRegistryServiceImpl {
         if (landRegistryDataList.isEmpty()) {
             return null;
         }
-
-        landRegistryDataList = landRegistryDataList.stream().filter(distinctByKey(lr -> lr.getConstraint(Selectable.postcode))).collect(Collectors.toList());
 
         Random random = new Random();
 

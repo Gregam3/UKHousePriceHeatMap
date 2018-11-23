@@ -31,7 +31,7 @@ public class LandRegistryController {
 
 
     private LandRegistryServiceImpl landRegistryService;
-    private static final int YEARS_TO_FETCH = 5;
+
 
     @Autowired
     public LandRegistryController(LandRegistryServiceImpl landRegistryService) {
@@ -49,34 +49,34 @@ public class LandRegistryController {
 
     @GetMapping("get-display-data")
     public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
-        long timer = System.nanoTime();
+        long timer = System.currentTimeMillis();
 
         try {
             for (String jsonKey : new String[]{"top", "bottom", "left", "right"}) {
                 if (mapPosition.isNull(jsonKey))
-                    throw new InvalidParameterException("Value " + jsonKey + " could not be found, please ensure requestbody contains this value as a top level node");
+                    throw new InvalidParameterException("Value \"" + jsonKey + "\" could not be found, please ensure requestbody contains this value as a top level node");
             }
 
             List<?> positionsInsideBounds = landRegistryService.getPositionInsideBounds(mapPosition);
 
             System.out.println(
                     "\n-----------------------------------------------------------------------------------------------------\n" +
-                            "\t\t\t\t\t\t\tRequest took " + (System.nanoTime() - timer) / 1000000 + "ms to fetch " + positionsInsideBounds.size() + " elements \n " +
+                            "\t\t\t\t\t\t\tRequest took " + (System.currentTimeMillis() - timer) + "ms to fetch " + positionsInsideBounds.size() + " elements \n " +
                             "-----------------------------------------------------------------------------------------------------"
             );
 
             return new ResponseEntity<>(positionsInsideBounds, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity("{\"error\" :\"An error occurred whilst handling this request: " + e +"\"}", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("get-transactions/{post-code}")
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-        constraint.getEqualityConstraints().setPostCode(formatPostCode(postCode));
-        constraint.setMinDate(LocalDate.now().minusYears(5));
+        constraint.setEqualityConstraint(Selectable.postcode, formatPostCode(postCode));
+        constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 
         try {
             return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
@@ -98,8 +98,10 @@ public class LandRegistryController {
     private String formatPostCode(String postCode) {
         if (postCode.charAt(postCode.length() - 4) == 32) {
             return postCode.toUpperCase();
-        } else {
+        } else if (postCode.length() > 3) {
             return (postCode.substring(0, postCode.length() - 3) + " " + postCode.substring(postCode.length() - 3)).toUpperCase();
+        } else {
+            throw new InvalidParameterException("Postcode " + postCode + "is too short");
         }
     }
 }

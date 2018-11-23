@@ -41,7 +41,7 @@ public class LandRegistryQueryTestUtils {
 	static LandRegistryQueryConstraint genLandRegistryQueryConstraint() {
 		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint(genLandRegistryData());
 		constraint.setMaxDate(LocalDate.now());
-		constraint.setMinDate(LocalDate.now().minusYears(5));
+		constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 		constraint.setMinPricePaid(150000);
 		constraint.setPostcodeRegex(getPostCodes());
 		return constraint;
