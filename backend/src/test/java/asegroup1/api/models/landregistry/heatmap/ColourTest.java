@@ -18,14 +18,14 @@ class ColourTest {
 
     @Test
     void testIfGetColourAsHexGeneratesValidColour() {
-        assert COLOUR_PATTERN.matcher(new Colour(255).getColourAsHex()).find();
-        assert COLOUR_PATTERN.matcher(new Colour(0).getColourAsHex()).find();
+        assert COLOUR_PATTERN.matcher(new Colour(255).getHex()).find();
+        assert COLOUR_PATTERN.matcher(new Colour(0).getHex()).find();
     }
 
     @Test
     void testIfTooLargeARedValueWillCauseInvalidParameterExceptionToBeThrown() {
-        assertThrows(InvalidParameterException.class, () -> new Colour(256).getColourAsHex());
-        assertThrows(InvalidParameterException.class, () -> new Colour(-1).getColourAsHex());
+        assertThrows(InvalidParameterException.class, () -> new Colour(256).getHex());
+        assertThrows(InvalidParameterException.class, () -> new Colour(-1).getHex());
     }
 
     @Test

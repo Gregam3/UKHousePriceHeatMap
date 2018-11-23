@@ -1,6 +1,11 @@
 package asegroup1.api.models.landregistry;
 
+import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * @author Rikkey Paal
+ */
 
 public class LandRegistryQuery implements LandRegistryQueryBody {
 
@@ -89,7 +94,7 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 	}
 
 	public static LandRegistryQuery buildQueryLatestSalesOnly(LandRegistryQueryConstraint body, List<Selectable> selectables) {
-
+		selectables = new ArrayList<>(selectables);
 		LandRegistryQueryGroup group = new LandRegistryQueryGroup("paon", "saon", "street", "postcode");
 
 		LandRegistryQuerySelect select = new LandRegistryQuerySelect();
@@ -111,7 +116,7 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		return new LandRegistryQuery(body, group, select);
 	}
 
-	public static LandRegistryQuery buildQueryAggrigatePostCode(LandRegistryQueryBody body, String postCodeName, String pricePaidName, String pricePaidFieldName) {
+	public static LandRegistryQuery buildQueryAggregatePostCode(LandRegistryQueryBody body, String postCodeName, String pricePaidName, String pricePaidFieldName) {
 
 		LandRegistryQueryGroup groupConstraint = new LandRegistryQueryGroup(postCodeName);
 		LandRegistryQuerySelect select = new LandRegistryQuerySelect();

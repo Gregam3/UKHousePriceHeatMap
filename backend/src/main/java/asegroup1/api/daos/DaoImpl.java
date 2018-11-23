@@ -32,14 +32,15 @@ public class DaoImpl<T> implements Dao<T> {
 
     //Set up entity manager based on properties provided in application.properties
     @PersistenceContext(type = PersistenceContextType.EXTENDED)
-	protected EntityManager entityManager;
+	private EntityManager entityManager;
 
     //Each time a Dao wants to access the database they fetch a new entity manager
-    private EntityManager getEntityManager() {
+    protected EntityManager getEntityManager() {
         //On the first attempt to get an entity manager, a factory is created based on the properties in the template entity manager, entity managers are retrieved from this factory
         if (entityManagerFactory == null)
             entityManagerFactory = entityManager.getEntityManagerFactory();
 
+        //The EntityManager will automatically be flushed on transaction completion
         return entityManagerFactory.createEntityManager();
     }
 
