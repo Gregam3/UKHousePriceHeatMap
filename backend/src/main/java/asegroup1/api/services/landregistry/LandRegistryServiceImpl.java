@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -53,7 +50,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final int[] AGGREGATION_LEVELS = new int[]{100};
+    private static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 8000};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -126,11 +123,11 @@ public class LandRegistryServiceImpl {
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > 10000) {
+        if (postcodesContained > AGGREGATION_LEVELS[2]) {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
-        } else if (postcodesContained > 4) {
+        } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
             return landRegistryDataForPostcodes;
-        } else if (postcodesContained > 0) {
+        } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(5));
 
@@ -236,12 +233,18 @@ public class LandRegistryServiceImpl {
             return null;
         }
 
+        Random random = new Random();
+
         //Find the minimum and maximum price, this is needed to normalise the values
         long min, max;
-        min = max = Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+        min = max = random.nextInt(10000000); //Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+
+        List<Long> pricesPaid = new ArrayList<>();
 
         for (int i = 1; i < landRegistryDataList.size(); i++) {
-            long pricePaid = Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid));
+            long pricePaid = random.nextInt(10000000); // Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid));
+
+            pricesPaid.add(pricePaid);
 
             if (pricePaid > max) max = pricePaid;
             if (pricePaid < min) min = pricePaid;
@@ -259,7 +262,8 @@ public class LandRegistryServiceImpl {
             //Pass in the normalised value and receive a Colour object
             heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
                     //Normalise the values between 0 and 1.0
-                    (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
+//                    (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
+                    (double) (pricesPaid.get((i < 1) ? i : i - 1) - min) / (double) (max - min)
                     )
             );
         }

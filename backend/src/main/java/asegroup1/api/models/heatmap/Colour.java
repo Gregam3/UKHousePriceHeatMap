@@ -1,5 +1,7 @@
 package asegroup1.api.models.heatmap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.security.InvalidParameterException;
 
 /**
@@ -13,10 +15,12 @@ public class Colour {
         this.red = red;
     }
 
+    @JsonIgnore
     public int getGreen() {
         return 0;
     }
 
+    @JsonIgnore
     public int getRed() {
         return red;
     }
@@ -25,6 +29,7 @@ public class Colour {
         this.red = green;
     }
 
+    @JsonIgnore
     public int getBlue() {
         return 0;
     }
@@ -32,10 +37,10 @@ public class Colour {
 
     @Override
     public String toString() {
-        return getColourAsHex();
+        return getHex();
     }
 
-    public String getColourAsHex() {
+    public String getHex() {
         return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
     }
 

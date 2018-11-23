@@ -124,11 +124,11 @@ public class LandRegistryData {
 	 * @throws InvalidParameterException if the post code is invalid
 	 */
 	public void setPostCode(String postCode) throws InvalidParameterException {
-		if (postCode.length() < 7 || postCode.charAt(postCode.length() - 4) != 32) {
-			throw new InvalidParameterException("Post Code: must contain a space in the correct position");
-		} else {
+//		if (postCode.length() < 7 || postCode.charAt(postCode.length() - 4) != 32) {
+//			throw new InvalidParameterException("Post Code: must contain a space in the correct position");
+//		} else {
 			addAddrConstraint(Selectable.postcode, postCode);
-		}
+//		}
 	}
 
 	private void addTransConstraint(Selectable selectable, String name, String value, boolean isString) {
@@ -487,6 +487,8 @@ public class LandRegistryData {
 	 * 
 	 * @return the latitude
 	 */
+
+	@JsonIgnore
 	public Double getLatitude() {
 		return latitude;
 	}
@@ -505,6 +507,7 @@ public class LandRegistryData {
 	 * 
 	 * @return the longitude
 	 */
+	@JsonIgnore
 	public Double getLongitude() {
 		return longitude;
 	}
