@@ -237,11 +237,13 @@ public class LandRegistryServiceImpl {
 
         Random random = new Random();
 
+        List<Long> pricesPaid = new ArrayList<>();
+
         //Find the minimum and maximum price, this is needed to normalise the values
         long min, max;
-        min = max = random.nextInt(10000000); //Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+        pricesPaid.add((long) random.nextInt(10000000));
 
-        List<Long> pricesPaid = new ArrayList<>();
+        min = max = pricesPaid.get(0); //Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
 
         for (int i = 1; i < landRegistryDataList.size(); i++) {
             long pricePaid = random.nextInt(10000000); // Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid));
@@ -271,11 +273,6 @@ public class LandRegistryServiceImpl {
         }
 
         return heatMapDataPoints;
-    }
-
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
     }
 
     private Colour getColoursForNormalisedValues(Double normalisedValue) {
