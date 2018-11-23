@@ -302,7 +302,7 @@ class LandRegistryServiceImplTest {
 
         List<LandRegistryData> landRegistryDataList = new ArrayList<>();
 
-        for (int i = 0; i < LandRegistryServiceImpl.getAggregationLevels()[1] + 1; i++) {
+        for (int i = 0; i < LandRegistryServiceImpl.AGGREGATION_LEVELS[1] + 1; i++) {
             LandRegistryData landRegistryData = new LandRegistryData();
             landRegistryData.setPostCode(postcodes[i % postcodes.length]);
 
@@ -343,7 +343,7 @@ class LandRegistryServiceImplTest {
 
         List<LandRegistryData> landRegistryDataList = new ArrayList<>();
 
-        for (int i = 0; i <= LandRegistryServiceImpl.getAggregationLevels()[2]; i++) {
+        for (int i = 0; i <= LandRegistryServiceImpl.AGGREGATION_LEVELS[2]; i++) {
             LandRegistryData landRegistryData = new LandRegistryData();
             landRegistryData.setPostCode(postcodes[i % postcodes.length]);
             landRegistryData.setLatitude(0);

@@ -53,7 +53,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 8000};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 8000};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -115,7 +115,6 @@ public class LandRegistryServiceImpl {
     }
 
     public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
-        List<LandRegistryData> fetchedData = new ArrayList<>();
 
         List<LandRegistryData> landRegistryDataForPostcodes = fetchPostCodesInsideCoordinateBox(
                 mapPosition.getDouble("top"),
@@ -220,10 +219,6 @@ public class LandRegistryServiceImpl {
         return addresses;
     }
 
-    public static int[] getAggregationLevels() {
-        return AGGREGATION_LEVELS;
-    }
-
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
         //Navigates through JSON and returns list of addresses based on post code
         return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
@@ -254,7 +249,7 @@ public class LandRegistryServiceImpl {
             pricesPaid.add(pricePaid);
 
             if (pricePaid > max) max = pricePaid;
-            if (pricePaid < min) min = pricePaid;
+            else if (pricePaid < min) min = pricePaid;
         }
 
         //Convert list of LandRegistryData to list of HeatMapDataPoints
