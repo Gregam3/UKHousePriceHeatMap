@@ -1,56 +1,56 @@
 sudo: required
-matrix:
-  include:
-    - language: java
-      services:
-        - docker
-      before_script:
-        - cd backend/
-      script:
-        - mvn package
-        #- sonar-scanner 
-        - mvn sonar:sonar   -Dsonar.projectKey=$Sonar_ProjectKey   -Dsonar.organization=$Sonar_Org   -Dsonar.host.url=https://sonarcloud.io/   -Dsonar.login=$Sonar_Login
-      after_success:
-        - docker login -u $DOCKER_USER -p $DOCKER_PASS
-        - |
-          if [$TRAVIS_BRANCH == "master"];
-          then export DOCKER_BRANCH = master;
-          elif [$TRAVIS_BRANCH == "development"];
-          then export DOCKER_BRANCH=development;
-          else export DOCKER_BRANCH=branch;
-          fi
-        - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
-        - docker push asegroup1/backend-$DOCKER_BRANCH:latest
-      #jdk:
-      #  - oraclejdk8
-      #addons:
-      #  sonarcloud:
-      #    organization: gregam3-github
-      #    token: 
-      #      secure: $Sonar_token
-      #script:
-        # other script steps might be done before running the actual analysis
-      #  - sonar-scanner 
-    - language: node_js
-      node_js:
-        - node
-        - lts/*
-      cache:
-        directories:
-          - ~/.npm
-      before_script:
-        - cd frontend/reactnative/
-        - npm install -g npm@latest
-        - npm install 
-      script:
-        - npm build
-      - jobs:
-        include:
-          - stage: deploy
-            node_js: lts/*
-            script:
-              - npm ci
-              - npx expo login -u briso -p asegroup1
-              - npx expo publish --non-interactive
-              - expo build:android
-              # - expo build:ios- language: node_js 
+#matrix:
+#  include:
+  - language: java
+    services:
+      - docker
+    before_script:
+      - cd backend/
+    script:
+      - mvn package
+      #- sonar-scanner 
+      - mvn sonar:sonar   -Dsonar.projectKey=$Sonar_ProjectKey   -Dsonar.organization=$Sonar_Org   -Dsonar.host.url=https://sonarcloud.io/   -Dsonar.login=$Sonar_Login
+    after_success:
+      - docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - |
+        if [$TRAVIS_BRANCH == "master"];
+        then export DOCKER_BRANCH = master;
+        elif [$TRAVIS_BRANCH == "development"];
+        then export DOCKER_BRANCH=development;
+        else export DOCKER_BRANCH=branch;
+        fi
+      - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
+      - docker push asegroup1/backend-$DOCKER_BRANCH:latest
+    #jdk:
+    #  - oraclejdk8
+    #addons:
+    #  sonarcloud:
+    #    organization: gregam3-github
+    #    token: 
+    #      secure: $Sonar_token
+    #script:
+      # other script steps might be done before running the actual analysis
+    #  - sonar-scanner 
+  - language: node_js
+    node_js:
+      - node
+      - lts/*
+    cache:
+      directories:
+        - ~/.npm
+    before_script:
+      - cd frontend/reactnative/
+      - npm install -g npm@latest
+      - npm install 
+    script:
+      - npm build
+    jobs:
+      include:
+        - stage: deploy
+          node_js: lts/*
+          script:
+            - npm ci
+            - npx expo login -u briso -p asegroup1
+            - npx expo publish --non-interactive
+            - expo build:android
+            # - expo build:ios- language: node_js 
