@@ -95,6 +95,11 @@ public class LandRegistryController {
 	public ResponseEntity<?> updateTransactionData(String prefix) {
 		if (prefix == null)
 			prefix = "";
+		else {
+			if (!prefix.matches("[\\p{Alnum} ]+")) {
+				return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
+			}
+		}
 		try {
 			landRegistryService.updatePostcodeDatabase(prefix);
 			return new ResponseEntity<>("Sucessfully updated?", HttpStatus.OK);
