@@ -127,9 +127,9 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		return new LandRegistryQuery(body, groupConstraint, select);
 	}
 
-	public static LandRegistryQuery buildQueryAveragePricePostcode() {
+	public static LandRegistryQuery buildQueryAveragePricePostcode(String postcodeRegex) {
 		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-		constraint.setPostcodeRegex(".*");
+		constraint.setPostcodeRegex(postcodeRegex);
 		return buildQueryAggregatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(Selectable.pricePaid)), "postcode", "PricePaid", "pricePaid");
 	}
 

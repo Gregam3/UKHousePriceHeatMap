@@ -97,6 +97,7 @@ public class LandRegistryController {
 			landRegistryService.updatePostcodeDatabase();
 			return new ResponseEntity<>("Sucessfully updated?", HttpStatus.OK);
 		} catch (IOException | UnirestException e) {
+			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
 		}
 	}

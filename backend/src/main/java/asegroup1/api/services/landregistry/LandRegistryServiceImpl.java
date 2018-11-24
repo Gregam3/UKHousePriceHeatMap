@@ -288,8 +288,8 @@ public class LandRegistryServiceImpl {
         return new Colour(255 - (int) (normalisedValue * 200));
     }
 
-	public HashMap<String, Long> getAllPostcodePrices() throws IOException, UnirestException {
-		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode());
+	private HashMap<String, Long> getAllPostcodePrices(String postcodeRegex) throws IOException, UnirestException {
+		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodeRegex));
 		HashMap<String, Long> postcodePrices = new HashMap<>();
 		for (LandRegistryData data : transactions) {
 			postcodePrices.put(data.getConstraint(Selectable.postcode), Long.parseLong(data.getConstraint(Selectable.pricePaid)));
@@ -299,12 +299,27 @@ public class LandRegistryServiceImpl {
 
 	public void updatePostcodeDatabase() throws IOException, UnirestException {
 		long startTime = System.currentTimeMillis();
-		System.out.println("Getting new average prices.\nThis will take a while.");
-		HashMap<String, Long> newPrices = getAllPostcodePrices();
-		System.out.println("Average prices retrieved in " + (System.currentTimeMillis() - startTime) + "ms.\nUpdating database.");
-		long updateStart = System.currentTimeMillis();
-		int updatedRecords = postCodeCoordinatesDao.updateAveragePrice(newPrices);
-		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - updateStart) + "ms");
+//		long tmpTime;
+		int updatedRecords = 0;
+
+		// Iterate over outcode list, to reduce memory use
+		List<String> outcodes = Arrays.asList("BN23 7");
+
+		for (String outcode : outcodes) {
+			System.out.println("Updating records in \"" + outcode +"\"");
+			List<String> postcodes = postCodeCoordinatesDao.getAllPostcodes(outcode);
+			for (String postcode : postcodes) {
+				HashMap<String, Long> newPrices = getAllPostcodePrices(postcode);
+				updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
+			}
+		}
+
+//		System.out.println("Getting new average prices.\nThis will take a while.");
+//		HashMap<String, Long> newPrices = getAllPostcodePrices();
+//		System.out.println("Average prices retrieved in " + (System.currentTimeMillis() - startTime) + "ms.\nUpdating database.");
+//		tmpTime = System.currentTimeMillis();
+//		int updatedRecords = postCodeCoordinatesDao.updateAveragePrice(newPrices);
+		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
 		System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
 	}
 

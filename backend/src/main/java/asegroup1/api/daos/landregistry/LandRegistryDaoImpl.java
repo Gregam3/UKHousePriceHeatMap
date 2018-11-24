@@ -94,4 +94,13 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		return updatedRecords;
     }
 
+	@SuppressWarnings("unchecked")
+	public List<String> getAllPostcodes(String outcode) {
+		return (List<String>) getEntityManager().createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode")
+				.setParameter("outcode", "\"" + outcode + "%\"").getResultList().stream().map(r -> {
+					Object[] currentItem = (Object[]) r;
+					return String.valueOf(currentItem[0]);
+				}).collect(Collectors.toList());
+	}
+
 }
