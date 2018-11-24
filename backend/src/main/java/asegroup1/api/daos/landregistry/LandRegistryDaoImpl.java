@@ -1,6 +1,7 @@
 package asegroup1.api.daos.landregistry;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -79,9 +80,9 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 			PostCodeCoordinates coordsToUpdate = em.find(PostCodeCoordinates.class, averagePrice.getKey());
 
 			if (!coordsToUpdate.getAverageprice().equals(averagePrice.getValue())) {
+
 				// update local values
 				em.getTransaction().begin();
-				System.out.println("Updating \"" + averagePrice.getKey() + "\" From \"" + coordsToUpdate.getAverageprice() + "\" To \"" + averagePrice.getValue());
 				coordsToUpdate.setAverageprice(averagePrice.getValue());
 				em.merge(coordsToUpdate);
 
@@ -91,16 +92,29 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 			}
 		}
 
+		em.close();
+
 		return updatedRecords;
     }
 
 	@SuppressWarnings("unchecked")
-	public List<String> getAllPostcodes(String outcode) {
-		return (List<String>) getEntityManager().createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode")
-				.setParameter("outcode", "\"" + outcode + "%\"").getResultList().stream().map(r -> {
-					Object[] currentItem = (Object[]) r;
-					return String.valueOf(currentItem[0]);
-				}).collect(Collectors.toList());
+	public HashMap<String, List<String>> getAllPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
+		List<String> postcodes = (List<String>) getEntityManager()
+				.createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode" + (restrictToUnset ? " AND averageprice = 0" : ""))
+				.setParameter("outcode", regex + "%").getResultList().stream().map(r -> String.valueOf(r)).collect(Collectors.toList());
+
+		HashMap<String, List<String>> postcodeMap = new HashMap<>();
+
+		for (String postcode : postcodes) {
+			String localPostcode = postcode.substring(0, postcode.length() - groupCharSize);
+
+			if (!postcodeMap.containsKey(localPostcode)) {
+				postcodeMap.put(localPostcode, new ArrayList<>());
+			}
+			postcodeMap.get(localPostcode).add(postcode);
+		}
+
+		return postcodeMap;
 	}
 
 }

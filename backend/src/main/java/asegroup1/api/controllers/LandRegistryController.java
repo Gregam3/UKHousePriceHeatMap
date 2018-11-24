@@ -91,10 +91,12 @@ public class LandRegistryController {
         }
     }
 
-	@GetMapping("update-postcode/")
-	public ResponseEntity<?> updateTransactionData() {
+	@GetMapping("update-postcode/{prefix}")
+	public ResponseEntity<?> updateTransactionData(String prefix) {
+		if (prefix == null)
+			prefix = "";
 		try {
-			landRegistryService.updatePostcodeDatabase();
+			landRegistryService.updatePostcodeDatabase(prefix);
 			return new ResponseEntity<>("Sucessfully updated?", HttpStatus.OK);
 		} catch (IOException | UnirestException e) {
 			e.printStackTrace();

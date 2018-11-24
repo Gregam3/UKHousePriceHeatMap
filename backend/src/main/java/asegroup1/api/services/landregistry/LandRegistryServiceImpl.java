@@ -2,12 +2,14 @@ package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -288,37 +290,53 @@ public class LandRegistryServiceImpl {
         return new Colour(255 - (int) (normalisedValue * 200));
     }
 
-	private HashMap<String, Long> getAllPostcodePrices(String postcodeRegex) throws IOException, UnirestException {
-		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodeRegex));
+	private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
+		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
 		HashMap<String, Long> postcodePrices = new HashMap<>();
 		for (LandRegistryData data : transactions) {
-			postcodePrices.put(data.getConstraint(Selectable.postcode), Long.parseLong(data.getConstraint(Selectable.pricePaid)));
-		}
-		return postcodePrices;
-	}
+			String postcode = data.getConstraint(Selectable.postcode);
+			String priceStr = data.getConstraint(Selectable.pricePaid);
 
-	public void updatePostcodeDatabase() throws IOException, UnirestException {
-		long startTime = System.currentTimeMillis();
-//		long tmpTime;
-		int updatedRecords = 0;
-
-		// Iterate over outcode list, to reduce memory use
-		List<String> outcodes = Arrays.asList("BN23 7");
-
-		for (String outcode : outcodes) {
-			System.out.println("Updating records in \"" + outcode +"\"");
-			List<String> postcodes = postCodeCoordinatesDao.getAllPostcodes(outcode);
-			for (String postcode : postcodes) {
-				HashMap<String, Long> newPrices = getAllPostcodePrices(postcode);
-				updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
+			if (postcode != null && priceStr != null) {
+				try {
+					Long pricePaid = Long.parseLong(priceStr);
+					postcodePrices.put(postcode, pricePaid);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
-//		System.out.println("Getting new average prices.\nThis will take a while.");
-//		HashMap<String, Long> newPrices = getAllPostcodePrices();
-//		System.out.println("Average prices retrieved in " + (System.currentTimeMillis() - startTime) + "ms.\nUpdating database.");
-//		tmpTime = System.currentTimeMillis();
-//		int updatedRecords = postCodeCoordinatesDao.updateAveragePrice(newPrices);
+		// Map all postcodes without a average price to null
+		List<String> unmatchedPostcodes = new ArrayList<>(Arrays.asList(postcodes));
+		unmatchedPostcodes.removeAll(postcodePrices.keySet());
+
+		for (String postcode : unmatchedPostcodes) {
+			postcodePrices.put(postcode, null);
+		}
+
+
+		return postcodePrices;
+	}
+
+	public void updatePostcodeDatabase(String postcodePrefix) throws IOException, UnirestException {
+		long startTime = System.currentTimeMillis();
+		int updatedRecords = 0;
+
+		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getAllPostcodes(postcodePrefix, true, 1);
+		double numAreas = postcodeAreas.size();
+		double numDone = 0;
+
+		for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
+
+			System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100, 
+					Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime)/numDone)*(numDone-numAreas))));
+			List<String> postcodes = postcodeArea.getValue();
+			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[postcodes.size()]));
+			updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
+			numDone++;
+		}
+
 		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
 		System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
 	}
