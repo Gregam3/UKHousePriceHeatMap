@@ -55,7 +55,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
         em.getTransaction().begin();
 
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, latitude, longitude FROM " + TABLE_NAME + "\n" +
+                "SELECT postcode, latitude, longitude, averageprice FROM " + TABLE_NAME + "\n" +
                         "WHERE latitude > :bottomBound AND latitude < :topBound\n" +
                         "AND longitude > :leftBound AND longitude < :rightBound")
                 .setParameter("topBound", top)
@@ -69,7 +69,12 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                     landRegistryData.setPostCode(String.valueOf(currentItem[0]));
                     landRegistryData.setLatitude(Double.valueOf(String.valueOf(currentItem[1])));
                     landRegistryData.setLongitude(Double.valueOf(String.valueOf(currentItem[2])));
-                    //TODO get average price when its implemented
+
+                    String pricePaid = String.valueOf(currentItem[3]);
+
+                    if (!pricePaid.equals("null")) {
+                        landRegistryData.setPricePaid(Long.valueOf(pricePaid));
+                    }
 
                     return landRegistryData;
                 }).collect(Collectors.toList());
