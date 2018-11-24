@@ -7,27 +7,21 @@ import javax.persistence.Table;
 /**
  * @author Greg Mitten
  * gregoryamitten@gmail.com
+ * 
+ * @author Rikkey Paal
  */
 @Entity
 @Table(name = "postcodelatlng")
 public class PostCodeCoordinates {
-    private long id;
     private String postcode;
     private double latitude;
     private double longitude;
+	private Long averageprice;
 
     public PostCodeCoordinates() {
     }
 
     @Id
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public String getPostcode() {
         return postcode;
     }
@@ -51,4 +45,12 @@ public class PostCodeCoordinates {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+	public Long getAverageprice() {
+		return averageprice;
+	}
+
+	public void setAverageprice(Long averageprice) {
+		this.averageprice = averageprice;
+	}
 }

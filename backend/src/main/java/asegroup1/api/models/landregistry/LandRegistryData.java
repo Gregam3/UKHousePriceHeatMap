@@ -310,7 +310,7 @@ public class LandRegistryData {
                 return true;
             case pricePaid:
                 try {
-                    setPricePaid(Integer.parseInt(value));
+					setPricePaid(Math.round(Double.parseDouble(value)));
                     return true;
                 } catch (NumberFormatException e) {
                     return false;

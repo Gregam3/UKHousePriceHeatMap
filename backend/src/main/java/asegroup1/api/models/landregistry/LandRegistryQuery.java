@@ -1,6 +1,7 @@
 package asegroup1.api.models.landregistry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -126,7 +127,20 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		return new LandRegistryQuery(body, groupConstraint, select);
 	}
 
+	public static LandRegistryQuery buildQueryAveragePricePostcode(String postcodeRegex, String town) {
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		constraint.setEqualityConstraint(Selectable.town, town);
+		constraint.setPostcodeRegex(postcodeRegex);
+		return buildQueryAggregatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Collections.singletonList(Selectable.pricePaid)), "postcode", "PricePaid",
+				"pricePaid");
+	}
 
+	public static LandRegistryQuery buildQueryAveragePricePostcode(String... postcodes) {
+		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		constraint.setEqualityConstraint(Selectable.postcode, postcodes);
+		return buildQueryAggregatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Collections.singletonList(Selectable.pricePaid)), "postcode", "PricePaid",
+				"pricePaid");
+	}
 
 	public enum Selectable {
 		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode;
