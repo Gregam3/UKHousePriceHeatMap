@@ -1,30 +1,38 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.*;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 
 /**
@@ -279,4 +287,18 @@ public class LandRegistryServiceImpl {
         //The higher the normalised value the darker the red will appear
         return new Colour(255 - (int) (normalisedValue * 200));
     }
+
+	public HashMap<String, Long> getAllPostcodePrices() throws IOException, UnirestException {
+		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode());
+		HashMap<String, Long> postcodePrices = new HashMap<>();
+		for (LandRegistryData data : transactions) {
+			postcodePrices.put(data.getConstraint(Selectable.postcode), Long.parseLong(data.getConstraint(Selectable.pricePaid)));
+		}
+		return postcodePrices;
+	}
+
+	public void updatePostcodeDatabase() throws IOException, UnirestException {
+		postCodeCoordinatesDao.updateAveragePrice(getAllPostcodePrices());
+	}
+
 }

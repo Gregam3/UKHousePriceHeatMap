@@ -1,24 +1,29 @@
 package asegroup1.api.controllers;
 
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 /**
  * @author Greg Mitten
@@ -85,6 +90,16 @@ public class LandRegistryController {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
+
+	@GetMapping("update-postcode/")
+	public ResponseEntity<?> updateTransactionData() {
+		try {
+			landRegistryService.updatePostcodeDatabase();
+			return new ResponseEntity<>("Sucessfully updated?", HttpStatus.OK);
+		} catch (IOException | UnirestException e) {
+			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+		}
+	}
 
     private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
         List<HashMap<String, String>> keys = new ArrayList<>();

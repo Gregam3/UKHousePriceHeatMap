@@ -1,13 +1,20 @@
 package asegroup1.api.daos.landregistry;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Repository;
+
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import asegroup1.api.daos.DaoImpl;
 import asegroup1.api.models.PostCodeCoordinates;
 import asegroup1.api.models.landregistry.LandRegistryData;
-import org.springframework.stereotype.Repository;
-
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Greg Mitten
@@ -61,4 +68,12 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                     return landRegistryData;
                 }).collect(Collectors.toList());
     }
+    
+	public void updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
+		System.out.println("ran");
+		for (Entry<String, Long> entry : averagePrices.entrySet()) {
+			getEntityManager().createNativeQuery("UPDATE " + TABLE_NAME + " SET averagePrice = " + entry.getKey() + " WHERE postcode = '" + entry.getValue() + "'").executeUpdate();
+		}
+    }
+
 }
