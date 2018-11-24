@@ -93,12 +93,10 @@ public class LandRegistryController {
 
 	@GetMapping("update-postcode/{prefix}")
 	public ResponseEntity<?> updateTransactionData(String prefix) {
-		if (prefix == null)
+		if (prefix == null) {
 			prefix = "";
-		else {
-			if (!prefix.matches("[\\p{Alnum} ]+")) {
+		} else if (!prefix.matches("[\\p{Alnum} ]+")) {
 				return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
-			}
 		}
 		try {
 			landRegistryService.updatePostcodeDatabase(prefix);
