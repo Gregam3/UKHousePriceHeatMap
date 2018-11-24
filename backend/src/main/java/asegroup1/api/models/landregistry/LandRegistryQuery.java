@@ -129,8 +129,7 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 
 	public static LandRegistryQuery buildQueryAveragePricePostcode() {
 		LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-		constraint.setEqualityConstraint(Selectable.town, "eastbourne");
-		constraint.setPostcodeRegex("BN23 7L");
+		constraint.setPostcodeRegex(".*");
 		return buildQueryAggregatePostCode(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(Selectable.pricePaid)), "postcode", "PricePaid", "pricePaid");
 	}
 
