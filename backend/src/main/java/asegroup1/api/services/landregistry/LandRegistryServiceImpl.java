@@ -36,8 +36,9 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 
 /**
- * @author Greg Mitten, Rikkey Paal
- * gregoryamitten@gmail.com
+ * @author Greg Mitten gregoryamitten@gmail.com
+ * 
+ * @author Rikkey Paal
  */
 
 //Does not need to extend ServiceImpl as does not use a Dao
@@ -56,7 +57,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+	private static final String GOOGLE_MAPS_API_KEY = ""; // "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
@@ -298,7 +299,14 @@ public class LandRegistryServiceImpl {
 	}
 
 	public void updatePostcodeDatabase() throws IOException, UnirestException {
-		postCodeCoordinatesDao.updateAveragePrice(getAllPostcodePrices());
+		long startTime = System.currentTimeMillis();
+		System.out.println("Getting new average prices.\nThis will take a while.");
+		HashMap<String, Long> newPrices = getAllPostcodePrices();
+		System.out.println("Average prices retrieved in " + (System.currentTimeMillis() - startTime) + "ms.\nUpdating database.");
+		long updateStart = System.currentTimeMillis();
+		int updatedRecords = postCodeCoordinatesDao.updateAveragePrice(newPrices);
+		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - updateStart) + "ms");
+		System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
 	}
 
 }

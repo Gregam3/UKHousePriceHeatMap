@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
@@ -17,8 +18,9 @@ import asegroup1.api.models.PostCodeCoordinates;
 import asegroup1.api.models.landregistry.LandRegistryData;
 
 /**
- * @author Greg Mitten
- * gregoryamitten@gmail.com
+ * @author Greg Mitten gregoryamitten@gmail.com
+ * 
+ * @author Rikkey Paal
  */
 
 @Repository
@@ -69,11 +71,27 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                 }).collect(Collectors.toList());
     }
     
-	public void updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
-		System.out.println("ran");
-		for (Entry<String, Long> entry : averagePrices.entrySet()) {
-			getEntityManager().createNativeQuery("UPDATE " + TABLE_NAME + " SET averagePrice = " + entry.getKey() + " WHERE postcode = '" + entry.getValue() + "'").executeUpdate();
+	public int updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
+		int updatedRecords = 0;
+		EntityManager em = getEntityManager();
+
+		for (Entry<String, Long> averagePrice : averagePrices.entrySet()) {
+			PostCodeCoordinates coordsToUpdate = em.find(PostCodeCoordinates.class, averagePrice.getKey());
+
+			if (!coordsToUpdate.getAverageprice().equals(averagePrice.getValue())) {
+				// update local values
+				em.getTransaction().begin();
+				System.out.println("Updating \"" + averagePrice.getKey() + "\" From \"" + coordsToUpdate.getAverageprice() + "\" To \"" + averagePrice.getValue());
+				coordsToUpdate.setAverageprice(averagePrice.getValue());
+				em.merge(coordsToUpdate);
+
+				// write update to database
+				em.getTransaction().commit();
+				updatedRecords++;
+			}
 		}
+
+		return updatedRecords;
     }
 
 }
