@@ -98,7 +98,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
     }
 
 	@SuppressWarnings("unchecked")
-	public HashMap<String, List<String>> getAllPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
+	public HashMap<String, List<String>> getMatchingPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
 		List<String> postcodes = (List<String>) getEntityManager()
 				.createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode" + (restrictToUnset ? " AND averageprice = 0" : ""))
 				.setParameter("outcode", regex + "%").getResultList().stream().map(r -> String.valueOf(r)).collect(Collectors.toList());

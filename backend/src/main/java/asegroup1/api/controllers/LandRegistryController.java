@@ -100,7 +100,7 @@ public class LandRegistryController {
 		}
 		try {
 			landRegistryService.updatePostcodeDatabase(prefix);
-			return new ResponseEntity<>("Sucessfully updated?", HttpStatus.OK);
+			return new ResponseEntity<>("Update triggered", HttpStatus.OK);
 		} catch (IOException | UnirestException e) {
 			e.printStackTrace();
 			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);

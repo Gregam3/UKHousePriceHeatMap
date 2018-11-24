@@ -1,6 +1,7 @@
 package asegroup1.api.services.landregistry;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,7 +59,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-	private static final String GOOGLE_MAPS_API_KEY = ""; // "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+	private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
@@ -164,69 +166,55 @@ public class LandRegistryServiceImpl {
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
-//        if (addresses.size() >= 100) {
-//            throw new InvalidParameterException("This method should never be passed more than 100 addresses");
-//        }
-//
-//        StringBuilder addressUriBuilder = new StringBuilder();
-//
-//        for (LandRegistryData address : addresses) {
-//            addressUriBuilder
-//                    .append(GOOGLE_MAPS_URL)
-//                    .append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
-//                    .append("+")
-//                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+"))
-//                    .append("+")
-//                    .append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-//                    .append("&key=")
-//                    .append(GOOGLE_MAPS_API_KEY);
-//
-//            try {
-//                JSONObject response = Unirest.get(addressUriBuilder.toString())
-//                        .asJson()
-//                        .getBody()
-//                        .getArray()
-//                        .getJSONObject(0)
-//                        .getJSONArray("results")
-//                        .getJSONObject(0)
-//                        .getJSONObject("geometry")
-//                        .getJSONObject("location");
-//
-//                address.setLatitude(response.getDouble("lat"));
-//                address.setLongitude(response.getDouble("lng"));
-//
-//            } catch (UnirestException | JSONException e) {
-//                e.printStackTrace();
-//                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-//            }
-//
-//            //Clear the StringBuilder buffer
-//            addressUriBuilder.delete(0, addressUriBuilder.length());
-//        }
-//
-//        for (LandRegistryData address : addresses) {
-//            addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
-//                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-//                    .append("&key=").append(GOOGLE_MAPS_API_KEY);
-//
-//            try {
-//                JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
-//                        .getJSONObject("geometry").getJSONObject("location");
-//
-//                address.setLatitude(response.getDouble("lat"));
-//                address.setLongitude(response.getDouble("lng"));
-//
-//            } catch (UnirestException | JSONException e) {
-//                e.printStackTrace();
-//                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-//            }
-//
-//            // Clear the StringBuilder buffer
-//            addressUriBuilder.delete(0, addressUriBuilder.length());
-//        }
-//
-//        return addresses;
-		return null;
+		if (addresses.size() >= 100) {
+			throw new InvalidParameterException("This method should never be passed more than 100 addresses");
+		}
+
+		StringBuilder addressUriBuilder = new StringBuilder();
+
+		for (LandRegistryData address : addresses) {
+			addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
+					.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
+					.append("&key=").append(GOOGLE_MAPS_API_KEY);
+
+			try {
+				JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
+						.getJSONObject("geometry").getJSONObject("location");
+
+				address.setLatitude(response.getDouble("lat"));
+				address.setLongitude(response.getDouble("lng"));
+
+			} catch (UnirestException | JSONException e) {
+				e.printStackTrace();
+				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+			}
+
+			// Clear the StringBuilder buffer
+			addressUriBuilder.delete(0, addressUriBuilder.length());
+		}
+
+		for (LandRegistryData address : addresses) {
+			addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
+					.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
+					.append("&key=").append(GOOGLE_MAPS_API_KEY);
+
+			try {
+				JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
+						.getJSONObject("geometry").getJSONObject("location");
+
+				address.setLatitude(response.getDouble("lat"));
+				address.setLongitude(response.getDouble("lng"));
+
+			} catch (UnirestException | JSONException e) {
+				e.printStackTrace();
+				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+			}
+
+			// Clear the StringBuilder buffer
+			addressUriBuilder.delete(0, addressUriBuilder.length());
+		}
+
+		return addresses;
     }
 
     private JSONObject executeSPARQLQuery(String query) throws UnirestException {
@@ -293,6 +281,7 @@ public class LandRegistryServiceImpl {
 	private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
 		List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
 		HashMap<String, Long> postcodePrices = new HashMap<>();
+
 		for (LandRegistryData data : transactions) {
 			String postcode = data.getConstraint(Selectable.postcode);
 			String priceStr = data.getConstraint(Selectable.pricePaid);
@@ -323,7 +312,7 @@ public class LandRegistryServiceImpl {
 		long startTime = System.currentTimeMillis();
 		int updatedRecords = 0;
 
-		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getAllPostcodes(postcodePrefix, true, 1);
+		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getMatchingPostcodes(postcodePrefix, true, 1);
 		double numAreas = postcodeAreas.size();
 		double numDone = 0;
 
@@ -332,7 +321,7 @@ public class LandRegistryServiceImpl {
 			System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100, 
 					Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime)/numDone)*(numDone-numAreas))));
 			List<String> postcodes = postcodeArea.getValue();
-			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[postcodes.size()]));
+			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
 			updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
 			numDone++;
 		}
