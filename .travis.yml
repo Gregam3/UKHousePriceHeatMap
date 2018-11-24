@@ -1,6 +1,6 @@
 sudo: required
-##matrix:
-#  include:
+matrix:
+  include:
   - language: java
     services:
       - docker
