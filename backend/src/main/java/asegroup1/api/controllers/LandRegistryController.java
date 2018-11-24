@@ -26,8 +26,8 @@ import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 /**
- * @author Greg Mitten
- * gregoryamitten@gmail.com
+ * @author Greg Mitten gregoryamitten@gmail.com
+ * @author Rikkey Paal
  */
 
 @RestController
