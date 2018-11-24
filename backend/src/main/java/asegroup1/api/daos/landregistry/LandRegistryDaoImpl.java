@@ -20,7 +20,6 @@ import asegroup1.api.models.landregistry.LandRegistryData;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
- * 
  * @author Rikkey Paal
  */
 
@@ -51,7 +50,11 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
             double bottom,
             double left
     ) {
-        return (List<LandRegistryData>) getEntityManager().createNativeQuery(
+        EntityManager em = getEntityManager();
+
+        em.getTransaction().begin();
+
+        List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
                 "SELECT postcode, latitude, longitude FROM " + TABLE_NAME + "\n" +
                         "WHERE latitude > :bottomBound AND latitude < :topBound\n" +
                         "AND longitude > :leftBound AND longitude < :rightBound")
@@ -70,51 +73,61 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
                     return landRegistryData;
                 }).collect(Collectors.toList());
-    }
-    
-	public int updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
-		int updatedRecords = 0;
-		EntityManager em = getEntityManager();
 
-		for (Entry<String, Long> averagePrice : averagePrices.entrySet()) {
-			PostCodeCoordinates coordsToUpdate = em.find(PostCodeCoordinates.class, averagePrice.getKey());
+        em.close();
 
-			if (!coordsToUpdate.getAverageprice().equals(averagePrice.getValue())) {
-
-				// update local values
-				em.getTransaction().begin();
-				coordsToUpdate.setAverageprice(averagePrice.getValue());
-				em.merge(coordsToUpdate);
-
-				// write update to database
-				em.getTransaction().commit();
-				updatedRecords++;
-			}
-		}
-
-		em.close();
-
-		return updatedRecords;
+        return collectedResponse;
     }
 
-	@SuppressWarnings("unchecked")
-	public HashMap<String, List<String>> getMatchingPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
-		List<String> postcodes = (List<String>) getEntityManager()
-				.createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode" + (restrictToUnset ? " AND averageprice = 0" : ""))
-				.setParameter("outcode", regex + "%").getResultList().stream().map(String::valueOf).collect(Collectors.toList());
+    public int updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
+        int updatedRecords = 0;
+        EntityManager em = getEntityManager();
 
-		HashMap<String, List<String>> postcodeMap = new HashMap<>();
+        for (Entry<String, Long> averagePrice : averagePrices.entrySet()) {
+            PostCodeCoordinates coordsToUpdate = em.find(PostCodeCoordinates.class, averagePrice.getKey());
 
-		for (String postcode : postcodes) {
-			String localPostcode = postcode.substring(0, postcode.length() - groupCharSize);
+            if (!coordsToUpdate.getAverageprice().equals(averagePrice.getValue())) {
 
-			if (!postcodeMap.containsKey(localPostcode)) {
-				postcodeMap.put(localPostcode, new ArrayList<>());
-			}
-			postcodeMap.get(localPostcode).add(postcode);
-		}
+                // update local values
+                em.getTransaction().begin();
+                coordsToUpdate.setAverageprice(averagePrice.getValue());
+                em.merge(coordsToUpdate);
 
-		return postcodeMap;
-	}
+                // write update to database
+                em.getTransaction().commit();
+                updatedRecords++;
+            }
+        }
+
+        em.close();
+
+        return updatedRecords;
+    }
+
+    @SuppressWarnings("unchecked")
+    public HashMap<String, List<String>> getMatchingPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
+        EntityManager em = getEntityManager();
+
+        em.getTransaction().begin();
+
+        List<String> postcodes = (List<String>) em
+                .createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode" + (restrictToUnset ? " AND averageprice = 0" : ""))
+                .setParameter("outcode", regex + "%").getResultList().stream().map(String::valueOf).collect(Collectors.toList());
+
+        HashMap<String, List<String>> postcodeMap = new HashMap<>();
+
+        for (String postcode : postcodes) {
+            String localPostcode = postcode.substring(0, postcode.length() - groupCharSize);
+
+            if (!postcodeMap.containsKey(localPostcode)) {
+                postcodeMap.put(localPostcode, new ArrayList<>());
+            }
+            postcodeMap.get(localPostcode).add(postcode);
+        }
+
+        em.close();
+
+        return postcodeMap;
+    }
 
 }

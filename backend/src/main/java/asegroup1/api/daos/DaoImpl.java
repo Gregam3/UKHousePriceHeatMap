@@ -27,12 +27,12 @@ public class DaoImpl<T> implements Dao<T> {
     protected void setCurrentClass(Class<T> currentClass) {
         this.currentClass = currentClass;
     }
-    private static EntityManagerFactory entityManagerFactory;
 
+    private static EntityManagerFactory entityManagerFactory;
 
     //Set up entity manager based on properties provided in application.properties
     @PersistenceContext(type = PersistenceContextType.EXTENDED)
-	private EntityManager entityManager;
+    private EntityManager entityManager;
 
     //Each time a Dao wants to access the database they fetch a new entity manager
     protected EntityManager getEntityManager() {
@@ -45,21 +45,48 @@ public class DaoImpl<T> implements Dao<T> {
     }
 
     public T get(String id) {
+        EntityManager em = getEntityManager();
+
         checkIfCurrentClassIsValid();
-        return getEntityManager().find(currentClass, id);
+        em.getTransaction().begin();
+
+        T t = em.find(currentClass, id);
+
+        em.close();
+
+        return t;
     }
 
     public void delete(String id) {
-        getEntityManager().remove(get(id));
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+
+        em.remove(get(id));
+
+        em.close();
     }
 
     public void update(T t) {
-        getEntityManager().merge(t);
+        EntityManager em = getEntityManager();
+
+        em.getTransaction().begin();
+
+        em.merge(t);
+
+        em.close();
     }
 
     public List<T> list() {
         checkIfCurrentClassIsValid();
-        return getEntityManager().createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
+        EntityManager em = getEntityManager();
+
+        em.getTransaction().begin();
+
+        List<T> resultList = em.createQuery("from " + currentClass.getSimpleName(), currentClass).getResultList();
+
+        em.close();
+
+        return resultList;
     }
 
     private void checkIfCurrentClassIsValid() {
@@ -70,6 +97,12 @@ public class DaoImpl<T> implements Dao<T> {
     }
 
     public void add(T t) {
-        getEntityManager().persist(t);
+        EntityManager em = getEntityManager();
+
+        em.getTransaction().begin();
+
+        em.persist(t);
+
+        em.close();
     }
 }
