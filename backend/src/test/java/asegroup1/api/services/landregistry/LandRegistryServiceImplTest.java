@@ -112,7 +112,6 @@ class LandRegistryServiceImplTest {
         addresses.add(data);
 
 
-
         LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
 
         //lat 50.824190 for address
@@ -140,9 +139,9 @@ class LandRegistryServiceImplTest {
             response.put("lat", 0);
             response.put("lng", 0);
 
-            when(landRegistryDataDaoMock.getGeoLocationData("https://maps.googleapis.com/maps/api/geocode/json?address=85+QUEEN+STREET+WORTHING&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA")).thenReturn(response);
+//            when(landRegistryDataDaoMock.getGeoLocationData("https://maps.googleapis.com/maps/api/geocode/json?address=85+QUEEN+STREET+WORTHING&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA")).thenReturn(response);
 
-        } catch (UnirestException | JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
 
             assert false;
