@@ -45,17 +45,12 @@ public class DaoImpl<T> implements Dao<T> {
     }
 
     public T get(String id) {
-        EntityManager em = getEntityManager();
-
         checkIfCurrentClassIsValid();
-        em.getTransaction().begin();
-
-        T t = em.find(currentClass, id);
-
-        em.close();
-
-        return t;
-    }
+		EntityManager em = getEntityManager();
+		T data = em.find(currentClass, id);
+		em.close();
+		return data;
+	}
 
     public void delete(String id) {
         EntityManager em = getEntityManager();
