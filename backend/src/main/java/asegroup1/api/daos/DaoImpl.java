@@ -103,6 +103,9 @@ public class DaoImpl<T> implements Dao<T> {
 
         em.persist(t);
 
+		em.getTransaction().commit();
+
         em.close();
     }
+
 }
