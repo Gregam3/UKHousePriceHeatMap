@@ -1,23 +1,29 @@
 package asegroup1.api.services.landregistry;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Greg Mitten
@@ -293,7 +299,8 @@ class LandRegistryServiceImplTest {
         }
     }
 
-    @Test
+	@SuppressWarnings("unchecked")
+	@Test
     void testIfPostcodesAreAggregatedCorrectly() {
         LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
 
