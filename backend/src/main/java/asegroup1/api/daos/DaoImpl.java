@@ -46,11 +46,16 @@ public class DaoImpl<T> implements Dao<T> {
 
     public T get(String id) {
         checkIfCurrentClassIsValid();
-        return getEntityManager().find(currentClass, id);
+		EntityManager em = getEntityManager();
+		T data = em.find(currentClass, id);
+		em.close();
+		return data;
     }
 
     public void delete(String id) {
-        getEntityManager().remove(get(id));
+		EntityManager em = getEntityManager();
+		em.remove(get(id));
+		em.close();
     }
 
     public void update(T t) {
@@ -70,6 +75,10 @@ public class DaoImpl<T> implements Dao<T> {
     }
 
     public void add(T t) {
-        getEntityManager().persist(t);
+		EntityManager em = getEntityManager();
+		em.getTransaction().begin();
+		em.persist(t);
+		em.getTransaction().commit();
+		em.close();
     }
 }

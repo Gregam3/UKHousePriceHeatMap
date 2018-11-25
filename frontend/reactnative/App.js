@@ -44,7 +44,6 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         this.lastSent = new Date() - 15000;
-
         Auth.loadUserId();
     }
 
@@ -86,8 +85,9 @@ export default class App extends Component {
             timelog: location.timestamp,
             delivered: true
         };
-
-        NetLib.postJSON('location/add-location-data/', locationData);
+		if(Auth.getUserKey()){
+			NetLib.postJSON('location/add-location-data/', locationData);
+		}
     };
 
     render() {
