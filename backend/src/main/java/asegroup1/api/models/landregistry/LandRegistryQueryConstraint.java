@@ -4,18 +4,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import asegroup1.api.models.landregistry.LandRegistryData.EqualityConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
 /**
  * Contains the constraints to be passed
  * 
  * @author Rikkey Paal
  */
-public class LandRegistryQueryConstraint {
+public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 
 	private HashSet<RangeConstraint> rangeConstraints;
+	private HashMap<String, LandRegistryQueryValues> values;
 	private LandRegistryData equalityConstraints;
 	private ArrayList<String> postcodes;
 
@@ -29,6 +32,7 @@ public class LandRegistryQueryConstraint {
 		rangeConstraints = new HashSet<>();
 		this.equalityConstraints = equalityConstraints;
 		postcodes = new ArrayList<>();
+		values = new HashMap<String, LandRegistryQueryValues>();
 	}
 
 	/**
@@ -46,6 +50,25 @@ public class LandRegistryQueryConstraint {
 	public LandRegistryData getEqualityConstraints() {
 		return equalityConstraints;
 	}
+
+	/* EQUALITY CONSTRAINTS */
+	public boolean setEqualityConstraint(Selectable name, String... constraints) {
+		if (constraints.length == 1) {
+			return getEqualityConstraints().setConstraint(name.toString(), constraints[0]);
+		} else {
+			String varName = name.toString().toUpperCase() + "CONSTRAINTS";
+			LandRegistryQueryValues value = new LandRegistryQueryValues(varName, LandRegistryData.processConstraintList(name, constraints));
+			values.put(name.toString(), value);
+			getEqualityConstraints().setConstraintVar(name, varName);
+			return true;
+		}
+	}
+
+	public LandRegistryQueryValues getValueList(String varName) {
+		return values.get(varName);
+	}
+
+
 
 	/* RANGE CONSTRAINTS */
 
@@ -130,7 +153,7 @@ public class LandRegistryQueryConstraint {
 	 * 
 	 * @param postcodes to set
 	 */
-	public void setPostcodes(ArrayList<String> postcodes) {
+	public void setPostcodeRegex(ArrayList<String> postcodes) {
 		this.postcodes = postcodes;
 	}
 
@@ -139,8 +162,8 @@ public class LandRegistryQueryConstraint {
 	 * 
 	 * @param postcodes to set
 	 */
-	public void setPostcodes(String... postcodes) {
-		setPostcodes(new ArrayList<>(Arrays.asList(postcodes)));
+	public void setPostcodeRegex(String... postcodes) {
+		setPostcodeRegex(new ArrayList<>(Arrays.asList(postcodes)));
 	}
 
 	/* QUERY GENERATION */
@@ -150,9 +173,16 @@ public class LandRegistryQueryConstraint {
 	 * 
 	 * @return the WHERE section of the query
 	 */
-	public String buildQueryWhere() {
-		String content = buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
-		return "WHERE { \n\t" + content.replace("\n", "\n\t") + "\n}";
+	public String buildQueryContent() {
+		return buildQueryValues() + "\n" + buildQuerySelection() + "\n" + buildQueryTransactionColumns() + "\n" + buildQueryAddressColumns() + "\n" + buildQueryFilter();
+	}
+
+	private String buildQueryValues() {
+		StringBuilder valuesBuilder = new StringBuilder();
+		for (LandRegistryQueryValues value : values.values()) {
+			valuesBuilder.append(value.toString()).append("\n");
+		}
+		return valuesBuilder.toString().trim();
 	}
 
 	private String buildQuerySelection() {
@@ -222,8 +252,6 @@ public class LandRegistryQueryConstraint {
 
 	/* TYPE DECLARATIONS */
 
-
-
 	class RangeConstraint {
 		private String type, name, comparator, value;
 
@@ -279,20 +307,5 @@ public class LandRegistryQueryConstraint {
 
 
 	}
-
-	public enum PropertyType {
-		detached, semi_detached, terraced, flat_maisonette, other;
-
-	}
-
-	public enum EstateType {
-		freehold, leasehold;
-
-	}
-
-	public enum TransactionCategory {
-		standard_price_paid_transaction, additional_price_paid_transaction;
-	}
-
 
 }

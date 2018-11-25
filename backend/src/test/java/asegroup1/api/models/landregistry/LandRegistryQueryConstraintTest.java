@@ -10,13 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.RangeConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+
 
 /**
  * @author Richousrick
@@ -25,12 +26,6 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
 class LandRegistryQueryConstraintTest {
 
 	LandRegistryQueryConstraint constraint;
-
-	private static long randomSeed = 8312595207343625996L;
-
-	private static String[] getRandomPostCodes() {
-		return new String[] { "OX14 1WH", "L18 9SN", "TN27 8JG", "PL8 2EE" };
-	}
 
 	@BeforeEach
 	public void initConstraint() {
@@ -46,24 +41,13 @@ class LandRegistryQueryConstraintTest {
 
 	}
 
-	private static LandRegistryData genLandRegistryData() {
-		LandRegistryData data = new LandRegistryData();
-		data.setNewBuild(true);
-		data.setPricePaid(new Random(randomSeed).nextInt(Integer.MAX_VALUE));
-		data.setPrimaryHouseName(LandRegistryDataTest.generateRandomString());
-		data.setStreetName(LandRegistryDataTest.generateRandomString());
-		data.setTownName(LandRegistryDataTest.generateRandomString());
-		data.setPropertyType(PropertyType.terraced);
-		return data;
-	}
-
 	/**
 	 * Test method for
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#LandRegistryQueryConstraint(asegroup1.api.models.landregistry.LandRegistryData)}.
 	 */
 	@Test
 	public void testLandRegistryQueryConstraintLandRegistryData() {
-		LandRegistryData data = genLandRegistryData();
+		LandRegistryData data = LandRegistryQueryTestUtils.genLandRegistryData();
 
 		constraint = new LandRegistryQueryConstraint(data);
 		assertEquals(data, constraint.getEqualityConstraints());
@@ -76,6 +60,32 @@ class LandRegistryQueryConstraintTest {
 	public void testLandRegistryQueryConstraint() {
 		assertEquals(0, constraint.getEqualityConstraints().getAllConstraints().size());
 		testFiltersEmpty();
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintSingle() {
+		String str;
+		for (Selectable s : new Selectable[] { Selectable.county, Selectable.paon, Selectable.saon, Selectable.town }) {
+			str = LandRegistryQueryTestUtils.generateRandomString();
+			assertTrue(constraint.setEqualityConstraint(s, str));
+			assertEquals(str.toUpperCase(), constraint.getEqualityConstraints().getConstraint(s));
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#setEqualityConstraint(Selectable, String...)}
+	 */
+	@Test
+	public void setEqualityConstraintMultiple() {
+		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
+		assertTrue(constraint.setEqualityConstraint(Selectable.postcode, postcodes));
+
+		assertEquals(Arrays.asList(postcodes).stream().map(v -> "\"" + v + "\"").collect(Collectors.toList()), constraint.getValueList(Selectable.postcode.toString()).getValues());
 	}
 
 	/**
@@ -108,7 +118,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	public void testSetMaxPricePaid() {
-		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
+		int pricePaid = new Random(LandRegistryQueryTestUtils.randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMaxPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", "<");
 		assertNotNull(rangeConstraint);
@@ -120,7 +130,7 @@ class LandRegistryQueryConstraintTest {
 	 */
 	@Test
 	public void testSetMinPricePaid() {
-		int pricePaid = new Random(randomSeed).nextInt(Integer.MAX_VALUE);
+		int pricePaid = new Random(LandRegistryQueryTestUtils.randomSeed).nextInt(Integer.MAX_VALUE);
 		constraint.setMinPricePaid(pricePaid);
 		RangeConstraint rangeConstraint = constraint.getRangeConstraint("pricePaid", ">");
 		assertNotNull(rangeConstraint);
@@ -128,173 +138,88 @@ class LandRegistryQueryConstraintTest {
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.util.ArrayList)}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.util.ArrayList)}.
 	 */
 	@Test
 	public void testSetPostcodesArrayListOfString() {
-		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(getRandomPostCodes()));
-		constraint.setPostcodes(postcodes);
+		ArrayList<String> postcodes = new ArrayList<String>(Arrays.asList(LandRegistryQueryTestUtils.getPostCodes()));
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(postcodes, constraint.getPostcodes());
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodes(java.lang.String[])}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#setPostcodeRegex(java.lang.String[])}.
 	 */
 	@Test
 	public void testSetPostcodesStringArray() {
-		String[] postcodes = getRandomPostCodes();
-		constraint.setPostcodes(postcodes);
+		String[] postcodes = LandRegistryQueryTestUtils.getPostCodes();
+		constraint.setPostcodeRegex(postcodes);
 		assertEquals(new ArrayList<String>(Arrays.asList(postcodes)), constraint.getPostcodes());
 	}
 
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereComplete() {
-		LandRegistryData data = genLandRegistryData();
+		LandRegistryData data = LandRegistryQueryTestUtils.genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(getRandomPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoConstraint() {
 		constraint = new LandRegistryQueryConstraint();
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
-		constraint.setPostcodes(getRandomPostCodes());
+		constraint.setPostcodeRegex(LandRegistryQueryTestUtils.getPostCodes());
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoPostCode() {
-		LandRegistryData data = genLandRegistryData();
+		LandRegistryData data = LandRegistryQueryTestUtils.genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 		constraint.setMaxDate(LocalDate.now());
 		constraint.setMinPricePaid(20122);
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereNoFilters() {
-		LandRegistryData data = genLandRegistryData();
+		LandRegistryData data = LandRegistryQueryTestUtils.genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryWhere()}.
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
 	public void testBuildQueryWhereEmpty() {
 		constraint = new LandRegistryQueryConstraint();
 
-		assertTrue(constraint.buildQueryWhere().matches(buildQueryRegex()));
-	}
-
-	private String buildQueryRegex() {
-		String delimeter = "\\s*";
-		// value regex parts
-		String valueReference = "\\?\\w+";
-		String valueString = "\"[^\"]*\"";
-		String valueInteger = "\\d+";
-		String valueBoolean = regexOptionalList("true", "false");
-
-		String yearReg = "\\d{4}";
-		String monthReg = regexOptionalList("0[1-9]", "1[0-2]");
-		String dayReg = regexOptionalList("0[1-9]", "[1-2]\\d", "3[0,1]");
-		String valueCalendar = regexAddWithDelim("\\-", yearReg, monthReg, dayReg);
-		
-		// declaration segments
-		String namespace = "\\w+:\\w+";
-		String value = regexOptionalList(valueReference, valueString, valueInteger, valueCalendar, namespace, valueBoolean);
-		String advancedNameSpace = namespace + "(/" + namespace + ")?";
-
-		// declaration
-		String partialDeclaration = regexAddWithDelim(delimeter, advancedNameSpace, value);
-		
-
-		String partialDeclarationListStart = regexAddWithDelim(delimeter, partialDeclaration, ";");
-		String partialDeclarationList = regexAddWithDelim(delimeter, "(", partialDeclarationListStart, ")*", partialDeclaration);
-
-
-
-
-		String declaration = regexAddWithDelim("\\s+", valueReference, partialDeclarationList);
-		String fullDeclaration = regexAddWithDelim(delimeter, declaration, "\\.");
-
-		String optionalDeclaration = regexAddWithDelim(delimeter, "OPTIONAL", "\\{", declaration, "\\}");
-
-
-
-		// declaration list
-		
-		String declarationListOptions = regexOptionalList(fullDeclaration, optionalDeclaration);
-		String declarationList = regexAddWithDelim(delimeter, "(", declarationListOptions, ")+");
-
-
-		//FILTER
-		
-		// range filter
-		String filterConstraint = "[<>]";
-		String filterCast = "\\^\\^"+namespace;
-		String filterValue = value + "(" + filterCast + ")?";
-		String rangeFilter = regexAddWithDelim(delimeter, valueReference, filterConstraint, filterValue);
-		
-		// regex filter
-		String regexFilterValue = "\".*\"";
-		String regexFilter = regexAddWithDelim(delimeter, "REGEX", "\\(", valueReference, ",", regexFilterValue, "\\)");
-
-		String filterOption = regexOptionalList(rangeFilter, regexFilter);
-		String filterOptionListStart = regexAddWithDelim(delimeter, "(", filterOption, "&&)*");
-		String filterOptionList = regexAddWithDelim(delimeter, filterOptionListStart, filterOption);
-		
-		String filter = regexAddWithDelim(delimeter, "FILTER", "\\(", "(" + filterOptionList + ")?", "\\)");
-		String optionalFilter = "(" + filter + ")?";
-
-		String queryRegex = regexAddWithDelim(delimeter, "WHERE", "\\{", declarationList, optionalFilter, "\\}");
-
-		
-		return queryRegex;
-	}
-
-	private static String regexAddWithDelim(String delimeter, String... parts) {
-		StringBuilder str = new StringBuilder();
-		for (int i = 0; i < parts.length - 1; i++) {
-			str.append(parts[i] + delimeter);
-		}
-		str.append(parts[parts.length - 1]);
-		return str.toString();
-	}
-
-	private static String regexOptionalList(String... options) {
-		StringBuilder str = new StringBuilder("(");
-		for (String option : options) {
-			str.append("(" + option + ")|");
-		}
-		str.deleteCharAt(str.length() - 1);
-		str.append(")");
-		return str.toString();
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
 	}
 
 	/**

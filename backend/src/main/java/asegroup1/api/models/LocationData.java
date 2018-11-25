@@ -1,12 +1,13 @@
 package asegroup1.api.models;
 
 
+import java.io.Serializable;
+import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Date;
 
 @Entity
 @Table(name = "location_data")
@@ -17,7 +18,7 @@ public class LocationData implements Serializable {
 	private String userId;
 	@Id
 	@Column(name = "TIMELOG")
-	private Date timelog;
+	private Timestamp timelog;
 	@Column(name = "LONGITUDE")
 	private float longitude;
 	@Column(name = "LATITUDE")
@@ -35,11 +36,11 @@ public class LocationData implements Serializable {
 		this.userId = userId;
 	}
 
-	public Date getTimelog() {
+	public Timestamp getTimelog() {
 		return timelog;
 	}
 
-	public void setTimelog(Date timelog) {
+	public void setTimelog(Timestamp timelog) {
 		this.timelog = timelog;
 	}
 

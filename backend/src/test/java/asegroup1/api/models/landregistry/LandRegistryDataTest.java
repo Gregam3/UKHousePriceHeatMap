@@ -20,10 +20,10 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.EstateType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.PropertyType;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint.TransactionCategory;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
 /**
  * @author Richousrick
@@ -33,16 +33,9 @@ class LandRegistryDataTest {
 
 	private LandRegistryData lRData;
 
-	private static long randomSeed = 8312595207343625996L;
-
-
 	@BeforeEach
 	public void initLandRegistryData() {
 		lRData = new LandRegistryData();
-	}
-
-	static String generateRandomString() {
-		return "Random: " + new Random(randomSeed).nextLong();
 	}
 
 	private void assertStoredStringEqual(Selectable selectable, String expected) {
@@ -67,11 +60,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetPrimaryHouseName() {
-		String houseNameStr = generateRandomString();
+		String houseNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setPrimaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.paon, houseNameStr);
 
-		houseNameStr = generateRandomString();
+		houseNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setPrimaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.paon, houseNameStr);
 	}
@@ -81,11 +74,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetSecondaryHouseName() {
-		String houseNameStr = generateRandomString();
+		String houseNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setSecondaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.saon, houseNameStr);
 
-		houseNameStr = generateRandomString();
+		houseNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setSecondaryHouseName(houseNameStr);
 		assertStoredStringEqual(Selectable.saon, houseNameStr);
 	}
@@ -95,11 +88,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetStreetName() {
-		String streetNameStr = generateRandomString();
+		String streetNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setStreetName(streetNameStr);
 		assertStoredStringEqual(Selectable.street, streetNameStr);
 
-		streetNameStr = generateRandomString();
+		streetNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setStreetName(streetNameStr);
 		assertStoredStringEqual(Selectable.street, streetNameStr);
 	}
@@ -109,11 +102,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetTownName() {
-		String townNameStr = generateRandomString();
+		String townNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setTownName(townNameStr);
 		assertStoredStringEqual(Selectable.town, townNameStr);
 
-		townNameStr = generateRandomString();
+		townNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setTownName(townNameStr);
 		assertStoredStringEqual(Selectable.town, townNameStr);
 	}
@@ -123,11 +116,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetLocality() {
-		String localityNameStr = generateRandomString();
+		String localityNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setLocality(localityNameStr);
 		assertStoredStringEqual(Selectable.locality, localityNameStr);
 
-		localityNameStr = generateRandomString();
+		localityNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setLocality(localityNameStr);
 		assertStoredStringEqual(Selectable.locality, localityNameStr);
 	}
@@ -137,11 +130,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetDistrict() {
-		String districtNameStr = generateRandomString();
+		String districtNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setDistrict(districtNameStr);
 		assertStoredStringEqual(Selectable.district, districtNameStr);
 
-		districtNameStr = generateRandomString();
+		districtNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setDistrict(districtNameStr);
 		assertStoredStringEqual(Selectable.district, districtNameStr);
 	}
@@ -151,11 +144,11 @@ class LandRegistryDataTest {
 	 */
 	@Test
 	public void testSetCounty() {
-		String countyNameStr = generateRandomString();
+		String countyNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setCounty(countyNameStr);
 		assertStoredStringEqual(Selectable.county, countyNameStr);
 
-		countyNameStr = generateRandomString();
+		countyNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setCounty(countyNameStr);
 		assertStoredStringEqual(Selectable.county, countyNameStr);
 	}
@@ -174,11 +167,6 @@ class LandRegistryDataTest {
 			fail("Did not accpet well formatted string");
 		}
 
-		try {
-			lRData.setPostCode("bn214nv");
-			fail("Did not accpet well formatted string");
-		} catch (InvalidParameterException e) {
-		}
 		assertStoredStringEqual(Selectable.postcode, postCode);
 	}
 
@@ -274,7 +262,7 @@ class LandRegistryDataTest {
 
 		EnumSet.allOf(Selectable.class).forEach(selectable -> {
 			String value = null;
-			Random rand = new Random(randomSeed);
+			Random rand = new Random(LandRegistryQueryTestUtils.randomSeed);
 			switch (selectable) {
 				case paon:
 				case saon:
@@ -284,7 +272,7 @@ class LandRegistryDataTest {
 				case district:
 				case county:
 					for (int i = 0; i < 5; i++) {
-						value = generateRandomString();
+						value = LandRegistryQueryTestUtils.generateRandomString();
 						testSetConstraint(selectable, value.toUpperCase());
 					}
 					break;
@@ -298,11 +286,6 @@ class LandRegistryDataTest {
 						fail("Did not accpet well formatted string");
 					}
 
-					try {
-						lRData.setConstraint(Selectable.postcode.toString(), "bn214nv");
-						fail("Did not accpet well formatted string");
-					} catch (InvalidParameterException e) {
-					}
 					assertStoredStringEqual(Selectable.postcode, postCode);
 					break;
 				case newBuild:
@@ -334,7 +317,6 @@ class LandRegistryDataTest {
 						testSetConstraint(selectable, value);
 					}
 					testSetInvalidConstraint(selectable, "words");
-					testSetInvalidConstraint(selectable, "12.2");
 					break;
 				case transactionDate:
 					LocalDate randomDate;
