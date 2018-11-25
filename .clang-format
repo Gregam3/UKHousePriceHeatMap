@@ -8,3 +8,5 @@ Language: JavaScript
 DisableFormat: true
 ---
 Language: Java
+IndentWidth: 4
+UseTab: Always
