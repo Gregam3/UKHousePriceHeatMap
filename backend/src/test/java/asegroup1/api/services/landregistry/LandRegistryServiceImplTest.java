@@ -106,25 +106,7 @@ class LandRegistryServiceImplTest {
         }
     }
 
-    //TODO mock correctly
-    void testIfLatitudeForAddressesAreFetchedAndRoughlyAccurate() {
-        List<LandRegistryData> addresses = new LinkedList<>();
-
-        LandRegistryData data = new LandRegistryData();
-        data.setPrimaryHouseName("85");
-        data.setStreetName("QUEEN STREET");
-        data.setTownName("WORTHING");
-        data.setPostCode("BN14 7BH");
-        addresses.add(data);
-
-
-        LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
-
-        //lat 50.824190 for address
-        assert (address.getLatitude() > 50.824 && address.getLatitude() < 50.825);
-    }
-
-    //TODO mock correctly
+    @Test
     void testIfLongitudeForAddressesAreFetchedAndRoughlyAccurate() {
         List<LandRegistryData> addresses = new LinkedList<>();
 
@@ -135,8 +117,6 @@ class LandRegistryServiceImplTest {
         data.setPostCode("BN14 7BH");
         addresses.add(data);
 
-        landRegistryService.getPositionForAddresses(addresses).get(0);
-
         LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
 
         try {
@@ -145,20 +125,19 @@ class LandRegistryServiceImplTest {
             response.put("lat", 0);
             response.put("lng", 0);
 
-//            when(landRegistryDataDaoMock.getGeoLocationData("https://maps.googleapis.com/maps/api/geocode/json?address=85+QUEEN+STREET+WORTHING&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA")).thenReturn(response);
-
-        } catch (JSONException e) {
+            when(landRegistryDataDaoMock.getGeoLocationData("https://maps.googleapis.com/maps/api/geocode/json?address=85+QUEEN+STREET+WORTHING&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA")).thenReturn(response);
+        } catch (UnirestException | JSONException e) {
             e.printStackTrace();
 
             assert false;
         }
 
-        LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+        LandRegistryServiceImpl landRegistryServiceLocal = new LandRegistryServiceImpl(landRegistryDataDaoMock);
 
-        LandRegistryData address = landRegistryService.getPositionForAddresses(addresses).get(0);
+        LandRegistryData address = landRegistryServiceLocal.getPositionForAddresses(addresses).get(0);
 
         //long -0.378000 for address
-        assert address.getLongitude() == 0;
+        assert address.getLongitude() == 0 && address.getLatitude() == 0;
     }
 
     @Test
