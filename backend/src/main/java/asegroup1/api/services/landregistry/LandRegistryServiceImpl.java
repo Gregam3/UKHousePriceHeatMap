@@ -192,27 +192,6 @@ public class LandRegistryServiceImpl {
             addressUriBuilder.delete(0, addressUriBuilder.length());
         }
 
-        for (LandRegistryData address : addresses) {
-            addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
-                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-                    .append("&key=").append(GOOGLE_MAPS_API_KEY);
-
-            try {
-                JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
-                        .getJSONObject("geometry").getJSONObject("location");
-
-                address.setLatitude(response.getDouble("lat"));
-                address.setLongitude(response.getDouble("lng"));
-
-            } catch (UnirestException | JSONException e) {
-                e.printStackTrace();
-                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-            }
-
-            // Clear the StringBuilder buffer
-            addressUriBuilder.delete(0, addressUriBuilder.length());
-        }
-
         return addresses;
     }
 

@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import com.mashape.unirest.http.Unirest;
+import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -135,4 +137,8 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
         return postcodeMap;
     }
 
+    public JSONObject getGeoLocationData(String builtUrl) throws UnirestException {
+        return Unirest.get(builtUrl).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
+                .getJSONObject("geometry").getJSONObject("location");
+    }
 }
