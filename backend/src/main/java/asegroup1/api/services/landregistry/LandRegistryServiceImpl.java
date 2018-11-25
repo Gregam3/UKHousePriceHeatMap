@@ -63,7 +63,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 8000};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 10000};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -232,8 +232,6 @@ public class LandRegistryServiceImpl {
             return null;
         }
 
-        List<Integer> indexesToRemove = new ArrayList<>();
-
         //Find the minimum and maximum price, this is needed to normalise the values
         long min, max;
 
@@ -247,14 +245,9 @@ public class LandRegistryServiceImpl {
 
                 if (pricePaid > max) max = pricePaid;
                 else if (pricePaid < min) min = pricePaid;
-            } else {
-                indexesToRemove.add(i);
             }
         }
 
-        for (int i : indexesToRemove) {
-            landRegistryDataList.remove(i);
-        }
 
         //Convert list of LandRegistryData to list of HeatMapDataPoints
         List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.parallelStream().map(lr ->
@@ -266,11 +259,15 @@ public class LandRegistryServiceImpl {
 
         for (int i = 0; i < landRegistryDataList.size() && i < heatMapDataPoints.size(); i++) {
             //Pass in the normalised value and receive a Colour object
-            heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
-                    //Normalise the values between 0 and 1.0
-                    (double) (Long.parseLong(landRegistryDataList.get(i).getConstraint(Selectable.pricePaid)) - min) / (double) (max - min)
-                    )
-            );
+
+            String pricePaid = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
+
+            if (pricePaid != null && pricePaid.matches("[0-9]+"))
+                heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
+                        //Normalise the values between 0 and 1.0
+                        (double) (Long.parseLong(pricePaid) - min) / (double) (max - min)
+                        )
+                );
         }
 
         return heatMapDataPoints;
