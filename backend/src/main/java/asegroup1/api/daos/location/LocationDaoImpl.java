@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
@@ -29,7 +30,8 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 
 	@SuppressWarnings("unchecked")
 	public List<LocationData> getUserLocations(String userID) {
-		return (List<LocationData>) getEntityManager()
+		EntityManager em = getEntityManager();
+		List<LocationData> retList = (List<LocationData>) em
 				.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID").setParameter("userID", userID)
 				.getResultList().stream()
 				.map(r -> {
@@ -48,5 +50,7 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 
 					return locationData;
 				}).collect(Collectors.toList());
+		em.close();
+		return retList;
 	}
 }

@@ -38,7 +38,7 @@ async function genKey(){
 		key = genUniqueString();
 		let keyFree = await isKeyFree(key);
 		var loopVar = keyFree;
-	}while(loopVar == false);
+	}while(loopVar === false);
 	// save valid key to phone
 	Config.storeSetting("userKey", key).then(function(result) {
 		if(!result){
