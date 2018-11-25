@@ -262,7 +262,7 @@ public class LandRegistryServiceImpl {
 
             String pricePaid = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
 
-            if (pricePaid != null && pricePaid.matches("[0-9]+"))
+            if (pricePaid != null && pricePaid.matches("[-0-9]+"))
                 heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
                         //Normalise the values between 0 and 1.0
                         (double) (Long.parseLong(pricePaid) - min) / (double) (max - min)
