@@ -167,11 +167,6 @@ class LandRegistryDataTest {
 			fail("Did not accpet well formatted string");
 		}
 
-		try {
-			lRData.setPostCode("bn214nv");
-			fail("Did not accpet well formatted string");
-		} catch (InvalidParameterException e) {
-		}
 		assertStoredStringEqual(Selectable.postcode, postCode);
 	}
 
@@ -291,11 +286,6 @@ class LandRegistryDataTest {
 						fail("Did not accpet well formatted string");
 					}
 
-					try {
-						lRData.setConstraint(Selectable.postcode.toString(), "bn214nv");
-						fail("Did not accpet well formatted string");
-					} catch (InvalidParameterException e) {
-					}
 					assertStoredStringEqual(Selectable.postcode, postCode);
 					break;
 				case newBuild:
@@ -327,7 +317,6 @@ class LandRegistryDataTest {
 						testSetConstraint(selectable, value);
 					}
 					testSetInvalidConstraint(selectable, "words");
-					testSetInvalidConstraint(selectable, "12.2");
 					break;
 				case transactionDate:
 					LocalDate randomDate;
