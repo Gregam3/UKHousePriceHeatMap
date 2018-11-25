@@ -47,7 +47,7 @@ public class UserController {
 		}
 	}
 
-	@GetMapping(value = "check-user-exsists/{userid}")
+	@GetMapping(value = "check-user-exists/{userid}")
 	public ResponseEntity<Boolean> checkUserData(@PathVariable("userid") String userid) {
 		UserData user = userService.get(userid);
 		return new ResponseEntity<>(user != null, HttpStatus.OK);

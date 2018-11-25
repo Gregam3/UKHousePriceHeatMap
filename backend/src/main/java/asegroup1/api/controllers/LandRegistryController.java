@@ -92,7 +92,7 @@ public class LandRegistryController {
     }
 
 	@GetMapping("update-postcode/{prefix}")
-	public ResponseEntity<?> updateTransactionData(String prefix) {
+	public ResponseEntity<?> updateTransactionData(@PathVariable("prefix") String prefix) {
 		if (prefix == null) {
 			prefix = "";
 		} else if (!prefix.matches("[\\p{Alnum} ]+")) {
