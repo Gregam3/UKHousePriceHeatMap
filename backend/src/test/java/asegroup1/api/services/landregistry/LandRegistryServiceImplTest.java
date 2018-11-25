@@ -200,9 +200,9 @@ class LandRegistryServiceImplTest {
 
         List<HeatMapDataPoint> heatMapDataPoints = landRegistryService.convertLandRegistryDataListToHeatMapList(landRegistryDataList);
 
-//        assert heatMapDataPoints.get(0).getColour().getRed() == 255 &&
-//                heatMapDataPoints.get(1).getColour().getRed() == 155 &&
-//                heatMapDataPoints.get(2).getColour().getRed() == 55;
+        assert heatMapDataPoints.get(0).getColour().getRed() == 255 &&
+                heatMapDataPoints.get(1).getColour().getRed() == 155 &&
+                heatMapDataPoints.get(2).getColour().getRed() == 55;
 
     }
 
@@ -215,6 +215,7 @@ class LandRegistryServiceImplTest {
             landRegistryData.setPricePaid(values[i]);
             landRegistryData.setLongitude(0);
             landRegistryData.setLatitude(0);
+
             landRegistryDataList.add(landRegistryData);
         }
 
@@ -226,8 +227,8 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
 
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-//        assert heatMapDataPoints.get(0).getColour().getRed() > heatMapDataPoints.get(1).getColour().getRed()
-//                && heatMapDataPoints.get(1).getColour().getRed() > heatMapDataPoints.get(2).getColour().getRed();
+        assert heatMapDataPoints.get(0).getColour().getRed() > heatMapDataPoints.get(1).getColour().getRed()
+                && heatMapDataPoints.get(1).getColour().getRed() > heatMapDataPoints.get(2).getColour().getRed();
     }
 
     @Test
@@ -235,7 +236,7 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 5L, 5L);
 
         for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-//            assert heatMapDataPoint.getColour().getRed() == 255;
+            assert heatMapDataPoint.getColour().getRed() == 255;
         }
     }
 
@@ -248,9 +249,8 @@ class LandRegistryServiceImplTest {
     void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(-5L, -15L, -10L);
 
-
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-        assert heatMapDataPoints.get(0).getColour().getRed() > heatMapDataPoints.get(2).getColour().getRed()
+        assert heatMapDataPoints.get(0).getColour().getRed() < heatMapDataPoints.get(2).getColour().getRed()
                 && heatMapDataPoints.get(2).getColour().getRed() < heatMapDataPoints.get(1).getColour().getRed();
 
     }
