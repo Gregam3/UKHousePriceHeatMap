@@ -48,6 +48,7 @@ buildNumber.properties
 
 # Intelij
 .idea/
+*.iml
 
 # Eclipse
 .classpath
