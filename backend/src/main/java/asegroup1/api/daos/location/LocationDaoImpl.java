@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Repository;
@@ -29,18 +30,23 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<LocationData> getUserLocations(String userID) {
+	public List<LocationData> getLocationDataById(String userID, Timestamp timestamp) {
 		EntityManager em = getEntityManager();
-		List<LocationData> retList = (List<LocationData>) em
-				.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID").setParameter("userID", userID)
-				.getResultList().stream()
+		Query query = em
+				.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID" + (timestamp != null ? " AND timelog=:timelog" : ""))
+				.setParameter("userID", userID);
+		if(timestamp != null) {
+			String timestampStr = timestamp.toString();
+			query.setParameter("timelog", timestampStr.substring(0, timestampStr.lastIndexOf('.')));
+		}
+		List<LocationData> retList = (List<LocationData>) 
+				query.getResultList().stream()
 				.map(r -> {
 					Object[] currentItem = (Object[]) r;
 
 					LocationData locationData = new LocationData();
 					locationData.setUserId(String.valueOf(currentItem[0]));
-					String time = String.valueOf(currentItem[1]);
-					locationData.setTimelog(Timestamp.valueOf(time));
+					locationData.setTimelog(Timestamp.valueOf(String.valueOf(currentItem[1])));
 
 					locationData.setLatitude(Float.valueOf(String.valueOf(currentItem[2])));
 					locationData.setLongitude(Float.valueOf(String.valueOf(currentItem[3])));
@@ -52,5 +58,9 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 				}).collect(Collectors.toList());
 		em.close();
 		return retList;
+	}
+
+	public List<LocationData> getUserLocations(String userID) {
+		return getLocationDataById(userID, null);
 	}
 }
