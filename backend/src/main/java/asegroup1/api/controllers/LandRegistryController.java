@@ -8,9 +8,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,6 +80,153 @@ public class LandRegistryController {
         }
     }
 
+    @GetMapping(value = "get-display-data-test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getTestDisplayData() {
+        return new ResponseEntity<>("[\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"9\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8124399\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"610000\",\n" +
+                "      \"transactionDate\": \"2016-08-12\",\n" +
+                "      \"longitude\": \"-0.3795235\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"4\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8119689\",\n" +
+                "      \"saon\": \"FLAT 2\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"112500\",\n" +
+                "      \"transactionDate\": \"2015-03-19\",\n" +
+                "      \"longitude\": \"-0.3791697\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"13\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8126867\",\n" +
+                "      \"saon\": \"FLAT 2\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"189000\",\n" +
+                "      \"transactionDate\": \"2014-09-12\",\n" +
+                "      \"longitude\": \"-0.3796079\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"4\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8119689\",\n" +
+                "      \"saon\": \"FLAT 6\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"155000\",\n" +
+                "      \"transactionDate\": \"2016-12-22\",\n" +
+                "      \"longitude\": \"-0.3791697\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"4\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8119689\",\n" +
+                "      \"saon\": \"FLAT 7\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"120000\",\n" +
+                "      \"transactionDate\": \"2015-04-24\",\n" +
+                "      \"longitude\": \"-0.3791697\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"4\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8119689\",\n" +
+                "      \"saon\": \"FLAT 5\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"224500\",\n" +
+                "      \"transactionDate\": \"2017-09-22\",\n" +
+                "      \"longitude\": \"-0.3791697\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"SUSSEX COURT\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8128956\",\n" +
+                "      \"saon\": \"FLAT 2\",\n" +
+                "      \"postcode\": \"BN11 4BT\",\n" +
+                "      \"pricePaid\": \"155000\",\n" +
+                "      \"transactionDate\": \"2016-10-07\",\n" +
+                "      \"longitude\": \"-0.3797229\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"4\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8119689\",\n" +
+                "      \"saon\": \"FLAT 8\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"170000\",\n" +
+                "      \"transactionDate\": \"2015-05-20\",\n" +
+                "      \"longitude\": \"-0.3791697\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"15\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8128531\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"490000\",\n" +
+                "      \"transactionDate\": \"2016-10-20\",\n" +
+                "      \"longitude\": \"-0.3796054\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"HARDWICKE LODGE\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8125322\",\n" +
+                "      \"saon\": \"FLAT 10\",\n" +
+                "      \"postcode\": \"BN11 4BU\",\n" +
+                "      \"pricePaid\": \"100000\",\n" +
+                "      \"transactionDate\": \"2018-09-04\",\n" +
+                "      \"longitude\": \"-0.3790423\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"mappings\": {\n" +
+                "      \"town\": \"WORTHING\",\n" +
+                "      \"paon\": \"11\",\n" +
+                "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"latitude\": \"50.8125689\",\n" +
+                "      \"saon\": \"FLAT 1\",\n" +
+                "      \"postcode\": \"BN11 4BY\",\n" +
+                "      \"pricePaid\": \"200000\",\n" +
+                "      \"transactionDate\": \"2016-05-27\",\n" +
+                "      \"longitude\": \"-0.3795491\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "]", HttpStatus.OK);
+    }
+
     @GetMapping("get-transactions/{post-code}")
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
@@ -91,21 +241,21 @@ public class LandRegistryController {
         }
     }
 
-	@GetMapping("update-postcode/{prefix}")
-	public ResponseEntity<?> updateTransactionData(@PathVariable("prefix") String prefix) {
-		if (prefix == null) {
-			prefix = "";
-		} else if (!prefix.matches("[\\p{Alnum} ]+")) {
-				return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
-		}
-		try {
-			landRegistryService.updatePostcodeDatabase(prefix);
-			return new ResponseEntity<>("Update triggered", HttpStatus.OK);
-		} catch (IOException | UnirestException e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-		}
-	}
+    @GetMapping("update-postcode/{prefix}")
+    public ResponseEntity<?> updateTransactionData(@PathVariable("prefix") String prefix) {
+        if (prefix == null) {
+            prefix = "";
+        } else if (!prefix.matches("[\\p{Alnum} ]+")) {
+            return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            landRegistryService.updatePostcodeDatabase(prefix);
+            return new ResponseEntity<>("Update triggered", HttpStatus.OK);
+        } catch (IOException | UnirestException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
         List<HashMap<String, String>> keys = new ArrayList<>();

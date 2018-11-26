@@ -16,29 +16,7 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         //Markers array filled with dummy data for display
-        markers: [
-            {
-                id:0,
-                longitude:-0.13104971498263165,
-                latitude:50.84609893155363,
-                title:'£100,000',
-                description:'1 Brighton Street \n BN1 1AB \n Brighton'
-            },
-            {
-                id:1,
-                longitude:-0.133,
-                latitude:50.84609893155363,
-                title:'Hello',
-                description:'World'
-            },
-            {
-                id:2,
-                longitude:-0.16,
-                latitude:50.88,
-                title:'Another',
-                description:'One'
-            }
-        ]
+        markers: null
     };
 
     constructor(props) {
@@ -66,6 +44,8 @@ export default class App extends Component {
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
                     this.lastSent = new Date();
+
+
                 }
             } else {
                 this.setState({
@@ -85,32 +65,43 @@ export default class App extends Component {
             timelog: location.timestamp,
             delivered: true
         };
-		if(Auth.getUserKey()){
-			NetLib.postJSON('location/add-location-data/', locationData);
-		}
+        if (Auth.getUserKey()) {
+            NetLib.postJSON('location/add-location-data/', locationData);
+        }
     };
+
+    getMarkersAsync = async () => {
+        let markers = await NetLib.getLandRegistryData(null);
+        this.setState({markers});
+    };
+
+    componentWillMount() {
+        this.requestAndGetLocationAsync();
+        this.getMarkersAsync();
+    }
 
     render() {
         let displayedText = 'Fetching position...';
 
         let latitude = null;
         let longitude = null;
+        let markers = null;
 
-        this.requestAndGetLocationAsync();
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
+            markers = this.state.markers;
 
             displayedText =
                 '\t\n Longitude: ' + longitude +
-                '\t\n Latitude: ' + latitude
+                '\t\n Latitude: ' + latitude;
         }
 
         return (
-            (latitude && longitude) ?
+            (latitude && longitude && markers) ?
                 <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
                     <View style={{flex: 1, flexDirection: 'row'}}>
                         <Text style={styles.coordinatesText}>{displayedText}</Text>
@@ -129,22 +120,22 @@ export default class App extends Component {
                         }}
                     >
 
-                      {this.state.markers.map(marker => (
-                        false ? (
-                            <MapView.Circle
-                                key={marker.id}
-                                center={{longitude:marker.longitude, latitude:marker.latitude}}
-                                radius={100}
-                                strokeColor={'#FF0000'}
-                                fillColor={'rgba(255,0,0,0.5)'}
-                            />)
-                        : (<MapView.Marker
-                                key={marker.id}
-                                coordinate={{longitude:marker.longitude, latitude:marker.latitude}}
-                                title={marker.title}
-                                description={marker.description}
-                            />)
-                      ))}
+                        {this.state.markers.map(marker => (
+                            false ? (
+                                    <MapView.Circle
+                                        key={marker.id}
+                                        center={{longitude: marker.longitude, latitude: marker.latitude}}
+                                        radius={100}
+                                        strokeColor={'#FF0000'}
+                                        fillColor={'rgba(255,0,0,0.5)'}
+                                    />)
+                                : (<MapView.Marker
+                                    key={marker.id}
+                                    coordinate={{longitude: marker.mappings.longitude, latitude: marker.mappings.latitude}}
+                                    title={marker.title}
+                                    description={marker.description}
+                                />)
+                        ))}
 
                     </MapView>
                 </View> :

@@ -1,6 +1,6 @@
 import request from 'superagent';
 
-var ip = 'http://ec2-35-176-126-234.eu-west-2.compute.amazonaws.com:8080/';
+var ip = 'http://192.168.0.10:8080/';
 
 export function postJSON(extension, jsonFile) {
     console.log("Attempting to post to " + extension);
@@ -14,14 +14,31 @@ export function postJSON(extension, jsonFile) {
         });
 }
 
-export async function get(extention, data){
-	return await request.get(ip + extention + data).then(res => {
-			if(res.body != null){
-				return JSON.stringify(res.body);
-			}else{
-				return res;
-			}
-		}).catch(err => {
-			return err
-		});
+export async function get(extension, data) {
+    return await request.get(ip + extension + data).then(res => {
+        if (res.body != null) {
+            return JSON.stringify(res.body);
+        } else {
+            return res;
+        }
+    }).catch(err => {
+        return err
+    });
+}
+
+//TODO generify method to accept any parameters
+export function getLandRegistryData(mapPosition) {
+    console.log("Attempting to get display data");
+
+    //TODO change to current ip if ip changes
+    request
+        .get(ip + '/land-registry/get-display-data-test')
+        // .set("mapPosition", parameters)
+        .then(res => {
+            return res.body;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        });
 }
