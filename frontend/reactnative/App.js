@@ -15,8 +15,7 @@ export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
-        //Markers array filled with dummy data for display
-        markers: null
+        markers: []
     };
 
     constructor(props) {
@@ -40,11 +39,10 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                var timeDiff = new Date() - this.lastSent;
+                let timeDiff = new Date() - this.lastSent;
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
                     this.lastSent = new Date();
-
 
                 }
             } else {
@@ -72,13 +70,12 @@ export default class App extends Component {
 
     getMarkersAsync = async () => {
         let markers = await NetLib.getLandRegistryData(null);
-        this.setState({markers});
-    };
 
-    componentWillMount() {
-        this.requestAndGetLocationAsync();
-        this.getMarkersAsync();
-    }
+        if (markers) {
+            console.log('Marker size = ' + markers.length);
+            this.setState({markers});
+        }
+    };
 
     render() {
         let displayedText = 'Fetching position...';
@@ -87,6 +84,14 @@ export default class App extends Component {
         let longitude = null;
         let markers = null;
 
+        this.requestAndGetLocationAsync();
+
+        let timeDiff = new Date() - this.lastSent;
+
+        if (timeDiff > 5000) {
+            this.getMarkersAsync();
+            this.lastSent = new Date();
+        }
 
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
@@ -101,7 +106,7 @@ export default class App extends Component {
         }
 
         return (
-            (latitude && longitude && markers) ?
+            (latitude && longitude) ?
                 <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
                     <View style={{flex: 1, flexDirection: 'row'}}>
                         <Text style={styles.coordinatesText}>{displayedText}</Text>
@@ -131,7 +136,7 @@ export default class App extends Component {
                                     />)
                                 : (<MapView.Marker
                                     key={marker.id}
-                                    coordinate={{longitude: marker.mappings.longitude, latitude: marker.mappings.latitude}}
+                                    coordinate={{longitude: parseFloat(marker.mappings.longitude), latitude: parseFloat(marker.mappings.latitude)}}
                                     title={marker.title}
                                     description={marker.description}
                                 />)

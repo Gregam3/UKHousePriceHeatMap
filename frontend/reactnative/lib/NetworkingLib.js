@@ -31,7 +31,7 @@ export function getLandRegistryData(mapPosition) {
     console.log("Attempting to get display data");
 
     //TODO change to current ip if ip changes
-    request
+    return request
         .get(ip + '/land-registry/get-display-data-test')
         // .set("mapPosition", parameters)
         .then(res => {
