@@ -86,6 +86,7 @@ public class LandRegistryController {
                 "  {\n" +
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
+                "      \"id\": \"1\",\n" +
                 "      \"paon\": \"9\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8124399\",\n" +
@@ -99,6 +100,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"4\",\n" +
+                "      \"id\": \"2\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8119689\",\n" +
                 "      \"saon\": \"FLAT 2\",\n" +
@@ -112,6 +114,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"13\",\n" +
+                "      \"id\": \"3\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8126867\",\n" +
                 "      \"saon\": \"FLAT 2\",\n" +
@@ -125,6 +128,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"4\",\n" +
+                "      \"id\": \"4\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8119689\",\n" +
                 "      \"saon\": \"FLAT 6\",\n" +
@@ -138,6 +142,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"4\",\n" +
+                "      \"id\": \"5\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8119689\",\n" +
                 "      \"saon\": \"FLAT 7\",\n" +
@@ -151,6 +156,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"4\",\n" +
+                "      \"id\": \"6\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8119689\",\n" +
                 "      \"saon\": \"FLAT 5\",\n" +
@@ -164,6 +170,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"SUSSEX COURT\",\n" +
+                "      \"id\": \"7\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8128956\",\n" +
                 "      \"saon\": \"FLAT 2\",\n" +
@@ -178,6 +185,7 @@ public class LandRegistryController {
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"4\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
+                "      \"id\": \"8\",\n" +
                 "      \"latitude\": \"50.8119689\",\n" +
                 "      \"saon\": \"FLAT 8\",\n" +
                 "      \"postcode\": \"BN11 4BY\",\n" +
@@ -190,6 +198,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"15\",\n" +
+                "      \"id\": \"9\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8128531\",\n" +
                 "      \"postcode\": \"BN11 4BY\",\n" +
@@ -202,6 +211,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"HARDWICKE LODGE\",\n" +
+                "      \"id\": \"10\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8125322\",\n" +
                 "      \"saon\": \"FLAT 10\",\n" +
@@ -215,6 +225,7 @@ public class LandRegistryController {
                 "    \"mappings\": {\n" +
                 "      \"town\": \"WORTHING\",\n" +
                 "      \"paon\": \"11\",\n" +
+                "      \"id\": \"11\",\n" +
                 "      \"street\": \"TENNYSON ROAD\",\n" +
                 "      \"latitude\": \"50.8125689\",\n" +
                 "      \"saon\": \"FLAT 1\",\n" +

@@ -15,7 +15,8 @@ export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
-        markers: []
+        markers: [],
+        mapRegion: null
     };
 
     constructor(props) {
@@ -77,6 +78,10 @@ export default class App extends Component {
         }
     };
 
+    _handleMapRegionChange = mapRegion => {
+        this.setState({mapRegion});
+    };
+
     render() {
         let displayedText = 'Fetching position...';
 
@@ -108,11 +113,8 @@ export default class App extends Component {
         return (
             (latitude && longitude) ?
                 <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
-                        <Text style={styles.coordinatesText}>{displayedText}</Text>
-                    </View>
                     <MapView
-                        style={{flex: 7}}
+                        style={{flex: 1}}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
@@ -123,22 +125,26 @@ export default class App extends Component {
                             latitudeDelta: 0.0006,
                             longitudeDelta: 0.002
                         }}
+                        onRegionChange={this._handleMapRegionChange}
                     >
 
                         {this.state.markers.map(marker => (
                             false ? (
                                     <MapView.Circle
-                                        key={marker.id}
+                                        key={marker.mappings.id}
                                         center={{longitude: marker.longitude, latitude: marker.latitude}}
                                         radius={100}
                                         strokeColor={'#FF0000'}
                                         fillColor={'rgba(255,0,0,0.5)'}
                                     />)
                                 : (<MapView.Marker
-                                    key={marker.id}
-                                    coordinate={{longitude: parseFloat(marker.mappings.longitude), latitude: parseFloat(marker.mappings.latitude)}}
-                                    title={marker.title}
-                                    description={marker.description}
+                                    key={marker.mappings.id}
+                                    coordinate={{
+                                        longitude: parseFloat(marker.mappings.longitude),
+                                        latitude: parseFloat(marker.mappings.latitude)
+                                    }}
+                                    title={marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                                    description={"£" + marker.mappings.pricePaid}
                                 />)
                         ))}
 
