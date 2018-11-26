@@ -30,7 +30,7 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<LocationData> getEntries(String userID, Timestamp timestamp) {
+	public List<LocationData> getLocationDataById(String userID, Timestamp timestamp) {
 		EntityManager em = getEntityManager();
 		Query query = em
 				.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID" + (timestamp != null ? " AND timelog=:timelog" : ""))
@@ -61,6 +61,6 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 	}
 
 	public List<LocationData> getUserLocations(String userID) {
-		return getEntries(userID, null);
+		return getLocationDataById(userID, null);
 	}
 }

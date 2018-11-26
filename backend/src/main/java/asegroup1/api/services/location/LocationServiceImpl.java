@@ -28,7 +28,7 @@ public class LocationServiceImpl extends ServiceImpl<LocationData> {
 
 	@Override
 	public void create(LocationData t) {
-		if (locationDao.getEntries(t.getUserId(), t.getTimelog()).size() == 0) {
+		if (locationDao.getLocationDataById(t.getUserId(), t.getTimelog()).size() == 0) {
 			super.create(t);
 		}else {
 			throw new InvalidParameterException("Entry already exists");
