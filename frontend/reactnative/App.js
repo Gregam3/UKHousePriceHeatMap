@@ -17,6 +17,12 @@ const startingDeltas = {
     longitude: 0.002,
 };
 
+const AGGREGATION_LEVELS = {
+    addresses: 0,
+    postcodes: 15,
+    heatmap: 300
+};
+
 export default class App extends Component {
 
     state = {
@@ -111,13 +117,12 @@ export default class App extends Component {
 
         let latitude = null;
         let longitude = null;
-        let markers = null;
 
         this.requestAndGetLocationAsync();
 
         let timeDiff = new Date() - this.lastSent;
 
-        if (timeDiff > 5000) {
+        if (timeDiff > 15000) {
             this.getMarkersAsync();
             this.lastSent = new Date();
         }
@@ -127,11 +132,6 @@ export default class App extends Component {
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
-            markers = this.state.markers;
-
-            displayedText =
-                '\t\n Longitude: ' + longitude +
-                '\t\n Latitude: ' + latitude;
         }
 
         return (
@@ -153,22 +153,27 @@ export default class App extends Component {
                     >
 
                         {this.state.markers.map(marker => (
-                            false ? (
+                            this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
                                     <MapView.Circle
-                                        key={marker.mappings.id}
+                                        key={marker.id}
                                         center={{longitude: marker.longitude, latitude: marker.latitude}}
                                         radius={100}
                                         strokeColor={'#FF0000'}
                                         fillColor={'rgba(255,0,0,0.5)'}
                                     />)
                                 : (<MapView.Marker
-                                    key={marker.mappings.id}
+                                    key={marker.id}
                                     coordinate={{
                                         longitude: parseFloat(marker.mappings.longitude),
                                         latitude: parseFloat(marker.mappings.latitude)
                                     }}
-                                    title={marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
-                                    description={"£" + marker.mappings.pricePaid}
+                                    title={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                                        "Average Price: £" + marker.mappings.pricePaid :
+                                        marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+
+                                    description={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                                        marker.mappings.postcode :
+                                        marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                                 />)
                         ))}
 
