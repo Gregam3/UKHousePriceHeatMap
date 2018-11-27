@@ -26,6 +26,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.PostCodeCoordinates;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
@@ -285,6 +286,27 @@ public class LandRegistryServiceImpl {
 
         return postcodePrices;
     }
+
+	private void aggrigatePostCodes(int aggriagationLevel) {
+		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getMatchingPostcodes("", true, aggriagationLevel);
+		for (Entry<String, List<String>> area : postcodeAreas.entrySet()) {
+			long avgPrice = 0;
+			double lng = 0;
+			double lat = 0;
+			for (String str : area.getValue()) {
+				PostCodeCoordinates postcodeData = postCodeCoordinatesDao.get(str);
+				avgPrice += postcodeData.getAverageprice();
+				lat += postcodeData.getLatitude();
+				lng += postcodeData.getLongitude();
+			}
+			int entries = area.getValue().size();
+			avgPrice = Math.round(((double) avgPrice) / ((double) entries));
+			lat = Math.round(((double) lat) / ((double) entries));
+			lng = Math.round(((double) lng) / ((double) entries));
+
+		}
+
+	}
 
     public void updatePostcodeDatabase(String postcodePrefix) throws IOException, UnirestException {
         long startTime = System.currentTimeMillis();

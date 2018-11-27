@@ -25,3 +25,7 @@ CREATE TABLE IF NOT EXISTS location_data (
 	-- Dont allow user to update ID if they have locations
 		ON UPDATE RESTRICT
 );
+
+CREATE TABLE IF NOT EXISTS postcodelatlng (
+
+);
