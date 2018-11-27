@@ -25,8 +25,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import asegroup1.api.daos.landregistry.LandRegistryAggDaoImpl;
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.PostCodeCoordinates;
+import asegroup1.api.models.PostCodeCoordinatesAgg;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
@@ -48,10 +50,12 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 public class LandRegistryServiceImpl {
 
     private LandRegistryDaoImpl postCodeCoordinatesDao;
+	private LandRegistryAggDaoImpl aggPostCodeCoordinatesDao;
 
     @Autowired
-    public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
+	public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao, LandRegistryAggDaoImpl aggPostCodeCoordinatesDao) {
         this.postCodeCoordinatesDao = postCodeCoordinatesDao;
+		this.aggPostCodeCoordinatesDao = aggPostCodeCoordinatesDao;
     }
 
     //API CONSTANTS
@@ -287,25 +291,41 @@ public class LandRegistryServiceImpl {
         return postcodePrices;
     }
 
-	private void aggrigatePostCodes(int aggriagationLevel) {
-		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getMatchingPostcodes("", true, aggriagationLevel);
+	private void aggrigatePostCodes(int aggriagationLevel, boolean insertOnly, String postcodePrefix) {
+		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao.getMatchingPostcodes(postcodePrefix, true, aggriagationLevel);
 		for (Entry<String, List<String>> area : postcodeAreas.entrySet()) {
-			long avgPrice = 0;
-			double lng = 0;
-			double lat = 0;
-			for (String str : area.getValue()) {
-				PostCodeCoordinates postcodeData = postCodeCoordinatesDao.get(str);
-				avgPrice += postcodeData.getAverageprice();
-				lat += postcodeData.getLatitude();
-				lng += postcodeData.getLongitude();
+			boolean exsists = aggPostCodeCoordinatesDao.get(area.getKey()) != null;
+			if (!insertOnly || !exsists) {
+				long avgPrice = 0;
+				double lng = 0;
+				double lat = 0;
+				for (String str : area.getValue()) {
+					PostCodeCoordinates postcodeData = postCodeCoordinatesDao.get(str);
+					avgPrice += postcodeData.getAverageprice();
+					lat += postcodeData.getLatitude();
+					lng += postcodeData.getLongitude();
+				}
+				int entries = area.getValue().size();
+				avgPrice = Math.round(((double) avgPrice) / ((double) entries));
+				lat = Math.round(((double) lat) / ((double) entries));
+				lng = Math.round(((double) lng) / ((double) entries));
+
+				if (!exsists) {
+					PostCodeCoordinatesAgg pcca = new PostCodeCoordinatesAgg();
+					pcca.setAverageprice(avgPrice);
+					pcca.setLatitude(lat);
+					pcca.setLongitude(lng);
+					pcca.setPostcode(area.getKey());
+					aggPostCodeCoordinatesDao.add(pcca);
+				} else {
+					PostCodeCoordinatesAgg pcca = aggPostCodeCoordinatesDao.get(area.getKey());
+					pcca.setAverageprice(avgPrice);
+					pcca.setLatitude(lat);
+					pcca.setLongitude(lng);
+					pcca.setPostcode(area.getKey());
+				}
 			}
-			int entries = area.getValue().size();
-			avgPrice = Math.round(((double) avgPrice) / ((double) entries));
-			lat = Math.round(((double) lat) / ((double) entries));
-			lng = Math.round(((double) lng) / ((double) entries));
-
 		}
-
 	}
 
     public void updatePostcodeDatabase(String postcodePrefix) throws IOException, UnirestException {

@@ -11,14 +11,14 @@ import javax.persistence.Table;
  * @author Rikkey Paal
  */
 @Entity
-@Table(name = "postcodelatlng_agg")
-public class PostCodeCoordinates {
+@Table(name = "postcodelatlng")
+public class PostCodeCoordinatesAgg {
     private String postcode;
     private double latitude;
     private double longitude;
 	private Long averageprice;
 
-    public PostCodeCoordinates() {
+    public PostCodeCoordinatesAgg() {
     }
 
     @Id

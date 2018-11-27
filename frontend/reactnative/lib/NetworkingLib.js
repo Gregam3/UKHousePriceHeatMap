@@ -1,6 +1,6 @@
 import request from 'superagent';
 
-var ip = 'http://ec2-35-176-126-234.eu-west-2.compute.amazonaws.com:8080/';
+var ip = 'http://192.168.1.161:8080/';
 
 export function postJSON(extension, jsonFile) {
     console.log("Attempting to post to " + extension);
