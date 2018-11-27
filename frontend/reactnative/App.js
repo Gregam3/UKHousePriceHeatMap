@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
+import 'global'
 
 import * as NetLib from './lib/NetworkingLib.js';
 import * as Auth from './lib/Auth.js';
@@ -11,12 +12,18 @@ import * as Auth from './lib/Auth.js';
  * gregoryamitten@gmail.com
  */
 
+const startingDeltas = {
+    latitude: 0.0006,
+    longitude: 0.002,
+};
+
 export default class App extends Component {
+
     state = {
         location: null,
         errorMessage: null,
         markers: [],
-        mapRegion: null
+        currentMapRegion: null
     };
 
     constructor(props) {
@@ -40,6 +47,17 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
+                if (!this.state.currentMapCoordinates) {
+                    let currentMapCoordinates = {
+                        top: location.coords.longitude + startingDeltas.longitude,
+                        bottom: location.coords.longitude - startingDeltas.longitude,
+                        right: location.coords.latitude + startingDeltas.latitude,
+                        left: location.coords.latitude - startingDeltas.latitude
+                    };
+
+                    this.setState({currentMapCoordinates});
+                }
+
                 let timeDiff = new Date() - this.lastSent;
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
@@ -55,7 +73,6 @@ export default class App extends Component {
     };
 
     getLocation = (location) => {
-
         let locationData = {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -70,7 +87,7 @@ export default class App extends Component {
     };
 
     getMarkersAsync = async () => {
-        let markers = await NetLib.getLandRegistryData(null);
+        let markers = await NetLib.getLandRegistryData(this.state.currentMapCoordinates);
 
         if (markers) {
             console.log('Marker size = ' + markers.length);
@@ -79,7 +96,14 @@ export default class App extends Component {
     };
 
     _handleMapRegionChange = mapRegion => {
-        this.setState({mapRegion});
+        let currentMapCoordinates = {
+            top: mapRegion.longitude + mapRegion.longitudeDelta,
+            bottom: mapRegion.longitude - mapRegion.longitudeDelta,
+            right: mapRegion.latitude + mapRegion.latitudeDelta,
+            left: mapRegion.latitude - mapRegion.latitudeDelta,
+        };
+
+        this.setState({currentMapCoordinates});
     };
 
     render() {
@@ -122,8 +146,8 @@ export default class App extends Component {
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
-                            latitudeDelta: 0.0006,
-                            longitudeDelta: 0.002
+                            latitudeDelta: startingDeltas.latitude,
+                            longitudeDelta: startingDeltas.longitude
                         }}
                         onRegionChange={this._handleMapRegionChange}
                     >

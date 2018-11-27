@@ -30,10 +30,12 @@ export async function get(extension, data) {
 export function getLandRegistryData(mapPosition) {
     console.log("Attempting to get display data");
 
+    console.log("coordinates: " + JSON.stringify(mapPosition));
+
     //TODO change to current ip if ip changes
     return request
-        .get(ip + '/land-registry/get-display-data-test')
-        // .set("mapPosition", parameters)
+        .get(ip + '/land-registry/get-display-data')
+        .query({"mapPosition": JSON.stringify(mapPosition)})
         .then(res => {
             return res.body;
         })
