@@ -3,10 +3,7 @@ package asegroup1.api.models.landregistry;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -23,6 +20,8 @@ public class LandRegistryData {
 
     private Double latitude, longitude;
 
+    private String id;
+
     public static final int YEARS_TO_FETCH = 5;
 
     /**
@@ -32,6 +31,7 @@ public class LandRegistryData {
         constraints = new HashMap<>();
         longitude = null;
         latitude = null;
+        id = UUID.randomUUID().toString();
     }
 
     /**
@@ -44,6 +44,10 @@ public class LandRegistryData {
     public LandRegistryData(JsonNode json) {
         this();
         parseResponse(json);
+    }
+
+    public String getId() {
+        return id;
     }
 
     private void addAddrConstraint(Selectable selectable, String value, boolean isString) {
@@ -310,7 +314,7 @@ public class LandRegistryData {
                 return true;
             case pricePaid:
                 try {
-					setPricePaid(Math.round(Double.parseDouble(value)));
+                    setPricePaid(Math.round(Double.parseDouble(value)));
                     return true;
                 } catch (NumberFormatException e) {
                     return false;

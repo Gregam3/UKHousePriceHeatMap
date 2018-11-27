@@ -62,7 +62,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 10000};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 300};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {

@@ -1,16 +1,19 @@
 package asegroup1.api.controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,12 +37,18 @@ import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 @RequestMapping("/land-registry/")
 public class LandRegistryController {
 
-
+    private Properties mockResponses;
     private LandRegistryServiceImpl landRegistryService;
-
 
     @Autowired
     public LandRegistryController(LandRegistryServiceImpl landRegistryService) {
+        try {
+            FileInputStream fakeResponsesInputStream = new FileInputStream(new File("src/main/java/asegroup1/api/controllers/fake-responses.properties"));
+            mockResponses = new Properties();
+            mockResponses.load(fakeResponsesInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.landRegistryService = landRegistryService;
     }
 
@@ -77,6 +86,11 @@ public class LandRegistryController {
         }
     }
 
+    @GetMapping(value = "get-display-data-test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getTestDisplayData() {
+        return new ResponseEntity<>(mockResponses.getProperty("addressData"), HttpStatus.OK);
+    }
+
     @GetMapping("get-transactions/{post-code}")
     public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
         LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
@@ -91,21 +105,21 @@ public class LandRegistryController {
         }
     }
 
-	@GetMapping("update-postcode/{prefix}")
-	public ResponseEntity<?> updateTransactionData(@PathVariable("prefix") String prefix) {
-		if (prefix == null) {
-			prefix = "";
-		} else if (!prefix.matches("[\\p{Alnum} ]+")) {
-				return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
-		}
-		try {
-			landRegistryService.updatePostcodeDatabase(prefix);
-			return new ResponseEntity<>("Update triggered", HttpStatus.OK);
-		} catch (IOException | UnirestException e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-		}
-	}
+    @GetMapping("update-postcode/{prefix}")
+    public ResponseEntity<?> updateTransactionData(@PathVariable("prefix") String prefix) {
+        if (prefix == null) {
+            prefix = "";
+        } else if (!prefix.matches("[\\p{Alnum} ]+")) {
+            return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            landRegistryService.updatePostcodeDatabase(prefix);
+            return new ResponseEntity<>("Update triggered", HttpStatus.OK);
+        } catch (IOException | UnirestException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
         List<HashMap<String, String>> keys = new ArrayList<>();
@@ -114,7 +128,6 @@ public class LandRegistryController {
         }
         return keys;
     }
-
 
     private String formatPostCode(String postCode) {
         if (postCode.charAt(postCode.length() - 4) == 32) {
