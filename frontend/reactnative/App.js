@@ -68,7 +68,7 @@ export default class App extends Component {
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
                     this.lastSent = new Date();
-
+                    
                 }
             } else {
                 this.setState({
@@ -122,7 +122,7 @@ export default class App extends Component {
 
         let timeDiff = new Date() - this.lastSent;
 
-        if (timeDiff > 15000) {
+        if (timeDiff > 15000 ) {
             this.getMarkersAsync();
             this.lastSent = new Date();
         }
@@ -157,9 +157,9 @@ export default class App extends Component {
                                     <MapView.Circle
                                         key={marker.id}
                                         center={{longitude: marker.longitude, latitude: marker.latitude}}
-                                        radius={100}
-                                        strokeColor={'#FF0000'}
-                                        fillColor={'rgba(255,0,0,0.5)'}
+                                        radius={50}
+                                        strokeColor={marker.colour.hex}
+                                        fillColor={marker.colour.rgba}
                                     />)
                                 : (<MapView.Marker
                                     key={marker.id}

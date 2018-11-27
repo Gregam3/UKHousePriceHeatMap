@@ -33,8 +33,8 @@ export function getLandRegistryData(mapPosition) {
 
     //returns test data, replace get-display-data-test with get-display-data
     return request
-        .get(ip + 'land-registry/get-display-data-test')
-        // .query({"mapPosition": JSON.stringify(mapPosition)})
+        .get(ip + 'land-registry/get-display-data')
+        .query({"mapPosition": JSON.stringify(mapPosition)})
         .then(res => {
             return res.body;
         })

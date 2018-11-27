@@ -55,9 +55,10 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
         em.getTransaction().begin();
 
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, latitude, longitude, averageprice FROM " + TABLE_NAME + "\n" +
-                        "WHERE longitude > :bottomBound AND longitude < :topBound\n" +
-                        "AND latitude > :leftBound AND latitude < :rightBound")
+                "SELECT postcode, latitude, longitude, averageprice FROM "+TABLE_NAME+"\n" +
+                        "WHERE longitude > :bottomBound AND longitude < :topBound \n" +
+                        "AND latitude > :leftBound AND latitude < :rightBound \n " +
+                        "AND averageprice IS NOT NULL;")
                 .setParameter("topBound", top)
                 .setParameter("bottomBound", bottom)
                 .setParameter("rightBound", right)

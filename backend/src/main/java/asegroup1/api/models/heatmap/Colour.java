@@ -40,6 +40,10 @@ public class Colour {
         return getHex();
     }
 
+    public String getRGBA() {
+        return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",1)";
+    }
+
     public String getHex() {
         return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
     }

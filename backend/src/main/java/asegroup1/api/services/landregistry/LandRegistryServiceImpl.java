@@ -211,41 +211,48 @@ public class LandRegistryServiceImpl {
         }
 
         //Find the minimum and maximum price, this is needed to normalise the values
-        long min, max;
+        double min, max, mean, total = 0;
 
         min = max = Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+
 
         for (int i = 1; i < landRegistryDataList.size(); i++) {
             String pricePaidString = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
 
-            if (pricePaidString != null && !pricePaidString.equals("null")) {
-                long pricePaid = Long.parseLong(pricePaidString);
+            long pricePaid = Long.parseLong(pricePaidString);
 
-                if (pricePaid > max) max = pricePaid;
-                else if (pricePaid < min) min = pricePaid;
-            }
+            if (pricePaid > max) max = pricePaid;
+            else if (pricePaid < min) min = pricePaid;
+
+            total += pricePaid;
         }
 
+        mean = total / landRegistryDataList.size();
 
         //Convert list of LandRegistryData to list of HeatMapDataPoints
-        List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.parallelStream().map(lr ->
-                new HeatMapDataPoint(
-                        lr.getLatitude(),
-                        lr.getLongitude(),
-                        null
-                )).collect(Collectors.toList());
+        List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.stream()
+                .map(lr ->
+                        new HeatMapDataPoint(
+                                lr.getLatitude(),
+                                lr.getLongitude(),
+                                null
+                        )).collect(Collectors.toList());
 
-        for (int i = 0; i < landRegistryDataList.size() && i < heatMapDataPoints.size(); i++) {
+
+        for (int i = 0; i < heatMapDataPoints.size(); i++) {
             //Pass in the normalised value and receive a Colour object
 
             String pricePaid = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
 
-            if (pricePaid != null && pricePaid.matches("[-0-9]+"))
+//            (1 / (1 + Math.pow(Math.E, (-1 * (max - min)))))
+
+
+            if (pricePaid != null && pricePaid.matches("[-0-9]+")) {
+                double normFactor = ((Long.parseLong(pricePaid) - min) / (max - min)) - 0.5;
                 heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
-                        //Normalise the values between 0 and 1.0
-                        (double) (Long.parseLong(pricePaid) - min) / (double) (max - min)
-                        )
+                        (1 / (1 + Math.pow(Math.E, (-1 * normFactor * 0.5)))))
                 );
+            }
         }
 
         return heatMapDataPoints;
@@ -297,7 +304,7 @@ public class LandRegistryServiceImpl {
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
 
             System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100,
-                    Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numDone - numAreas))));
+                    Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime) / numDone) * ((numDone / 10000) - numAreas))));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
             updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
