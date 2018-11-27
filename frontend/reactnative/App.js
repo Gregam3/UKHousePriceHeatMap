@@ -107,6 +107,7 @@ export default class App extends Component {
             bottom: mapRegion.longitude - mapRegion.longitudeDelta,
             right: mapRegion.latitude + mapRegion.latitudeDelta,
             left: mapRegion.latitude - mapRegion.latitudeDelta,
+            delta: mapRegion.longitudeDelta * 500
         };
 
         this.setState({currentMapCoordinates});
@@ -157,7 +158,7 @@ export default class App extends Component {
                                     <MapView.Circle
                                         key={marker.id}
                                         center={{longitude: marker.longitude, latitude: marker.latitude}}
-                                        radius={50}
+                                        radius={100 * (this.state.currentMapCoordinates.delta / 25)}
                                         strokeColor={marker.colour.hex}
                                         fillColor={marker.colour.rgba}
                                     />)

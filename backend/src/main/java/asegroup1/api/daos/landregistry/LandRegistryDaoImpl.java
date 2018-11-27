@@ -54,11 +54,16 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
         em.getTransaction().begin();
 
+        int scalingCoefficient = (int) ((top - bottom) * 18.5);
+
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, latitude, longitude, averageprice FROM "+TABLE_NAME+"\n" +
+                "SELECT postcode, latitude, longitude, averageprice,  @rowid \\:= @rowid + 1 AS rowid  FROM " + TABLE_NAME +
+                        ", (SELECT @rowid\\:=0) as init \n" +
                         "WHERE longitude > :bottomBound AND longitude < :topBound \n" +
                         "AND latitude > :leftBound AND latitude < :rightBound \n " +
-                        "AND averageprice IS NOT NULL;")
+                        "AND averageprice > 0  \n" +
+                        "HAVING rowid mod :scalingCoefficient = 0")
+                .setParameter("scalingCoefficient", (scalingCoefficient > 0) ? scalingCoefficient : 1)
                 .setParameter("topBound", top)
                 .setParameter("bottomBound", bottom)
                 .setParameter("rightBound", right)
@@ -72,10 +77,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                     landRegistryData.setLongitude(Double.valueOf(String.valueOf(currentItem[2])));
 
                     String pricePaid = String.valueOf(currentItem[3]);
-
-                    if (!pricePaid.equals("null")) {
-                        landRegistryData.setPricePaid(Long.valueOf(pricePaid));
-                    }
+                    landRegistryData.setPricePaid(Long.valueOf(pricePaid));
 
                     return landRegistryData;
                 }).collect(Collectors.toList());
