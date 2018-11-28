@@ -8,7 +8,6 @@
 	<packaging>jar</packaging>
 	<version>3.0</version>
 	<properties>
-		<java.version>1.8</java.version>
 		<swagger2markup.version>1.2.0</swagger2markup.version>
 		<swagger.output.dir>${project.build.directory}/swagger</swagger.output.dir>
 		<documentation.directory>${project.build.directory}/docs</documentation.directory>
@@ -16,8 +15,6 @@
 		<html.directory>${documentation.directory}/html</html.directory>
 		<pdf.directory>${documentation.directory}/pdf</pdf.directory>
 		<swagger.input>${swagger.output.dir}/swagger.json</swagger.input>
-		<jackson.version>2.9.6</jackson.version>
-		<springfox.version>2.9.2</springfox.version>
 	</properties>
 	<pluginRepositories>
 		<pluginRepository>
