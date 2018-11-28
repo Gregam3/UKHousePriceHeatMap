@@ -164,9 +164,16 @@ public class LandRegistryServiceImpl {
     }
 
     private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
+    	landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
+                .collect(Collectors.toList());
 
-
-        return null;
+    	List<Double> numbers = normaliseList(
+    			landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
+    	
+    	for(int i = 0; i< numbers.size(); i++) {
+    		landRegistryDataForPostcodes.get(i).setColour(getColoursForNormalisedValues(numbers.get(i)));
+    	}
+        return landRegistryDataForPostcodes;
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
