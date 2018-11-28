@@ -29,7 +29,8 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         markers: [],
-        currentMapRegion: null
+        currentMapRegion: null,
+        circleSize: 100
     };
 
     constructor(props) {
@@ -97,6 +98,9 @@ export default class App extends Component {
 
         if (markers) {
             console.log('Marker size = ' + markers.length);
+            let circleSize = 100 * (this.state.currentMapCoordinates.delta / 30);
+
+            this.setState({circleSize});
             this.setState({markers});
         }
     };
@@ -175,7 +179,7 @@ export default class App extends Component {
             <MapView.Circle
                 key={marker.id}
                 center={{longitude: marker.longitude, latitude: marker.latitude}}
-                radius={100 * (this.state.currentMapCoordinates.delta / 30)}
+                radius={this.state.circleSize}
                 strokeColor={marker.colour.hex}
                 fillColor={marker.colour.rgba}
             />

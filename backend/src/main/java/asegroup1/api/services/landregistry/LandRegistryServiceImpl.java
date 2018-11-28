@@ -137,7 +137,7 @@ public class LandRegistryServiceImpl {
         if (postcodesContained > AGGREGATION_LEVELS[2]) {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
         } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
-            return landRegistryDataForPostcodes;
+            return addColoursToLandRegistryData(landRegistryDataForPostcodes);
         } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
@@ -161,6 +161,12 @@ public class LandRegistryServiceImpl {
         } else {
             return new ArrayList<>();
         }
+    }
+
+    private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
+
+
+        return null;
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {

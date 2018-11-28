@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import asegroup1.api.models.heatmap.Colour;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -23,6 +24,8 @@ public class LandRegistryData implements Comparable{
     private String id;
 
     public static final int YEARS_TO_FETCH = 5;
+
+    private Colour colour;
 
     /**
      * Initialise the {@Link LandRegistryData} class, to be empty
@@ -44,6 +47,14 @@ public class LandRegistryData implements Comparable{
     public LandRegistryData(JsonNode json) {
         this();
         parseResponse(json);
+    }
+
+    public void setColour(Colour colour) {
+        this.colour = colour;
+    }
+
+    public Colour getColour() {
+        return colour;
     }
 
     public String getId() {

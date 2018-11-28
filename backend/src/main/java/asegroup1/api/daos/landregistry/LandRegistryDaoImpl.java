@@ -1,23 +1,18 @@
 package asegroup1.api.daos.landregistry;
 
-import java.io.IOException;
+import asegroup1.api.daos.DaoImpl;
+import asegroup1.api.models.PostCodeCoordinates;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
-
-import org.springframework.stereotype.Repository;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import asegroup1.api.daos.DaoImpl;
-import asegroup1.api.models.PostCodeCoordinates;
-import asegroup1.api.models.landregistry.LandRegistryData;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -58,16 +53,16 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
         double delta = ((top - bottom));
 
-        int scalingModifier = 8 - (int) ((delta > 0) ? delta : delta);
+        int scalingModifier = 8 - (int) ((delta > 0) ? delta /2 : delta);
 
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, latitude, longitude, averageprice, SUBSTRING(postcode, 1, :scalingModifier) as postcode_aggregate FROM postcodelatlng \n" +
-                        "WHERE longitude > :bottomBound \n" +
-                        "AND longitude < :topBound \n" +
-                        "AND latitude > :leftBound \n" +
-                        "AND latitude < :rightBound \n" +
-                        "AND averageprice > 0  \n" +
+                "SELECT postcode, avg(latitude) as avgLat, avg(longitude) as avgLon, averageprice, SUBSTRING(postcode, 1, :scalingModifier) as postcode_aggregate FROM postcodelatlng \n" +
+                        "WHERE averageprice > 0 \n" +
                         "GROUP BY postcode_aggregate\n" +
+                        "HAVING avgLon > :bottomBound \n" +
+                        "AND avgLon < :topBound \n" +
+                        "AND avgLat > :leftBound \n" +
+                        "AND avgLat < :rightBound \n" +
                         "ORDER BY RAND()\n" +
                         "LIMIT 1000")
                 .setParameter("scalingModifier", (scalingModifier > 3) ? scalingModifier : 3)
@@ -91,7 +86,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
         em.close();
 
-        if(sorted) Collections.sort(collectedResponse);
+        if (sorted) Collections.sort(collectedResponse);
 
         return collectedResponse;
     }
