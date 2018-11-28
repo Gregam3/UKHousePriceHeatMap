@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
+import 'global'
 
 import * as NetLib from './lib/NetworkingLib.js';
 import * as Auth from './lib/Auth.js';
@@ -11,34 +12,24 @@ import * as Auth from './lib/Auth.js';
  * gregoryamitten@gmail.com
  */
 
+const startingDeltas = {
+    latitude: 0.0006,
+    longitude: 0.002,
+};
+
+const AGGREGATION_LEVELS = {
+    addresses: 0,
+    postcodes: 15,
+    heatmap: 300
+};
+
 export default class App extends Component {
+
     state = {
         location: null,
         errorMessage: null,
-        //Markers array filled with dummy data for display
-        markers: [
-            {
-                id:0,
-                longitude:-0.13104971498263165,
-                latitude:50.84609893155363,
-                title:'£100,000',
-                description:'1 Brighton Street \n BN1 1AB \n Brighton'
-            },
-            {
-                id:1,
-                longitude:-0.133,
-                latitude:50.84609893155363,
-                title:'Hello',
-                description:'World'
-            },
-            {
-                id:2,
-                longitude:-0.16,
-                latitude:50.88,
-                title:'Another',
-                description:'One'
-            }
-        ]
+        markers: [],
+        currentMapRegion: null
     };
 
     constructor(props) {
@@ -62,10 +53,22 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                var timeDiff = new Date() - this.lastSent;
+                if (!this.state.currentMapCoordinates) {
+                    let currentMapCoordinates = {
+                        top: location.coords.longitude + startingDeltas.longitude,
+                        bottom: location.coords.longitude - startingDeltas.longitude,
+                        right: location.coords.latitude + startingDeltas.latitude,
+                        left: location.coords.latitude - startingDeltas.latitude
+                    };
+
+                    this.setState({currentMapCoordinates});
+                }
+
+                let timeDiff = new Date() - this.lastSent;
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
                     this.lastSent = new Date();
+
                 }
             } else {
                 this.setState({
@@ -76,7 +79,6 @@ export default class App extends Component {
     };
 
     getLocation = (location) => {
-
         let locationData = {
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -85,10 +87,29 @@ export default class App extends Component {
             timelog: Math.round(location.timestamp),
             delivered: true
         };
-		if(Auth.getUserKey()){
+        if (Auth.getUserKey()) {
+            NetLib.postJSON('location/add-location-data/', locationData);
+        }
+    };
 
-			NetLib.postJSON('location/add-location-data/', locationData);
-		}
+    getMarkersAsync = async () => {
+        let markers = await NetLib.getLandRegistryData(this.state.currentMapCoordinates);
+
+        if (markers) {
+            console.log('Marker size = ' + markers.length);
+            this.setState({markers});
+        }
+    };
+
+    _handleMapRegionChange = mapRegion => {
+        let currentMapCoordinates = {
+            top: mapRegion.longitude + mapRegion.longitudeDelta,
+            bottom: mapRegion.longitude - mapRegion.longitudeDelta,
+            right: mapRegion.latitude + mapRegion.latitudeDelta,
+            left: mapRegion.latitude - mapRegion.latitudeDelta,
+        };
+
+        this.setState({currentMapCoordinates});
     };
 
     render() {
@@ -99,25 +120,25 @@ export default class App extends Component {
 
         this.requestAndGetLocationAsync();
 
+        let timeDiff = new Date() - this.lastSent;
+
+        if (timeDiff > 15000) {
+            this.getMarkersAsync();
+            this.lastSent = new Date();
+        }
+
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
-
-            displayedText =
-                '\t\n Longitude: ' + longitude +
-                '\t\n Latitude: ' + latitude
         }
 
         return (
             (latitude && longitude) ?
                 <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
-                        <Text style={styles.coordinatesText}>{displayedText}</Text>
-                    </View>
                     <MapView
-                        style={{flex: 7}}
+                        style={{flex: 1}}
                         showsMyLocationButton={true}
                         showsUserLocation={true}
                         provider={MapView.PROVIDER_GOOGLE}
@@ -125,27 +146,36 @@ export default class App extends Component {
                         initialRegion={{
                             longitude: longitude,
                             latitude: latitude,
-                            latitudeDelta: 0.0006,
-                            longitudeDelta: 0.002
+                            latitudeDelta: startingDeltas.latitude,
+                            longitudeDelta: startingDeltas.longitude
                         }}
+                        onRegionChange={this._handleMapRegionChange}
                     >
 
-                      {this.state.markers.map(marker => (
-                        false ? (
-                            <MapView.Circle
-                                key={marker.id}
-                                center={{longitude:marker.longitude, latitude:marker.latitude}}
-                                radius={100}
-                                strokeColor={'#FF0000'}
-                                fillColor={'rgba(255,0,0,0.5)'}
-                            />)
-                        : (<MapView.Marker
-                                key={marker.id}
-                                coordinate={{longitude:marker.longitude, latitude:marker.latitude}}
-                                title={marker.title}
-                                description={marker.description}
-                            />)
-                      ))}
+                        {this.state.markers.map(marker => (
+                            this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
+                                    <MapView.Circle
+                                        key={marker.id}
+                                        center={{longitude: marker.longitude, latitude: marker.latitude}}
+                                        radius={100}
+                                        strokeColor={'#FF0000'}
+                                        fillColor={'rgba(255,0,0,0.5)'}
+                                    />)
+                                : (<MapView.Marker
+                                    key={marker.id}
+                                    coordinate={{
+                                        longitude: parseFloat(marker.mappings.longitude),
+                                        latitude: parseFloat(marker.mappings.latitude)
+                                    }}
+                                    title={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                                        "Average Price: £" + marker.mappings.pricePaid :
+                                        marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+
+                                    description={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                                        marker.mappings.postcode :
+                                        marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                                />)
+                        ))}
 
                     </MapView>
                 </View> :
