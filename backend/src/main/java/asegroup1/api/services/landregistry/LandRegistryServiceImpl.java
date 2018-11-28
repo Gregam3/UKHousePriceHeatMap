@@ -176,8 +176,7 @@ public class LandRegistryServiceImpl {
                     .append("&key=").append(GOOGLE_MAPS_API_KEY);
 
             try {
-                JSONObject response = Unirest.get(addressUriBuilder.toString()).asJson().getBody().getArray().getJSONObject(0).getJSONArray("results").getJSONObject(0)
-                        .getJSONObject("geometry").getJSONObject("location");
+                JSONObject response = postCodeCoordinatesDao.getGeoLocationData(addressUriBuilder.toString());
 
                 address.setLatitude(response.getDouble("lat"));
                 address.setLongitude(response.getDouble("lng"));
