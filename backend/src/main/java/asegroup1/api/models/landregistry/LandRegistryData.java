@@ -15,7 +15,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
-public class LandRegistryData {
+public class LandRegistryData implements Comparable{
     private HashMap<Selectable, EqualityConstraint> constraints;
 
     private Double latitude, longitude;
@@ -522,6 +522,14 @@ public class LandRegistryData {
      */
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    @Override
+    public int compareTo(Object that) {
+        long thisPricePaid = Long.valueOf(this.getConstraint(Selectable.pricePaid));
+        long thatPricePaid = Long.valueOf(((LandRegistryData) that).getConstraint(Selectable.pricePaid));
+
+        return Long.compare(thisPricePaid, thatPricePaid);
     }
 
     abstract class EqualityConstraint implements Comparable<EqualityConstraint> {

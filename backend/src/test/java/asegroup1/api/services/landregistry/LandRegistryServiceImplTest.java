@@ -294,7 +294,8 @@ class LandRegistryServiceImplTest {
                     mockRequest.getDouble("top"),
                     mockRequest.getDouble("right"),
                     mockRequest.getDouble("bottom"),
-                    mockRequest.getDouble("left")
+                    mockRequest.getDouble("left"),
+                    false
             )).thenReturn(postCodeLocationData);
 
             landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
@@ -306,8 +307,8 @@ class LandRegistryServiceImplTest {
         }
     }
 
-	@SuppressWarnings("unchecked")
-	@Test
+    @SuppressWarnings("unchecked")
+    @Test
     void testIfPostcodesAreAggregatedCorrectly() {
         LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
 
@@ -323,7 +324,7 @@ class LandRegistryServiceImplTest {
             landRegistryDataList.add(landRegistryData);
         }
 
-        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0))
+        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0, false))
                 .thenReturn(landRegistryDataList);
 
         LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
@@ -366,7 +367,7 @@ class LandRegistryServiceImplTest {
             landRegistryDataList.add(landRegistryData);
         }
 
-        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0))
+        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0, false))
                 .thenReturn(landRegistryDataList);
 
         LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);

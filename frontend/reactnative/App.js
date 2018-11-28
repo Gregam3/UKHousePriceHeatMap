@@ -68,7 +68,7 @@ export default class App extends Component {
                 if (timeDiff >= 15000) {
                     this.getLocation(location);
                     this.lastSent = new Date();
-                    
+
                 }
             } else {
                 this.setState({
@@ -106,7 +106,7 @@ export default class App extends Component {
             top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
             bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
             right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
-            left: mapRegion.latitude -(mapRegion.latitudeDelta / 2),
+            left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
             delta: mapRegion.longitudeDelta * 500
         };
 
@@ -123,7 +123,7 @@ export default class App extends Component {
 
         let timeDiff = new Date() - this.lastSent;
 
-        if (timeDiff > 15000 ) {
+        if (timeDiff > 15000) {
             this.getMarkersAsync();
             this.lastSent = new Date();
         }
@@ -143,8 +143,8 @@ export default class App extends Component {
         );
     }
 
-    drawMap(longitude, latitude){
-        return  <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+    drawMap(longitude, latitude) {
+        return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
             <MapView
                 style={{flex: 1}}
                 showsMyLocationButton={true}
@@ -170,7 +170,7 @@ export default class App extends Component {
         </View>
     }
 
-    drawHeatmap(){
+    drawHeatmap() {
         return this.state.markers.map(marker => (
             <MapView.Circle
                 key={marker.id}
@@ -182,7 +182,7 @@ export default class App extends Component {
         ))
     }
 
-    drawMarkers(){
+    drawMarkers() {
         return this.state.markers.map(marker => (
             <MapView.Marker
                 key={marker.id}

@@ -2,6 +2,7 @@ package asegroup1.api.daos.landregistry;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,7 +49,8 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
             double top,
             double right,
             double bottom,
-            double left
+            double left,
+            boolean sorted
     ) {
         EntityManager em = getEntityManager();
 
@@ -56,7 +58,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
         double delta = ((top - bottom));
 
-        int scalingModifier = 7 - (int) ((delta > 0) ? delta : delta);
+        int scalingModifier = 8 - (int) ((delta > 0) ? delta : delta);
 
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
                 "SELECT postcode, latitude, longitude, averageprice, SUBSTRING(postcode, 1, :scalingModifier) as postcode_aggregate FROM postcodelatlng \n" +
@@ -88,6 +90,8 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
                 }).collect(Collectors.toList());
 
         em.close();
+
+        if(sorted) Collections.sort(collectedResponse);
 
         return collectedResponse;
     }

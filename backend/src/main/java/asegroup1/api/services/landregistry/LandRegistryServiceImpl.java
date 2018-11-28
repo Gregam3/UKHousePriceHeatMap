@@ -120,7 +120,7 @@ public class LandRegistryServiceImpl {
     }
 
     private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
-        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left);
+        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
     }
 
     public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
@@ -320,7 +320,7 @@ public class LandRegistryServiceImpl {
 
     private Colour getColoursForNormalisedValues(Double normalisedValue) {
         //The higher the normalised value the darker the red will appear
-        return new Colour(255 - (int) (normalisedValue * 200));
+        return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
     private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
