@@ -30,8 +30,15 @@ public class Swagger2MarkupTest {
 
   @Autowired private MockMvc mockMvc;
 
+  /**
+   * This Generates the swagger.json file in a unit tests and stores it in
+   * target/swagger/swagger.json so that it can be converted at compile time to
+   * static documentation
+   *
+   * @throws Exception
+   */
   @Test
-  public void createSpringfoxSwaggerJson() throws Exception {
+  public void generateSwaggerJson() throws Exception {
     String outputDir = "target/swagger/";
     MvcResult mvcResult =
         this.mockMvc
