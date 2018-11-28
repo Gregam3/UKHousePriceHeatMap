@@ -62,7 +62,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 300};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 100};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -209,53 +209,113 @@ public class LandRegistryServiceImpl {
         if (landRegistryDataList.isEmpty()) {
             return null;
         }
+        landRegistryDataList = landRegistryDataList.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
+                .collect(Collectors.toList());
 
-        //Find the minimum and maximum price, this is needed to normalise the values
-        double min, max, mean, total = 0;
+        List<Double> numbers = normaliseList(
+                landRegistryDataList.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
 
-        min = max = Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+        List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
 
-
-        for (int i = 1; i < landRegistryDataList.size(); i++) {
-            String pricePaidString = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
-
-            long pricePaid = Long.parseLong(pricePaidString);
-
-            if (pricePaid > max) max = pricePaid;
-            else if (pricePaid < min) min = pricePaid;
-
-            total += pricePaid;
-        }
-
-        mean = total / landRegistryDataList.size();
-
-        //Convert list of LandRegistryData to list of HeatMapDataPoints
-        List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.stream()
-                .map(lr ->
-                        new HeatMapDataPoint(
-                                lr.getLatitude(),
-                                lr.getLongitude(),
-                                null
-                        )).collect(Collectors.toList());
-
-
-        for (int i = 0; i < heatMapDataPoints.size(); i++) {
-            //Pass in the normalised value and receive a Colour object
-
-            String pricePaid = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
-
-//            (1 / (1 + Math.pow(Math.E, (-1 * (max - min)))))
-
-
-            if (pricePaid != null && pricePaid.matches("[-0-9]+")) {
-                double normFactor = ((Long.parseLong(pricePaid) - min) / (max - min)) - 0.5;
-                heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
-                        (1 / (1 + Math.pow(Math.E, (-1 * normFactor * 0.5)))))
-                );
-            }
+        for (int i = 0; i < landRegistryDataList.size(); i++) {
+            LandRegistryData lr = landRegistryDataList.get(i);
+            heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(), getColoursForNormalisedValues(numbers.get(i))));
         }
 
         return heatMapDataPoints;
+    }
+
+    private List<Double> normaliseList(List<Double> numbers) {
+        System.out.println("Start");
+        List<Double> retNum = rescaleList(standardiseList(numbers));
+
+        retNum = makePositive(retNum);
+
+        printList(retNum, "Final");
+
+        return retNum;
+    }
+
+    private void printList(List<Double> retNum, String name) {
+        double min, max, avg = 0;
+        min = max = retNum.get(0);
+        for (Double dum : retNum) {
+            if (dum > max) {
+                max = dum;
+            } else if (dum < min) {
+                min = dum;
+            }
+            avg += dum;
+        }
+
+        avg /= retNum.size();
+        System.out.println(name + ":");
+        System.out.println("\tMin: " + min);
+        System.out.println("\tMax: " + max);
+        System.out.println("\tAVG: " + avg);
+    }
+
+    private List<Double> standardiseList(List<Double> numbers) {
+        // mean standard deviation
+        double mean, sd, total = 0;
+        for (double num : numbers) {
+            total += num;
+        }
+        mean = total / numbers.size();
+
+        // get standard deviation
+        total = 0;
+        for (double num : numbers) {
+            total += Math.pow(num - mean, 2);
+        }
+        sd = Math.sqrt(total / numbers.size());
+
+        List<Double> standardise = numbers.stream().map(pricePaid -> (pricePaid - mean) / (sd / 7)).collect(Collectors.toList());
+
+        printList(standardise, "Standard");
+
+        List<Double> retList = standardise.stream().map(standardised -> {
+            // normalise result
+            return (1 / (1 + Math.pow(Math.E, (-1 * standardised))));
+        }).collect(Collectors.toList());
+
+        printList(retList, "Norm");
+        return retList;
+    }
+
+    private List<Double> rescaleList(List<Double> numbers) {
+        double max, min, total = 0;
+        max = min = numbers.get(0);
+
+        for (double num : numbers) {
+            if (num > max) {
+                max = num;
+            } else if (num < min) {
+                min = num;
+            }
+            total += num;
+        }
+
+        total /= numbers.size();
+
+        final double range = max - min;
+        final double minVar = total;
+        return numbers.stream().map(pricePaid -> ((pricePaid - minVar) / range)).collect(Collectors.toList());
+    }
+
+    private List<Double> makePositive(List<Double> numbers) {
+        double min = 0;
+        for (double num : numbers) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        if (min < 0) {
+            final double numToAdd = -min;
+            return numbers.stream().map(num -> num + numToAdd).collect(Collectors.toList());
+        } else {
+            return numbers;
+        }
     }
 
     private Colour getColoursForNormalisedValues(Double normalisedValue) {
@@ -288,7 +348,6 @@ public class LandRegistryServiceImpl {
         for (String postcode : unmatchedPostcodes) {
             postcodePrices.put(postcode, null);
         }
-
 
         return postcodePrices;
     }

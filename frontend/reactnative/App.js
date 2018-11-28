@@ -20,7 +20,7 @@ const startingDeltas = {
 const AGGREGATION_LEVELS = {
     addresses: 0,
     postcodes: 15,
-    heatmap: 300
+    heatmap: 100
 };
 
 export default class App extends Component {
@@ -103,10 +103,10 @@ export default class App extends Component {
 
     _handleMapRegionChange = mapRegion => {
         let currentMapCoordinates = {
-            top: mapRegion.longitude + mapRegion.longitudeDelta,
-            bottom: mapRegion.longitude - mapRegion.longitudeDelta,
-            right: mapRegion.latitude + mapRegion.latitudeDelta,
-            left: mapRegion.latitude - mapRegion.latitudeDelta,
+            top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
+            bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
+            right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
+            left: mapRegion.latitude -(mapRegion.latitudeDelta / 2),
             delta: mapRegion.longitudeDelta * 500
         };
 
@@ -137,51 +137,68 @@ export default class App extends Component {
 
         return (
             (latitude && longitude) ?
-                <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-                    <MapView
-                        style={{flex: 1}}
-                        showsMyLocationButton={true}
-                        showsUserLocation={true}
-                        provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle={darkMapStyle}
-                        initialRegion={{
-                            longitude: longitude,
-                            latitude: latitude,
-                            latitudeDelta: startingDeltas.latitude,
-                            longitudeDelta: startingDeltas.longitude
-                        }}
-                        onRegionChange={this._handleMapRegionChange}
-                    >
-
-                        {this.state.markers.map(marker => (
-                            this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
-                                    <MapView.Circle
-                                        key={marker.id}
-                                        center={{longitude: marker.longitude, latitude: marker.latitude}}
-                                        radius={100 * (this.state.currentMapCoordinates.delta / 25)}
-                                        strokeColor={marker.colour.hex}
-                                        fillColor={marker.colour.rgba}
-                                    />)
-                                : (<MapView.Marker
-                                    key={marker.id}
-                                    coordinate={{
-                                        longitude: parseFloat(marker.mappings.longitude),
-                                        latitude: parseFloat(marker.mappings.latitude)
-                                    }}
-                                    title={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
-                                        "Average Price: £" + marker.mappings.pricePaid :
-                                        marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
-
-                                    description={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
-                                        marker.mappings.postcode :
-                                        marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
-                                />)
-                        ))}
-
-                    </MapView>
-                </View> :
+                this.drawMap(longitude, latitude)
+                :
                 <Text style={styles.centerText}>{displayedText}</Text>
         );
+    }
+
+    drawMap(longitude, latitude){
+        return  <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+            <MapView
+                style={{flex: 1}}
+                showsMyLocationButton={true}
+                showsUserLocation={true}
+                provider={MapView.PROVIDER_GOOGLE}
+                customMapStyle={darkMapStyle}
+                initialRegion={{
+                    longitude: longitude,
+                    latitude: latitude,
+                    latitudeDelta: startingDeltas.latitude,
+                    longitudeDelta: startingDeltas.longitude
+                }}
+                onRegionChange={this._handleMapRegionChange}
+            >
+
+                {this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
+                    this.drawHeatmap()
+                ) : (
+                    this.drawMarkers()
+                )}
+
+            </MapView>
+        </View>
+    }
+
+    drawHeatmap(){
+        return this.state.markers.map(marker => (
+            <MapView.Circle
+                key={marker.id}
+                center={{longitude: marker.longitude, latitude: marker.latitude}}
+                radius={100 * (this.state.currentMapCoordinates.delta / 30)}
+                strokeColor={marker.colour.hex}
+                fillColor={marker.colour.rgba}
+            />
+        ))
+    }
+
+    drawMarkers(){
+        return this.state.markers.map(marker => (
+            <MapView.Marker
+                key={marker.id}
+                coordinate={{
+                    longitude: parseFloat(marker.mappings.longitude),
+                    latitude: parseFloat(marker.mappings.latitude)
+                }}
+                title={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                    "Average Price: £" + marker.mappings.pricePaid :
+                    marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+
+                description={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
+                    marker.mappings.postcode :
+                    marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+            />
+        ))
     }
 }
 

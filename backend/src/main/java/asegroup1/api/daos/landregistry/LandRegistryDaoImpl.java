@@ -54,16 +54,21 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
         em.getTransaction().begin();
 
-        int scalingCoefficient = (int) ((top - bottom) * 18.5);
+        double delta = ((top - bottom));
+
+        int scalingModifier = 7 - (int) ((delta > 0) ? delta : delta);
 
         List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, latitude, longitude, averageprice,  @rowid \\:= @rowid + 1 AS rowid  FROM " + TABLE_NAME +
-                        ", (SELECT @rowid\\:=0) as init \n" +
-                        "WHERE longitude > :bottomBound AND longitude < :topBound \n" +
-                        "AND latitude > :leftBound AND latitude < :rightBound \n " +
+                "SELECT postcode, latitude, longitude, averageprice, SUBSTRING(postcode, 1, :scalingModifier) as postcode_aggregate FROM postcodelatlng \n" +
+                        "WHERE longitude > :bottomBound \n" +
+                        "AND longitude < :topBound \n" +
+                        "AND latitude > :leftBound \n" +
+                        "AND latitude < :rightBound \n" +
                         "AND averageprice > 0  \n" +
-                        "HAVING rowid mod :scalingCoefficient = 0")
-                .setParameter("scalingCoefficient", (scalingCoefficient > 0) ? scalingCoefficient : 1)
+                        "GROUP BY postcode_aggregate\n" +
+                        "ORDER BY RAND()\n" +
+                        "LIMIT 1000")
+                .setParameter("scalingModifier", (scalingModifier > 3) ? scalingModifier : 3)
                 .setParameter("topBound", top)
                 .setParameter("bottomBound", bottom)
                 .setParameter("rightBound", right)
@@ -87,7 +92,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
         return collectedResponse;
     }
 
-    public int updateAveragePrice(HashMap<String, Long> averagePrices) throws IOException, UnirestException {
+    public int updateAveragePrice(HashMap<String, Long> averagePrices) {
         int updatedRecords = 0;
         EntityManager em = getEntityManager();
 
