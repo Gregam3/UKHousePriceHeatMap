@@ -86,6 +86,7 @@ export default class App extends Component {
             delivered: true
         };
 		if(Auth.getUserKey()){
+
 			NetLib.postJSON('location/add-location-data/', locationData);
 		}
     };
