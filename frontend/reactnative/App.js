@@ -84,7 +84,7 @@ export default class App extends Component {
             longitude: location.coords.longitude,
             altitude: location.coords.altitude,
             userId: Auth.getUserKey(),
-            timelog: location.timestamp,
+            timelog: Math.round(location.timestamp),
             delivered: true
         };
         if (Auth.getUserKey()) {
