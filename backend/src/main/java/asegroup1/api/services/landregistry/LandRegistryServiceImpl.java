@@ -3,7 +3,6 @@ package asegroup1.api.services.landregistry;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -380,9 +379,9 @@ public class LandRegistryServiceImpl {
         double numDone = 0;
 
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
-
-            System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100,
-                    Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime) / numDone) * ((numDone / 10000) - numAreas))));
+			long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
+					estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
             updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
