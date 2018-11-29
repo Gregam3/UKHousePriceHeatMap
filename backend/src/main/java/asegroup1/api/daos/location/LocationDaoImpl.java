@@ -5,7 +5,6 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 
@@ -31,33 +30,32 @@ public class LocationDaoImpl extends DaoImpl<LocationData> {
 
 	@SuppressWarnings("unchecked")
 	public List<LocationData> getLocationDataById(String userID, Timestamp timestamp) {
-		EntityManager em = getEntityManager();
-		Query query = em
-				.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID" + (timestamp != null ? " AND timelog=:timelog" : ""))
-				.setParameter("userID", userID);
-		if(timestamp != null) {
-			String timestampStr = timestamp.toString();
-			query.setParameter("timelog", timestampStr.substring(0, timestampStr.lastIndexOf('.')));
-		}
-		List<LocationData> retList = (List<LocationData>) 
-				query.getResultList().stream()
-				.map(r -> {
-					Object[] currentItem = (Object[]) r;
+		return useEntityManager(em -> {
+			Query query = em
+					.createNativeQuery("SELECT * FROM " + TABLE_NAME + "\n" + "WHERE USER_ID=:userID" + (timestamp != null ? " AND timelog=:timelog" : ""))
+					.setParameter("userID", userID);
+			if(timestamp != null) {
+				String timestampStr = timestamp.toString();
+				query.setParameter("timelog", timestampStr.substring(0, timestampStr.lastIndexOf('.')));
+			}
+			return (List<LocationData>) 
+					query.getResultList().stream()
+					.map(r -> {
+						Object[] currentItem = (Object[]) r;
 
-					LocationData locationData = new LocationData();
-					locationData.setUserId(String.valueOf(currentItem[0]));
-					locationData.setTimelog(Timestamp.valueOf(String.valueOf(currentItem[1])));
+						LocationData locationData = new LocationData();
+						locationData.setUserId(String.valueOf(currentItem[0]));
+						locationData.setTimelog(Timestamp.valueOf(String.valueOf(currentItem[1])));
 
-					locationData.setLatitude(Float.valueOf(String.valueOf(currentItem[2])));
-					locationData.setLongitude(Float.valueOf(String.valueOf(currentItem[3])));
-					locationData.setAltitude(Float.valueOf(String.valueOf(currentItem[4])));
+						locationData.setLatitude(Float.valueOf(String.valueOf(currentItem[2])));
+						locationData.setLongitude(Float.valueOf(String.valueOf(currentItem[3])));
+						locationData.setAltitude(Float.valueOf(String.valueOf(currentItem[4])));
 
-					locationData.setDelivered(Boolean.valueOf(String.valueOf(currentItem[5])));
+						locationData.setDelivered(Boolean.valueOf(String.valueOf(currentItem[5])));
 
-					return locationData;
-				}).collect(Collectors.toList());
-		em.close();
-		return retList;
+						return locationData;
+					}).collect(Collectors.toList());
+		});
 	}
 
 	public List<LocationData> getUserLocations(String userID) {
