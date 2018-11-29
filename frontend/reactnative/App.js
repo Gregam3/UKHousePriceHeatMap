@@ -23,6 +23,13 @@ const AGGREGATION_LEVELS = {
     heatmap: 100
 };
 
+// min time before location will be sent to the server
+const locationSendRate = 120000
+// min time before map can update
+const mapUpdateRate = 15000;
+// min time without map movement before map will update
+const mapPauseBeforeUpdate = 2000;
+
 export default class App extends Component {
 
     state = {
@@ -35,7 +42,10 @@ export default class App extends Component {
 
     constructor(props) {
         super(props);
-        this.lastSent = new Date() - 15000;
+        this.lastSent = new Date() - locationSendRate;
+		this.lastMapUpdate = new Date() - mapUpdateRate+2000;
+		this.noMapMove = new Date();
+		this.movedSinceUpdate = true;
         Auth.loadUserId();
     }
 
@@ -53,7 +63,7 @@ export default class App extends Component {
 
             if (location) {
                 this.setState({location});
-
+				
                 if (!this.state.currentMapCoordinates) {
                     let currentMapCoordinates = {
                         top: location.coords.longitude + startingDeltas.longitude,
@@ -66,7 +76,7 @@ export default class App extends Component {
                 }
 
                 let timeDiff = new Date() - this.lastSent;
-                if (timeDiff >= 15000) {
+                if (timeDiff >= locationSendRate) {
                     this.getLocation(location);
                     this.lastSent = new Date();
 
@@ -113,23 +123,28 @@ export default class App extends Component {
             left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
             delta: mapRegion.longitudeDelta * 500
         };
-
+		this.noMapMove = new Date();
+		this.movedSinceUpdate = true;
         this.setState({currentMapCoordinates});
     };
 
     render() {
+		
         let displayedText = 'Fetching position...';
-
+		var now = new Date();
+	
         let latitude = null;
         let longitude = null;
 
         this.requestAndGetLocationAsync();
 
-        let timeDiff = new Date() - this.lastSent;
-
-        if (timeDiff > 15000) {
+        var updateTimeDiff = now - this.lastMapUpdate;
+		var waitTimeDiff = now - this.noMapMove;
+		
+        if (this.movedSinceUpdate && (updateTimeDiff > mapUpdateRate) && (waitTimeDiff > mapPauseBeforeUpdate)) {
             this.getMarkersAsync();
-            this.lastSent = new Date();
+            this.lastMapUpdate = new Date();
+			this.movedSinceUpdate = false;
         }
 
         if (this.state.errorMessage) {
@@ -148,6 +163,9 @@ export default class App extends Component {
     }
 
     drawMap(longitude, latitude) {
+		
+		
+		
         return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
             <MapView
                 style={{flex: 1}}
