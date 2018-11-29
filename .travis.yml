@@ -12,7 +12,7 @@ matrix:
         - cd frontend/reactnative/
         - npm install -g npm@latest
         - npm install
-      script:
+      #script:
       jobs:
         include:
           - stage: deploy
