@@ -57,7 +57,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+	private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
@@ -272,6 +272,9 @@ public class LandRegistryServiceImpl {
     }
 
     private List<Double> standardiseList(List<Double> numbers) {
+
+		numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
+
         // mean standard deviation
         double mean, sd, total = 0;
         for (double num : numbers) {
