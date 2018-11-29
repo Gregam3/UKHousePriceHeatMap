@@ -62,7 +62,7 @@ public class LandRegistryServiceImpl {
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 100};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -149,30 +149,33 @@ public class LandRegistryServiceImpl {
 
             constraint.setEqualityConstraint(Selectable.postcode, postcodes.toArray(new String[0]));
 
-            return getPositionForAddresses(
-                    getTransactions(
-                            LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(
-                                    Selectable.paon,
-                                    Selectable.street,
-                                    Selectable.town,
-                                    Selectable.pricePaid
-                            ))
-                    ));
+            return addColoursToLandRegistryData(
+                    getPositionForAddresses(
+                            getTransactions(
+                                    LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(
+                                            Selectable.paon,
+                                            Selectable.street,
+                                            Selectable.town,
+                                            Selectable.pricePaid
+                                    ))
+                            )
+                    )
+            );
         } else {
             return new ArrayList<>();
         }
     }
 
     private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
-    	landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
+        landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
                 .collect(Collectors.toList());
 
-    	List<Double> numbers = normaliseList(
-    			landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
-    	
-    	for(int i = 0; i< numbers.size(); i++) {
-    		landRegistryDataForPostcodes.get(i).setColour(getColoursForNormalisedValues(numbers.get(i)));
-    	}
+        List<Double> numbers = normaliseList(
+                landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
+
+        for (int i = 0; i < numbers.size(); i++) {
+            landRegistryDataForPostcodes.get(i).setColour(getColoursForNormalisedValues(numbers.get(i)));
+        }
         return landRegistryDataForPostcodes;
     }
 

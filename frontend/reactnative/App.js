@@ -20,7 +20,7 @@ const startingDeltas = {
 const AGGREGATION_LEVELS = {
     addresses: 0,
     postcodes: 15,
-    heatmap: 100
+    heatmap: 500
 };
 
 // min time before location will be sent to the server
@@ -219,6 +219,7 @@ export default class App extends Component {
                 description={(this.state.markers.length > AGGREGATION_LEVELS.postcodes) ?
                     marker.mappings.postcode :
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                pinColor={marker.colour.hex}
             />
         ))
     }
