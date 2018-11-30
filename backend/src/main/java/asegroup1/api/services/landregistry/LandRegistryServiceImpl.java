@@ -3,7 +3,6 @@ package asegroup1.api.services.landregistry;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +56,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+	private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
@@ -235,7 +234,8 @@ public class LandRegistryServiceImpl {
 
         for (int i = 0; i < landRegistryDataList.size(); i++) {
             LandRegistryData lr = landRegistryDataList.get(i);
-            heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(), getColoursForNormalisedValues(numbers.get(i))));
+			heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(),
+					getColoursForNormalisedValues(numbers.get(i)), lr.getRadius()));
         }
 
         return heatMapDataPoints;
@@ -272,6 +272,9 @@ public class LandRegistryServiceImpl {
     }
 
     private List<Double> standardiseList(List<Double> numbers) {
+
+		numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
+
         // mean standard deviation
         double mean, sd, total = 0;
         for (double num : numbers) {
@@ -377,9 +380,9 @@ public class LandRegistryServiceImpl {
         double numDone = 0;
 
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
-
-            System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100,
-                    Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime) / numDone) * ((numDone / 10000) - numAreas))));
+			long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
+					estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
             updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);

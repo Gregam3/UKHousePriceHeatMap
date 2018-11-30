@@ -1,18 +1,19 @@
 package asegroup1.api.daos.landregistry;
 
-import asegroup1.api.daos.DaoImpl;
-import asegroup1.api.models.PostCodeCoordinates;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Repository;
+
+import asegroup1.api.daos.DaoImpl;
+import asegroup1.api.models.PostCodeCoordinates;
+import asegroup1.api.models.landregistry.LandRegistryData;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -23,122 +24,133 @@ import java.util.stream.Collectors;
 @Transactional
 public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
-    private static final String TABLE_NAME = "postcodelatlng";
+	private static final String TABLE_NAME = "postcodelatlng";
 
-    public LandRegistryDaoImpl() {
-        setCurrentClass(PostCodeCoordinates.class);
-    }
+	public LandRegistryDaoImpl() {
+		setCurrentClass(PostCodeCoordinates.class);
+	}
 
-    @Override
-    public void delete(String id) {
-        throw new AssertionError("Items cannot be deleted from postcodelatlng table");
-    }
+	@Override
+	public void delete(String id) {
+		throw new AssertionError(
+				"Items cannot be deleted from postcodelatlng table");
+	}
 
-    @Override
-    public List<PostCodeCoordinates> list() {
-        throw new AssertionError("All Postcodes cannot be listed due to magnitude, use searchForLandRegistryDataInBoundaries instead.");
-    }
+	@Override
+	public List<PostCodeCoordinates> list() {
+		throw new AssertionError(
+				"All Postcodes cannot be listed due to magnitude, use searchForLandRegistryDataInBoundaries instead.");
+	}
 
-    @SuppressWarnings("unchecked")
-    public List<LandRegistryData> searchForLandRegistryDataInBoundaries(
-            double top,
-            double right,
-            double bottom,
-            double left,
-            boolean sorted
-    ) {
-        EntityManager em = getEntityManager();
+	@SuppressWarnings("unchecked")
+	public List<LandRegistryData> searchForLandRegistryDataInBoundaries(
+			double top, double right, double bottom, double left,
+			boolean sorted) {
+		return makeTransaction(em -> {
+			double delta = ((top - bottom));
+			double deltab3 = Math.log(delta) / Math.log(3);
+			int scalingModifier = (int) Math.max(0,
+					Math.min(Math.ceil(deltab3), 3));
+			int retCount = 1000;
 
-        em.getTransaction().begin();
+			List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em
+					.createNativeQuery(
+							"SELECT SUBSTRING(postcode, 1, 8 "
+									+ "- ((5 - Locate(' ', postcode))) "
+									+ "- LEAST(3, FLOOR(LOG10(FOUND_ROWS()/"
+									+ " :aggrigationDiff )) + :scalingModifier ))"
+									+ " as postcode_aggregate,"
+									+ "avg(latitude) as avgLat, avg(longitude)"
+									+ " as avgLon,"
+									+ " avg(averageprice) as avgPrice,"
+									+ "SQRT(POW(max(latitude)- min(latitude),"
+									+ " 2)"
+									+ " + POW(max(longitude)- min(longitude),2"
+									+ "))*55556 as radius "
+									+ "FROM ( SELECT * FROM " + TABLE_NAME + " "
+									+ "WHERE averageprice > 0 "
+									+ "AND longitude > :bottomBound "
+									+ "AND longitude < :topBound "
+									+ "AND latitude > :leftBound "
+									+ "AND latitude < :rightBound ) as innerQuery "
+									+ "group by postcode_aggregate "
+									+ "ORDER BY RAND() "
+									+ "LIMIT :returnCount")
+					.setParameter("scalingModifier", scalingModifier)
+					.setParameter("topBound", top)
+					.setParameter("bottomBound", bottom)
+					.setParameter("rightBound", right)
+					.setParameter("leftBound", left)
+					.setParameter("aggrigationDiff", retCount * 5)
+					.setParameter("returnCount", retCount)
+					.getResultList().stream()
+					.map(r -> extractData((Object[]) r))
+					.collect(Collectors.toList());
+			if (sorted)
+				Collections.sort(collectedResponse);
 
-        double delta = ((top - bottom));
+			return collectedResponse;
+		});
+	}
 
-        int scalingModifier = 8 - (int) ((delta > 0) ? delta /2 : delta);
+	private LandRegistryData extractData(Object[] elements) {
+		LandRegistryData landRegistryData = new LandRegistryData();
+		landRegistryData.setPostCode(String.valueOf(elements[0]));
+		landRegistryData
+				.setLatitude(Double.valueOf(String.valueOf(elements[1])));
+		landRegistryData
+				.setLongitude(Double.valueOf(String.valueOf(elements[2])));
+		String pricePaid = String.valueOf(elements[3]);
+		landRegistryData.setPricePaid(Math.round(Double.valueOf(pricePaid)));
+		landRegistryData.setRadius(Double.valueOf(String.valueOf(elements[4])));
 
-        List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-                "SELECT postcode, avg(latitude) as avgLat, avg(longitude) as avgLon, averageprice, SUBSTRING(postcode, 1, :scalingModifier) as postcode_aggregate FROM postcodelatlng \n" +
-                        "WHERE averageprice > 0 \n" +
-                        "GROUP BY postcode_aggregate\n" +
-                        "HAVING avgLon > :bottomBound \n" +
-                        "AND avgLon < :topBound \n" +
-                        "AND avgLat > :leftBound \n" +
-                        "AND avgLat < :rightBound \n" +
-                        "ORDER BY RAND()\n" +
-                        "LIMIT 1000")
-                .setParameter("scalingModifier", (scalingModifier > 3) ? scalingModifier : 3)
-                .setParameter("topBound", top)
-                .setParameter("bottomBound", bottom)
-                .setParameter("rightBound", right)
-                .setParameter("leftBound", left)
-                .getResultList().stream().map(r -> {
-                    Object[] currentItem = (Object[]) r;
+		return landRegistryData;
+	}
 
-                    LandRegistryData landRegistryData = new LandRegistryData();
-                    landRegistryData.setPostCode(String.valueOf(currentItem[0]));
-                    landRegistryData.setLatitude(Double.valueOf(String.valueOf(currentItem[1])));
-                    landRegistryData.setLongitude(Double.valueOf(String.valueOf(currentItem[2])));
+	public int updateAveragePrice(HashMap<String, Long> averagePrices) {
 
-                    String pricePaid = String.valueOf(currentItem[3]);
-                    landRegistryData.setPricePaid(Long.valueOf(pricePaid));
+		return makeTransaction(em -> {
+			int updatedRecords = 0;
+			for (Entry<String, Long> averagePrice : averagePrices.entrySet()) {
 
-                    return landRegistryData;
-                }).collect(Collectors.toList());
+				PostCodeCoordinates coordsToUpdate = em
+						.find(PostCodeCoordinates.class, averagePrice.getKey());
 
-        em.close();
+				if (!coordsToUpdate.getAverageprice()
+						.equals(averagePrice.getValue())) {
+					coordsToUpdate.setAverageprice(averagePrice.getValue());
+					em.merge(coordsToUpdate);
+					updatedRecords++;
+				}
+			}
+			return updatedRecords;
+		});
 
-        if (sorted) Collections.sort(collectedResponse);
+	}
 
-        return collectedResponse;
-    }
+	@SuppressWarnings("unchecked")
+	public HashMap<String, List<String>> getMatchingPostcodes(String regex,
+			boolean restrictToUnset, int groupCharSize) {
+		return makeTransaction(em -> {
+			List<String> postcodes = (List<String>) em
+					.createNativeQuery("SELECT postcode FROM " + TABLE_NAME
+							+ "\n" + "WHERE postcode LIKE :outcode"
+							+ (restrictToUnset ? " AND averageprice = 0" : ""))
+					.setParameter("outcode", regex + "%").getResultList()
+					.stream().map(String::valueOf).collect(Collectors.toList());
 
-    public int updateAveragePrice(HashMap<String, Long> averagePrices) {
-        int updatedRecords = 0;
-        EntityManager em = getEntityManager();
+			HashMap<String, List<String>> postcodeMap = new HashMap<>();
 
-        for (Entry<String, Long> averagePrice : averagePrices.entrySet()) {
-            PostCodeCoordinates coordsToUpdate = em.find(PostCodeCoordinates.class, averagePrice.getKey());
+			for (String postcode : postcodes) {
+				String localPostcode = postcode.substring(0,
+						postcode.length() - groupCharSize);
 
-            if (!coordsToUpdate.getAverageprice().equals(averagePrice.getValue())) {
-
-                // update local values
-                em.getTransaction().begin();
-                coordsToUpdate.setAverageprice(averagePrice.getValue());
-                em.merge(coordsToUpdate);
-
-                // write update to database
-                em.getTransaction().commit();
-                updatedRecords++;
-            }
-        }
-
-        em.close();
-
-        return updatedRecords;
-    }
-
-    @SuppressWarnings("unchecked")
-    public HashMap<String, List<String>> getMatchingPostcodes(String regex, boolean restrictToUnset, int groupCharSize) {
-        EntityManager em = getEntityManager();
-
-        em.getTransaction().begin();
-
-        List<String> postcodes = (List<String>) em
-                .createNativeQuery("SELECT postcode FROM " + TABLE_NAME + "\n" + "WHERE postcode LIKE :outcode" + (restrictToUnset ? " AND averageprice = 0" : ""))
-                .setParameter("outcode", regex + "%").getResultList().stream().map(String::valueOf).collect(Collectors.toList());
-
-        HashMap<String, List<String>> postcodeMap = new HashMap<>();
-
-        for (String postcode : postcodes) {
-            String localPostcode = postcode.substring(0, postcode.length() - groupCharSize);
-
-            if (!postcodeMap.containsKey(localPostcode)) {
-                postcodeMap.put(localPostcode, new ArrayList<>());
-            }
-            postcodeMap.get(localPostcode).add(postcode);
-        }
-
-        em.close();
-
-        return postcodeMap;
-    }
+				if (!postcodeMap.containsKey(localPostcode)) {
+					postcodeMap.put(localPostcode, new ArrayList<>());
+				}
+				postcodeMap.get(localPostcode).add(postcode);
+			}
+			return postcodeMap;
+		});
+	}
 }

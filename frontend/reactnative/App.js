@@ -13,8 +13,8 @@ import * as Auth from './lib/Auth.js';
  */
 
 const startingDeltas = {
-    latitude: 0.0006,
-    longitude: 0.002,
+    latitude: 0.012,
+    longitude: 0.04,
 };
 
 const AGGREGATION_LEVELS = {
@@ -26,10 +26,11 @@ const AGGREGATION_LEVELS = {
 // min time before location will be sent to the server
 const locationSendRate = 120000
 // min time before map can update
-const mapUpdateRate = 15000;
+const mapUpdateRate = 7000;
 // min time without map movement before map will update
 const mapPauseBeforeUpdate = 2000;
-
+// number used to scale up the minimum size of the circlesin the heatmap
+const heatmapScaleFactor = 30;
 export default class App extends Component {
 
     state = {
@@ -43,7 +44,7 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         this.lastSent = new Date() - locationSendRate;
-		this.lastMapUpdate = new Date() - mapUpdateRate+2000;
+		this.lastMapUpdate = new Date() - mapUpdateRate+4000;
 		this.noMapMove = new Date();
 		this.movedSinceUpdate = true;
         Auth.loadUserId();
@@ -108,7 +109,7 @@ export default class App extends Component {
 
         if (markers) {
             console.log('Marker size = ' + markers.length);
-            let circleSize = 100 * (this.state.currentMapCoordinates.delta / 30);
+            let circleSize = heatmapScaleFactor * (this.state.currentMapCoordinates.delta / 30);
 
             this.setState({circleSize});
             this.setState({markers});
@@ -197,7 +198,7 @@ export default class App extends Component {
             <MapView.Circle
                 key={marker.id}
                 center={{longitude: marker.longitude, latitude: marker.latitude}}
-                radius={this.state.circleSize}
+                radius={Math.max(this.state.circleSize, marker.radius)}
                 strokeColor={marker.colour.hex}
                 fillColor={marker.colour.rgba}
             />
