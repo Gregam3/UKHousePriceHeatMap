@@ -26,7 +26,7 @@ const AGGREGATION_LEVELS = {
 // min time before location will be sent to the server
 const locationSendRate = 120000
 // min time before map can update
-const mapUpdateRate = 10000;
+const mapUpdateRate = 7000;
 // min time without map movement before map will update
 const mapPauseBeforeUpdate = 2000;
 
@@ -109,8 +109,7 @@ export default class App extends Component {
         if (markers) {
             console.log('Marker size = ' + markers.length);
 			// CHANGE 10 FOR DIFFERENT MINIMUM CIRCLE SIZE
-            let circleSize = 10 * (this.state.currentMapCoordinates.delta / 30);
-			console.log("CircleSize: " + circleSize);
+            let circleSize = 20 * (this.state.currentMapCoordinates.delta / 30);
 
             this.setState({circleSize});
             this.setState({markers});
