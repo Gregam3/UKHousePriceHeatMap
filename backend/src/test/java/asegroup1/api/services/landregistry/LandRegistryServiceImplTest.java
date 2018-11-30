@@ -1,33 +1,24 @@
 package asegroup1.api.services.landregistry;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import org.junit.rules.ExpectedException;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Greg Mitten
@@ -69,27 +60,26 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfCoordinatesAreSetCorrectly() {
-        LandRegistryData address = null;
+        LandRegistryData address;
         List<LandRegistryData> addresses = new ArrayList<>();
         LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
 
         LandRegistryData landRegistryData = new LandRegistryData();
         landRegistryData.setLongitude(0);
         landRegistryData.setLatitude(0);
+
+        //Invalid Postcode that won't touch SPARQL
         landRegistryData.setPostCode("XXX XXXX");
         addresses.add(landRegistryData);
 
         try {
             JSONObject mockRequest = new JSONObject();
-            JSONObject mockResponse = new JSONObject();
-
-            mockResponse.put("lat", 0);
-            mockResponse.put("lng", 0);
 
             mockRequest.put("top", 0);
             mockRequest.put("right", 0);
             mockRequest.put("bottom", 0);
             mockRequest.put("left", 0);
+
 
             when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
                     mockRequest.getDouble("top"),
@@ -99,20 +89,26 @@ class LandRegistryServiceImplTest {
                     )
             ).thenReturn(addresses);
 
+            JSONObject mockResponse = new JSONObject();
+
+            mockResponse.put("lat", 0);
+            mockResponse.put("lng", 0);
+
+            //This is the url that will be generated as no addresses will be fetched
             when(landRegistryDataDaoMock.getGeoLocationData(
                     "https://maps.googleapis.com/maps/api/geocode/json?address=++&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA"
                     )
             ).thenReturn(mockResponse);
 
             LandRegistryServiceImpl landRegistryServiceLocal = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
             address = (LandRegistryData) landRegistryServiceLocal.getPositionInsideBounds(mockRequest).get(0);
+
+            assert address.getLongitude() == 0 && address.getLatitude() == 0;
         } catch (UnirestException | JSONException | IOException e) {
             e.printStackTrace();
-
             assert false;
         }
-
-        assert address.getLongitude() == 0 && address.getLatitude() == 0;
     }
 
     @Test
