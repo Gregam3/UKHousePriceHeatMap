@@ -1,8 +1,8 @@
 package asegroup1.api.models.heatmap;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.security.InvalidParameterException;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Greg Mitten
@@ -52,7 +52,7 @@ public class Colour {
     }
 
     public String getRGBA() {
-        return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",1)";
+		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",0.75)";
     }
 
     public String getHex() {
