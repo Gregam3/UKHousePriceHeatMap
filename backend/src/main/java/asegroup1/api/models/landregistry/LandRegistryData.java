@@ -3,19 +3,24 @@ package asegroup1.api.models.landregistry;
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
-public class LandRegistryData {
+public class LandRegistryData implements Comparable{
     private HashMap<Selectable, EqualityConstraint> constraints;
 
     private Double latitude, longitude;
@@ -23,6 +28,10 @@ public class LandRegistryData {
     private String id;
 
     public static final int YEARS_TO_FETCH = 5;
+
+    private Colour colour;
+
+	private Double radius;
 
     /**
      * Initialise the {@Link LandRegistryData} class, to be empty
@@ -32,6 +41,7 @@ public class LandRegistryData {
         longitude = null;
         latitude = null;
         id = UUID.randomUUID().toString();
+		radius = null;
     }
 
     /**
@@ -44,6 +54,14 @@ public class LandRegistryData {
     public LandRegistryData(JsonNode json) {
         this();
         parseResponse(json);
+    }
+
+    public void setColour(Colour colour) {
+        this.colour = colour;
+    }
+
+    public Colour getColour() {
+        return colour;
     }
 
     public String getId() {
@@ -462,6 +480,9 @@ public class LandRegistryData {
         if (latitude != null) {
             retMap.put("latitude", latitude + "");
         }
+		if (radius != null) {
+			retMap.put("radius", radius + "");
+		}
 
         return retMap;
     }
@@ -524,7 +545,24 @@ public class LandRegistryData {
         this.longitude = longitude;
     }
 
-    abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
+    @Override
+    public int compareTo(Object that) {
+        long thisPricePaid = Long.valueOf(this.getConstraint(Selectable.pricePaid));
+        long thatPricePaid = Long.valueOf(((LandRegistryData) that).getConstraint(Selectable.pricePaid));
+
+        return Long.compare(thisPricePaid, thatPricePaid);
+    }
+
+	@JsonIgnore
+	public Double getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Double radius) {
+		this.radius = radius;
+	}
+
+	abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
         protected String namespace, type, name, value;
         private boolean isString;
 
