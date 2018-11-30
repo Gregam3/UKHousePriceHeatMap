@@ -52,15 +52,6 @@ public class LandRegistryController {
         this.landRegistryService = landRegistryService;
     }
 
-    @GetMapping("get-addresses/{post-code}")
-    public ResponseEntity<?> getAddressDataForPostCode(@PathVariable("post-code") String postCode) {
-        try {
-            return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getAddressesForPostCode(formatPostCode(postCode))), HttpStatus.OK);
-        } catch (UnirestException e) {
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @GetMapping("get-display-data")
     public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
         long timer = System.currentTimeMillis();
@@ -89,20 +80,6 @@ public class LandRegistryController {
     @GetMapping(value = "get-display-data-test", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getTestDisplayData() {
         return new ResponseEntity<>(mockResponses.getProperty("addressData"), HttpStatus.OK);
-    }
-
-    @GetMapping("get-transactions/{post-code}")
-    public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
-        LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-        constraint.setEqualityConstraint(Selectable.postcode, formatPostCode(postCode));
-        constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
-
-        try {
-            return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
-                    HttpStatus.OK);
-        } catch (IOException | UnirestException e) {
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
     }
 
     @GetMapping("update-postcode/{prefix}")

@@ -14,6 +14,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 
 public class LandRegistryData {
     private HashMap<Selectable, EqualityConstraint> constraints;
@@ -266,6 +267,10 @@ public class LandRegistryData {
      */
     public boolean setConstraint(String name, String value) {
         Selectable selectable;
+
+        if(value == null) {
+            throw new InvalidParameterException("Value cannot be null");
+        }
 
         try {
             if (name.length() < 2) {
