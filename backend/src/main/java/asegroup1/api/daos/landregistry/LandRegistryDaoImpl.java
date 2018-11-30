@@ -52,9 +52,10 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
     		double delta = ((top - bottom));
 			double deltab3 = Math.log(delta) / Math.log(3);
 			int scalingModifier = (int) Math.max(0, Math.min(Math.ceil(deltab3), 3));
+			int retCount = 1000;
 
             List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em.createNativeQuery(
-							"SELECT SUBSTRING(postcode, 1, 8 - ((5 - Locate(' ', postcode))) - LEAST(3, FLOOR(LOG10(FOUND_ROWS()/5000)) + :scalingModifier )) as postcode_aggregate,"
+							"SELECT SUBSTRING(postcode, 1, 8 - ((5 - Locate(' ', postcode))) - LEAST(3, FLOOR(LOG10(FOUND_ROWS()/ :aggrigationDiff )) + :scalingModifier )) as postcode_aggregate,"
 									+ "avg(latitude) as avgLat, avg(longitude) as avgLon, avg(averageprice) as avgPrice,"
 									+ "SQRT( POW(max(latitude)- min(latitude), 2) + POW(max(longitude)- min(longitude),2))*55556 as radius "
 									+ "FROM ( SELECT * FROM " + TABLE_NAME + " "
@@ -63,12 +64,14 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 									+ "AND latitude > :leftBound "
 									+ "AND latitude < :rightBound ) as innerQuery "
 									+ "group by postcode_aggregate " + "ORDER BY RAND() "
-									+ "LIMIT 1000")
+									+ "LIMIT :returnCount")
 					.setParameter("scalingModifier", scalingModifier)
                     .setParameter("topBound", top)
                     .setParameter("bottomBound", bottom)
                     .setParameter("rightBound", right)
                     .setParameter("leftBound", left)
+					.setParameter("aggrigationDiff", retCount * 5)
+					.setParameter("returnCount", retCount)
                     .getResultList().stream().map(r -> {
                         Object[] currentItem = (Object[]) r;
 
