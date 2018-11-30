@@ -3,7 +3,6 @@ package asegroup1.api.services.landregistry;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,12 +56,12 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+	private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 300};
+    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
 
 
     public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
@@ -120,7 +119,7 @@ public class LandRegistryServiceImpl {
     }
 
     private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
-        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left);
+        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
     }
 
     public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
@@ -137,7 +136,7 @@ public class LandRegistryServiceImpl {
         if (postcodesContained > AGGREGATION_LEVELS[2]) {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
         } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
-            return landRegistryDataForPostcodes;
+            return addColoursToLandRegistryData(landRegistryDataForPostcodes);
         } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
@@ -149,18 +148,34 @@ public class LandRegistryServiceImpl {
 
             constraint.setEqualityConstraint(Selectable.postcode, postcodes.toArray(new String[0]));
 
-            return getPositionForAddresses(
-                    getTransactions(
-                            LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(
-                                    Selectable.paon,
-                                    Selectable.street,
-                                    Selectable.town,
-                                    Selectable.pricePaid
-                            ))
-                    ));
+            return addColoursToLandRegistryData(
+                    getPositionForAddresses(
+                            getTransactions(
+                                    LandRegistryQuery.buildQueryLatestSalesOnly(constraint, Arrays.asList(
+                                            Selectable.paon,
+                                            Selectable.street,
+                                            Selectable.town,
+                                            Selectable.pricePaid
+                                    ))
+                            )
+                    )
+            );
         } else {
             return new ArrayList<>();
         }
+    }
+
+    private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
+        landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
+                .collect(Collectors.toList());
+
+        List<Double> numbers = normaliseList(
+                landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
+
+        for (int i = 0; i < numbers.size(); i++) {
+            landRegistryDataForPostcodes.get(i).setColour(getColoursForNormalisedValues(numbers.get(i)));
+        }
+        return landRegistryDataForPostcodes;
     }
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
@@ -208,51 +223,122 @@ public class LandRegistryServiceImpl {
         if (landRegistryDataList.isEmpty()) {
             return null;
         }
+        landRegistryDataList = landRegistryDataList.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
+                .collect(Collectors.toList());
 
-        //Find the minimum and maximum price, this is needed to normalise the values
-        long min, max;
+        List<Double> numbers = normaliseList(
+                landRegistryDataList.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
 
-        min = max = Long.parseLong(landRegistryDataList.get(0).getConstraint(Selectable.pricePaid));
+        List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
 
-        for (int i = 1; i < landRegistryDataList.size(); i++) {
-            String pricePaidString = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
-
-            if (pricePaidString != null && !pricePaidString.equals("null")) {
-                long pricePaid = Long.parseLong(pricePaidString);
-
-                if (pricePaid > max) max = pricePaid;
-                else if (pricePaid < min) min = pricePaid;
-            }
-        }
-
-
-        //Convert list of LandRegistryData to list of HeatMapDataPoints
-        List<HeatMapDataPoint> heatMapDataPoints = landRegistryDataList.parallelStream().map(lr ->
-                new HeatMapDataPoint(
-                        lr.getLatitude(),
-                        lr.getLongitude(),
-                        null
-                )).collect(Collectors.toList());
-
-        for (int i = 0; i < landRegistryDataList.size() && i < heatMapDataPoints.size(); i++) {
-            //Pass in the normalised value and receive a Colour object
-
-            String pricePaid = landRegistryDataList.get(i).getConstraint(Selectable.pricePaid);
-
-            if (pricePaid != null && pricePaid.matches("[-0-9]+"))
-                heatMapDataPoints.get(i).setColour(getColoursForNormalisedValues(
-                        //Normalise the values between 0 and 1.0
-                        (double) (Long.parseLong(pricePaid) - min) / (double) (max - min)
-                        )
-                );
+        for (int i = 0; i < landRegistryDataList.size(); i++) {
+            LandRegistryData lr = landRegistryDataList.get(i);
+			heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(),
+					getColoursForNormalisedValues(numbers.get(i)), lr.getRadius()));
         }
 
         return heatMapDataPoints;
     }
 
+    private List<Double> normaliseList(List<Double> numbers) {
+        System.out.println("Start");
+        List<Double> retNum = rescaleList(standardiseList(numbers));
+
+        retNum = makePositive(retNum);
+
+        printList(retNum, "Final");
+
+        return retNum;
+    }
+
+    private void printList(List<Double> retNum, String name) {
+        double min, max, avg = 0;
+        min = max = retNum.get(0);
+        for (Double dum : retNum) {
+            if (dum > max) {
+                max = dum;
+            } else if (dum < min) {
+                min = dum;
+            }
+            avg += dum;
+        }
+
+        avg /= retNum.size();
+        System.out.println(name + ":");
+        System.out.println("\tMin: " + min);
+        System.out.println("\tMax: " + max);
+        System.out.println("\tAVG: " + avg);
+    }
+
+    private List<Double> standardiseList(List<Double> numbers) {
+
+		numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
+
+        // mean standard deviation
+        double mean, sd, total = 0;
+        for (double num : numbers) {
+            total += num;
+        }
+        mean = total / numbers.size();
+
+        // get standard deviation
+        total = 0;
+        for (double num : numbers) {
+            total += Math.pow(num - mean, 2);
+        }
+        sd = Math.sqrt(total / numbers.size());
+
+        List<Double> standardise = numbers.stream().map(pricePaid -> (pricePaid - mean) / (sd / 7)).collect(Collectors.toList());
+
+        printList(standardise, "Standard");
+
+        List<Double> retList = standardise.stream().map(standardised -> {
+            // normalise result
+            return (1 / (1 + Math.pow(Math.E, (-1 * standardised))));
+        }).collect(Collectors.toList());
+
+        printList(retList, "Norm");
+        return retList;
+    }
+
+    private List<Double> rescaleList(List<Double> numbers) {
+        double max, min, total = 0;
+        max = min = numbers.get(0);
+
+        for (double num : numbers) {
+            if (num > max) {
+                max = num;
+            } else if (num < min) {
+                min = num;
+            }
+            total += num;
+        }
+
+        total /= numbers.size();
+
+        final double range = max - min;
+        final double minVar = total;
+        return numbers.stream().map(pricePaid -> ((pricePaid - minVar) / range)).collect(Collectors.toList());
+    }
+
+    private List<Double> makePositive(List<Double> numbers) {
+        double min = 0;
+        for (double num : numbers) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        if (min < 0) {
+            final double numToAdd = -min;
+            return numbers.stream().map(num -> num + numToAdd).collect(Collectors.toList());
+        } else {
+            return numbers;
+        }
+    }
+
     private Colour getColoursForNormalisedValues(Double normalisedValue) {
         //The higher the normalised value the darker the red will appear
-        return new Colour(255 - (int) (normalisedValue * 200));
+        return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
     private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
@@ -281,7 +367,6 @@ public class LandRegistryServiceImpl {
             postcodePrices.put(postcode, null);
         }
 
-
         return postcodePrices;
     }
 
@@ -294,9 +379,9 @@ public class LandRegistryServiceImpl {
         double numDone = 0;
 
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
-
-            System.out.printf("Updating records in \"%s\" %.3f %% done, %s remaining\n", postcodeArea.getKey(), (numDone / numAreas) * 100,
-                    Duration.ofMillis(Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numDone - numAreas))));
+			long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
+					estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
             updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
