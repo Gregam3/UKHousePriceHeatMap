@@ -17,17 +17,6 @@ matrix:
         - npx expo login -u $Expo_User -p $Expo_password
         - npx expo publish --non-interactive
         - expo build:android
-        # - expo build:ios
-      #jobs:
-      #  include:
-      #    - stage: deploy
-      #      node_js: lts/*
-      #      script:
-      #        - npm ci
-      #        - npx expo login -u $Expo_User -p $Expo_password
-      #        - npx expo publish --non-interactive
-      #        - expo build:android
-              # - expo build:ios
     - language: java
       services:
         - docker
