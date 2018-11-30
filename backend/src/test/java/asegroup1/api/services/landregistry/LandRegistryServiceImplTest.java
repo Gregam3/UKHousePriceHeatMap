@@ -80,7 +80,6 @@ class LandRegistryServiceImplTest {
             mockRequest.put("bottom", 0);
             mockRequest.put("left", 0);
 
-
             when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
                     mockRequest.getDouble("top"),
                     mockRequest.getDouble("right"),
