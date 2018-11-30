@@ -29,7 +29,8 @@ const locationSendRate = 120000
 const mapUpdateRate = 7000;
 // min time without map movement before map will update
 const mapPauseBeforeUpdate = 2000;
-
+// number used to scale up the minimum size of the circlesin the heatmap
+const heatmapScaleFactor = 30;
 export default class App extends Component {
 
     state = {
@@ -108,8 +109,7 @@ export default class App extends Component {
 
         if (markers) {
             console.log('Marker size = ' + markers.length);
-			// CHANGE 10 FOR DIFFERENT MINIMUM CIRCLE SIZE
-            let circleSize = 20 * (this.state.currentMapCoordinates.delta / 30);
+            let circleSize = heatmapScaleFactor * (this.state.currentMapCoordinates.delta / 30);
 
             this.setState({circleSize});
             this.setState({markers});
