@@ -90,7 +90,7 @@ export default class App extends Component {
             if (markers) {
                 let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
 
-                console.log('called set state');
+                log('Set state for new markers and new circleSize');
                 this.setState({markers, circleSize});
             }
         }
