@@ -270,7 +270,8 @@ class LandRegistryServiceImplTest {
             landRegistryData.setLatitude(0);
             landRegistryData.setLongitude(0);
             landRegistryData.setPricePaid(random.nextInt(10000000));
-            landRegistryDataList.add(landRegistryData);
+			landRegistryData.setRadius(0.0);
+			landRegistryDataList.add(landRegistryData);
         }
 
         when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0, true))
