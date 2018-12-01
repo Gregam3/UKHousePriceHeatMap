@@ -54,8 +54,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		return makeTransaction(em -> {
 			double delta = ((top - bottom));
 			double deltab3 = Math.log(delta) / Math.log(3);
-			int scalingModifier = (int) Math.max(0,
-					Math.min(Math.ceil(deltab3), 3));
+			int scalingModifier = (int) Math.max(0, Math.min(Math.ceil(deltab3), 3));
 			int retCount = 1000;
 
 			List<LandRegistryData> collectedResponse = (List<LandRegistryData>) em
@@ -63,7 +62,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 							"SELECT SUBSTRING(postcode, 1, 8 "
 									+ "- ((5 - Locate(' ', postcode))) "
 									+ "- LEAST(3, FLOOR(LOG10(FOUND_ROWS()/"
-									+ " :aggrigationDiff )) + :scalingModifier ))"
+									+ " :aggregationDiff )) + :scalingModifier ))"
 									+ " as postcode_aggregate,"
 									+ "avg(latitude) as avgLat, avg(longitude)"
 									+ " as avgLon,"
@@ -86,10 +85,10 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 					.setParameter("bottomBound", bottom)
 					.setParameter("rightBound", right)
 					.setParameter("leftBound", left)
-					.setParameter("aggrigationDiff", retCount * 5)
+					.setParameter("aggregationDiff", retCount * 5)
 					.setParameter("returnCount", retCount)
 					.getResultList().stream()
-					.map(r -> extractData((Object[]) r))
+					.map(r -> extractDataLandRegistryDataFromRow((Object[]) r))
 					.collect(Collectors.toList());
 			if (sorted)
 				Collections.sort(collectedResponse);
@@ -98,7 +97,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		});
 	}
 
-	private LandRegistryData extractData(Object[] elements) {
+	private LandRegistryData extractDataLandRegistryDataFromRow(Object[] elements) {
 		LandRegistryData landRegistryData = new LandRegistryData();
 		landRegistryData.setPostCode(String.valueOf(elements[0]));
 		landRegistryData
