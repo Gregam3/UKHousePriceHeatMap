@@ -13,6 +13,7 @@ import javax.persistence.Table;
 @Table(name = "location_data")
 public class LocationData implements Serializable {
 
+	private static final long serialVersionUID = 6213875596995994390L;
 	@Id
 	@Column(name = "USER_ID")
 	private String userId;

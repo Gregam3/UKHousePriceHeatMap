@@ -5,10 +5,12 @@ import * as NetLib from './NetworkingLib.js';
 
 let userKey;
 
+const authLogging = true;
+
 export function wipeUserId(){
 	Config.eraseSetting("userKey").then(function(result) {
-		// log if erase was sucessful or not
-		console.log("Erase sucess: " + result);
+		// log if erase was successful or not
+		if(authLogging) log("Erase success: " + result);
 	});
 }
 	
@@ -18,36 +20,34 @@ export async function loadUserId(){
 	await Config.retrieveSetting("userKey").then(function(result){
 		// if no key is stored locally
 		if(result){
-			console.log("Key found");
+			if(authLogging) log("Key found");
 			userKey = result;
 			keyNeedsGenning = false;
 		}
 	});
 	if(keyNeedsGenning){
-		console.log("No key found, generating one");
+		if(authLogging) log("No key found, generating one");
 		await genKey();
 	}
 	
-	console.log("Key: " + userKey);
+	if(authLogging) log("Key: " + userKey);
 }
 
-async function genKey(){
-	var key;
-	var loopVar = false;
-	do{
-		key = genUniqueString();
-		let keyFree = await isKeyFree(key);
-		var loopVar = keyFree;
-	}while(loopVar === false);
-	// save valid key to phone
-	Config.storeSetting("userKey", key).then(function(result) {
-		if(!result){
-			console.error("failed to store userKey");
-		}
-	});
-	
-	userKey = key;
-	return;
+async function genKey() {
+    let key;
+    let loopVar = false;
+    do {
+        key = genUniqueString();
+        loopVar = await isKeyFree(key);
+    } while (loopVar === false);
+    // save valid key to phone
+    Config.storeSetting("userKey", key).then(function (result) {
+        if (!result) {
+            console.error("failed to store userKey");
+        }
+    });
+
+    userKey = key;
 }
 	
 function genUniqueString(){
@@ -63,7 +63,7 @@ function getSha256(key){
 }
 	
 async function isKeyFree(key){
-	let res = await NetLib.get("user/check-user-exsists/", key);
+	let res = await NetLib.get("user/check-user-exists/", key);
 	var free = (res == "false");
 	if(!free){
 		return free;
@@ -76,8 +76,12 @@ async function isKeyFree(key){
 
 export function getUserKey(){
 	if(!userKey){
-		//console.log("UserKey is not loaded");
+		if(authLogging) log("UserKey is not loaded");
 		return null;
 	}
 	return userKey;
+}
+
+function log(message) {
+    console.log('AUTH LOGGING: ' + message)
 }

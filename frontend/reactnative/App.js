@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
+import {Button} from 'react-native';
+
+import 'global'
 
 import * as NetLib from './lib/NetworkingLib.js';
 import * as Auth from './lib/Auth.js';
@@ -11,44 +14,41 @@ import * as Auth from './lib/Auth.js';
  * gregoryamitten@gmail.com
  */
 
+const startingDeltas = {
+    latitude: 0.012,
+    longitude: 0.04,
+};
+
+const AGGREGATION_LEVELS = {
+    addresses: 0,
+    postcodes: 15,
+    heatmap: 500
+};
+
+//Turn to false to disable logging
+const logging = true;
+
+// min time without map movement before map will update
+const waitTimeBeforeUpdate = 2000;
+// number used to scale up the minimum size of the circlesin the heatmap
+const heatmapScaleFactor = 100;
 export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
-        //Markers array filled with dummy data for display
-        markers: [
-            {
-                id:0,
-                longitude:-0.13104971498263165,
-                latitude:50.84609893155363,
-                title:'£100,000',
-                description:'1 Brighton Street \n BN1 1AB \n Brighton'
-            },
-            {
-                id:1,
-                longitude:-0.133,
-                latitude:50.84609893155363,
-                title:'Hello',
-                description:'World'
-            },
-            {
-                id:2,
-                longitude:-0.16,
-                latitude:50.88,
-                title:'Another',
-                description:'One'
-            }
-        ]
+        markers: [],
+        circleSize: heatmapScaleFactor
     };
 
     constructor(props) {
         super(props);
-        this.lastSent = new Date() - 15000;
         Auth.loadUserId();
+        this.currentMapCoordinates = null;
+        this._requestAndGetLocationAsync();
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
-    requestAndGetLocationAsync = async () => {
+    _requestAndGetLocationAsync = async () => {
         let location;
 
         let {status} = await Permissions.askAsync(Permissions.LOCATION);
@@ -62,10 +62,18 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                var timeDiff = new Date() - this.lastSent;
-                if (timeDiff >= 15000) {
-                    this.getLocation(location);
-                    this.lastSent = new Date();
+                if (!this.currentMapCoordinates) {
+
+
+                    let currentMapCoordinates = {
+                        top: location.coords.longitude + startingDeltas.longitude,
+                        bottom: location.coords.longitude - startingDeltas.longitude,
+                        right: location.coords.latitude + startingDeltas.latitude,
+                        left: location.coords.latitude - startingDeltas.latitude,
+                        delta: startingDeltas.longitude * 500
+                    };
+
+                    this.currentMapCoordinates = currentMapCoordinates;
                 }
             } else {
                 this.setState({
@@ -75,19 +83,29 @@ export default class App extends Component {
         }
     };
 
-    getLocation = (location) => {
+    _getDisplayData = async () => {
+        if (this.currentMapCoordinates) {
+            let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
 
-        let locationData = {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            altitude: location.coords.altitude,
-            userId: Auth.getUserKey(),
-            timelog: location.timestamp,
-            delivered: true
+            if (markers) {
+                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
+
+                log('Set state for new markers and new circleSize');
+                this.setState({markers, circleSize});
+            }
+        }
+    };
+
+    handleMapRegionChange = mapRegion => {
+        let currentMapCoordinates = {
+            top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
+            bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
+            right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
+            left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
+            delta: mapRegion.longitudeDelta * 500
         };
-		if(Auth.getUserKey()){
-			NetLib.postJSON('location/add-location-data/', locationData);
-		}
+        this.currentMapCoordinates = currentMapCoordinates;
+
     };
 
     render() {
@@ -96,61 +114,93 @@ export default class App extends Component {
         let latitude = null;
         let longitude = null;
 
-        this.requestAndGetLocationAsync();
-
         if (this.state.errorMessage) {
             displayedText = this.state.errorMessage;
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
-
-            displayedText =
-                '\t\n Longitude: ' + longitude +
-                '\t\n Latitude: ' + latitude
         }
 
         return (
             (latitude && longitude) ?
-                <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
-                        <Text style={styles.coordinatesText}>{displayedText}</Text>
-                    </View>
-                    <MapView
-                        style={{flex: 7}}
-                        showsMyLocationButton={true}
-                        showsUserLocation={true}
-                        provider={MapView.PROVIDER_GOOGLE}
-                        customMapStyle={darkMapStyle}
-                        initialRegion={{
-                            longitude: longitude,
-                            latitude: latitude,
-                            latitudeDelta: 0.0006,
-                            longitudeDelta: 0.002
-                        }}
-                    >
-
-                      {this.state.markers.map(marker => (
-                        false ? (
-                            <MapView.Circle
-                                key={marker.id}
-                                center={{longitude:marker.longitude, latitude:marker.latitude}}
-                                radius={100}
-                                strokeColor={'#FF0000'}
-                                fillColor={'rgba(255,0,0,0.5)'}
-                            />)
-                        : (<MapView.Marker
-                                key={marker.id}
-                                coordinate={{longitude:marker.longitude, latitude:marker.latitude}}
-                                title={marker.title}
-                                description={marker.description}
-                            />)
-                      ))}
-
-                    </MapView>
-                </View> :
+                this.drawMapWithData(longitude, latitude)
+                :
                 <Text style={styles.centerText}>{displayedText}</Text>
         );
     }
+
+    drawMapWithData(longitude, latitude) {
+        return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+            <MapView
+                style={{flex: 1}}
+                showsMyLocationButton={true}
+                showsUserLocation={true}
+                provider={MapView.PROVIDER_GOOGLE}
+                customMapStyle={darkMapStyle}
+                initialRegion={{
+                    longitude: longitude,
+                    latitude: latitude,
+                    latitudeDelta: startingDeltas.latitude,
+                    longitudeDelta: startingDeltas.longitude
+                }}
+                onRegionChange={this.handleMapRegionChange}
+            >
+
+                {
+                    this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
+                        this.drawHeatmap()
+                    ) : (
+                        this.drawMarkers()
+                    )}
+
+            </MapView>
+            <Button
+                onPress={this._getDisplayData}
+                title="Load elements"
+                color="#841584"
+            />
+        </View>
+    }
+
+    drawHeatmap() {
+        if (logging) log("Rendering " + this.state.markers.length + " heatmap data points");
+
+        return this.state.markers.map(marker => (
+            <MapView.Circle
+                key={marker.id}
+                center={{longitude: marker.longitude, latitude: marker.latitude}}
+                radius={Math.max(this.state.circleSize, marker.radius)}
+                strokeColor={marker.colour.hex}
+                fillColor={marker.colour.rgba}
+            />
+        ))
+    }
+
+    drawMarkers() {
+        if (logging) log("Rendering " + this.state.markers.length + " markers");
+
+        return this.state.markers.map(marker => (
+            <MapView.Marker
+                key={marker.id}
+                coordinate={{
+                    longitude: parseFloat(marker.mappings.longitude),
+                    latitude: parseFloat(marker.mappings.latitude)
+                }}
+                title={(!marker.mappings.street) ?
+                    "Average Price: £" + marker.mappings.pricePaid :
+                    "£" + marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+
+                description={(!marker.mappings.street) ?
+                    marker.mappings.postcode :
+                    marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                pinColor={marker.colour.hex}
+            />
+        ))
+    }
+}
+
+function log(message) {
+    console.log('APP LOGGING: ' + message)
 }
 
 const styles = StyleSheet.create({

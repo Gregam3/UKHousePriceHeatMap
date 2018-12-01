@@ -12,7 +12,7 @@ public interface Dao<T> {
 
 	void delete(String id);
 
-	List list();
+	List<T> list();
 
 	void update(T t);
 

@@ -13,16 +13,10 @@ matrix:
         - npm install -g npm@latest
         - npm install
       script:
-      jobs:
-        include:
-          - stage: deploy
-            node_js: lts/*
-            script:
-              - npm ci
-              - npx expo login -u briso -p asegroup1
-              - npx expo publish --non-interactive
-              - expo build:android
-              # - expo build:ios
+        - npm ci
+        - npx expo login -u $Expo_User -p $Expo_password
+        - npx expo publish --non-interactive
+        - expo build:android
     - language: java
       services:
         - docker
@@ -30,6 +24,7 @@ matrix:
         - cd backend/
       script:
         - mvn package
+        - mvn sonar:sonar   -Dsonar.projectKey=$Sonar_ProjectKey   -Dsonar.organization=$Sonar_Org   -Dsonar.host.url=https://sonarcloud.io/   -Dsonar.login=$Sonar_Login
       after_success:
         - docker login -u $DOCKER_USER -p $DOCKER_PASS
         - |
