@@ -64,26 +64,6 @@ public class LandRegistryServiceImpl {
     public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
 
 
-    public List<LandRegistryData> getAddressesForPostCode(String postCode) throws UnirestException {
-        List<LandRegistryData> landRegistryDataList = new LinkedList<>();
-        JSONArray addresses = Unirest.get(LAND_REGISTRY_ROOT_URL + "address.json?postcode=" + postCode.replace(" ", LR_SPACE).toUpperCase())
-                .asJson().getBody().getObject().getJSONObject("result").getJSONArray("items");
-
-        for (int i = 0; i < addresses.length(); i++) {
-            JSONObject currentNode = (JSONObject) addresses.get(i);
-
-            LandRegistryData data = new LandRegistryData();
-            data.setPrimaryHouseName(currentNode.get("paon").toString());
-            data.setStreetName(currentNode.get("street").toString());
-            data.setTownName(currentNode.get("town").toString());
-            data.setPostCode(postCode);
-
-            landRegistryDataList.add(data);
-        }
-
-        return getPositionForAddresses(landRegistryDataList);
-    }
-
     public List<LandRegistryData> getTransactions(LandRegistryQuery query)
             throws IOException, UnirestException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
@@ -169,7 +149,7 @@ public class LandRegistryServiceImpl {
         landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry ->
                 entry != null &&
                         entry.getConstraint(Selectable.pricePaid) != null &&
-                        entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+")
+                        entry.getConstraint(Selectable.pricePaid).matches("[0-9]+")
         ).collect(Collectors.toList());
 
 		List<Double> numbers = MathUtil.normaliseList(
