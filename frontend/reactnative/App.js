@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
-import { Button } from 'react-native';
+import {Button} from 'react-native';
 
 import 'global'
 
@@ -43,7 +43,7 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         Auth.loadUserId();
-		this.currentMapCoordinates = null;
+        this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
     }
 
@@ -63,14 +63,14 @@ export default class App extends Component {
                 this.setState({location});
 
                 if (!this.currentMapCoordinates) {
-					
-					
+
+
                     let currentMapCoordinates = {
                         top: location.coords.longitude + startingDeltas.longitude,
                         bottom: location.coords.longitude - startingDeltas.longitude,
                         right: location.coords.latitude + startingDeltas.latitude,
                         left: location.coords.latitude - startingDeltas.latitude,
-						delta: startingDeltas.longitude * 500
+                        delta: startingDeltas.longitude * 500
                     };
 
                     this.currentMapCoordinates = currentMapCoordinates;
@@ -84,16 +84,16 @@ export default class App extends Component {
     };
 
     _getDisplayData = async () => {
-		if(this.currentMapCoordinates){
-			let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
+        if (this.currentMapCoordinates) {
+            let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
 
-			if (markers) {
-				let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
+            if (markers) {
+                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
 
-				console.log('called set state');
-				this.setState({markers, circleSize});
-			}
-		}
+                console.log('called set state');
+                this.setState({markers, circleSize});
+            }
+        }
     };
 
     handleMapRegionChange = mapRegion => {
@@ -105,7 +105,7 @@ export default class App extends Component {
             delta: mapRegion.longitudeDelta * 500
         };
         this.currentMapCoordinates = currentMapCoordinates;
-		
+
     };
 
     render() {
@@ -186,11 +186,11 @@ export default class App extends Component {
                     longitude: parseFloat(marker.mappings.longitude),
                     latitude: parseFloat(marker.mappings.latitude)
                 }}
-                title={(marker.mappings.street) ?
+                title={(!marker.mappings.street) ?
                     "Average Price: £" + marker.mappings.pricePaid :
-                    marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+                    "£" + marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
 
-                description={(marker.mappings.street) ?
+                description={(!marker.mappings.street) ?
                     marker.mappings.postcode :
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                 pinColor={marker.colour.hex}
