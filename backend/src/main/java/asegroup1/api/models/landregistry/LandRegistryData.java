@@ -8,22 +8,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
 
-public class LandRegistryData {
+public class LandRegistryData implements Comparable{
     private HashMap<Selectable, EqualityConstraint> constraints;
 
     private Double latitude, longitude;
 
+    private String id;
+
     public static final int YEARS_TO_FETCH = 5;
+
+    private Colour colour;
+
+	private Double radius;
 
     /**
      * Initialise the {@Link LandRegistryData} class, to be empty
@@ -32,6 +40,8 @@ public class LandRegistryData {
         constraints = new HashMap<>();
         longitude = null;
         latitude = null;
+        id = UUID.randomUUID().toString();
+		radius = null;
     }
 
     /**
@@ -44,6 +54,18 @@ public class LandRegistryData {
     public LandRegistryData(JsonNode json) {
         this();
         parseResponse(json);
+    }
+
+    public void setColour(Colour colour) {
+        this.colour = colour;
+    }
+
+    public Colour getColour() {
+        return colour;
+    }
+
+    public String getId() {
+        return id;
     }
 
     private void addAddrConstraint(Selectable selectable, String value, boolean isString) {
@@ -126,7 +148,11 @@ public class LandRegistryData {
      * @throws InvalidParameterException if the post code is invalid
      */
     public void setPostCode(String postCode) throws InvalidParameterException {
-        addAddrConstraint(Selectable.postcode, postCode);
+		if (postCode == null || postCode.length() < 3 ||
+			!postCode.matches("[0-9A-Za-z\\s]+")) {
+			throw new InvalidParameterException("Invalid ParaException");
+		}
+		addAddrConstraint(Selectable.postcode, postCode);
     }
 
     private void addTransConstraint(Selectable selectable, String name, String value, boolean isString) {
@@ -310,7 +336,7 @@ public class LandRegistryData {
                 return true;
             case pricePaid:
                 try {
-					setPricePaid(Math.round(Double.parseDouble(value)));
+                    setPricePaid(Math.round(Double.parseDouble(value)));
                     return true;
                 } catch (NumberFormatException e) {
                     return false;
@@ -458,6 +484,9 @@ public class LandRegistryData {
         if (latitude != null) {
             retMap.put("latitude", latitude + "");
         }
+		if (radius != null) {
+			retMap.put("radius", radius + "");
+		}
 
         return retMap;
     }
@@ -520,7 +549,24 @@ public class LandRegistryData {
         this.longitude = longitude;
     }
 
-    abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
+    @Override
+    public int compareTo(Object that) {
+        long thisPricePaid = Long.valueOf(this.getConstraint(Selectable.pricePaid));
+        long thatPricePaid = Long.valueOf(((LandRegistryData) that).getConstraint(Selectable.pricePaid));
+
+        return Long.compare(thisPricePaid, thatPricePaid);
+    }
+
+	@JsonIgnore
+	public Double getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Double radius) {
+		this.radius = radius;
+	}
+
+	abstract class EqualityConstraint implements Comparable<EqualityConstraint> {
         protected String namespace, type, name, value;
         private boolean isString;
 

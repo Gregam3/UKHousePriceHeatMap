@@ -12,6 +12,8 @@ import javax.persistence.Table;
 @Table(name = "user_data")
 public class UserData implements Serializable {
 
+	private static final long serialVersionUID = 111625058648136567L;
+
 	public UserData() {
 		super();
 	}
