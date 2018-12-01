@@ -143,25 +143,25 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 	}
 
 	public enum Selectable {
-		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode;
-	}
+		propertyType, estateType, transactionDate, pricePaid, newBuild, transactionCategory, paon, saon, street, locality, town, district, county, postcode
+    }
 
 	public enum PropertyType {
-		detached, semi_detached, terraced, flat_maisonette, other;
+		detached, semi_detached, terraced, flat_maisonette, other
 
-	}
+    }
 
 	public enum EstateType {
-		freehold, leasehold;
+		freehold, leasehold
 
-	}
+    }
 
 	public enum TransactionCategory {
-		standard_price_paid_transaction, additional_price_paid_transaction;
-	}
+		standard_price_paid_transaction, additional_price_paid_transaction
+    }
 
 	public enum Aggregation {
-		COUNT, SUM, AVG, MIN, MAX, SAMPLE, NONE;
-	}
+		COUNT, SUM, AVG, MIN, MAX, SAMPLE, NONE
+    }
 	
 }
