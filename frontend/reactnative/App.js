@@ -37,14 +37,13 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         markers: [],
-        currentMapRegion: null,
-        circleSize: 100
+        circleSize: heatmapScaleFactor
     };
 
     constructor(props) {
         super(props);
         Auth.loadUserId();
-
+		this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
     }
 
@@ -63,33 +62,38 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                if (!this.state.currentMapCoordinates) {
+                if (!this.currentMapCoordinates) {
+					
+					
                     let currentMapCoordinates = {
                         top: location.coords.longitude + startingDeltas.longitude,
                         bottom: location.coords.longitude - startingDeltas.longitude,
                         right: location.coords.latitude + startingDeltas.latitude,
-                        left: location.coords.latitude - startingDeltas.latitude
+                        left: location.coords.latitude - startingDeltas.latitude,
+						delta: startingDeltas.longitude * 500
                     };
 
-                    this.setState({currentMapCoordinates});
+                    this.currentMapCoordinates = currentMapCoordinates;
                 }
             } else {
                 this.setState({
                     errorMessage: 'Location could not be determined.'
-                });dw894
+                });
             }
         }
     };
 
     _getDisplayData = async () => {
-        let markers = await NetLib.getLandRegistryData(this.state.currentMapCoordinates);
+		if(this.currentMapCoordinates){
+			let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
 
-        if (markers) {
-            let circleSize = heatmapScaleFactor * (this.state.currentMapCoordinates.delta / 30);
+			if (markers) {
+				let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
 
-            console.log('called set state');
-            this.setState({markers, circleSize});
-        }
+				console.log('called set state');
+				this.setState({markers, circleSize});
+			}
+		}
     };
 
     handleMapRegionChange = mapRegion => {
@@ -100,8 +104,8 @@ export default class App extends Component {
             left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
             delta: mapRegion.longitudeDelta * 500
         };
-
-        this.setState({currentMapCoordinates});
+        this.currentMapCoordinates = currentMapCoordinates;
+		
     };
 
     render() {
