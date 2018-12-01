@@ -1,20 +1,18 @@
 package asegroup1.api.models.landregistry;
 
+import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
-import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 public class LandRegistryData {
     private HashMap<Selectable, EqualityConstraint> constraints;
@@ -131,7 +129,9 @@ public class LandRegistryData {
      * @throws InvalidParameterException if the post code is invalid
      */
     public void setPostCode(String postCode) throws InvalidParameterException {
-        addAddrConstraint(Selectable.postcode, postCode);
+        if(postCode.length() >= 3 && postCode.matches("[0-9A-Za-z\\s]+"))
+            addAddrConstraint(Selectable.postcode, postCode);
+        else throw new InvalidParameterException("Invalid postcode: " + postCode);
     }
 
     private void addTransConstraint(Selectable selectable, String name, String value, boolean isString) {
@@ -269,7 +269,7 @@ public class LandRegistryData {
         Selectable selectable;
 
         if(value == null) {
-            throw new InvalidParameterException("Value cannot be null");
+            throw new IllegalArgumentException("Value cannot be null");
         }
 
         try {

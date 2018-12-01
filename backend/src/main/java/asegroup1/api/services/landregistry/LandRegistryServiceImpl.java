@@ -1,39 +1,28 @@
 package asegroup1.api.services.landregistry;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.text.ParseException;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.*;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 
 /**
@@ -53,16 +42,13 @@ public class LandRegistryServiceImpl {
         this.postCodeCoordinatesDao = postCodeCoordinatesDao;
     }
 
-    //API CONSTANTS
-    private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
-    private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 300};
+    public static final int[] AGGREGATION_LEVELS = new int[]{1, 15, 300};
 
     public List<LandRegistryData> getTransactions(LandRegistryQuery query)
             throws IOException, UnirestException {
@@ -113,11 +99,11 @@ public class LandRegistryServiceImpl {
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > AGGREGATION_LEVELS[2]) {
+        if (postcodesContained >= AGGREGATION_LEVELS[2]) {
             return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
-        } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
+        } else if (postcodesContained >= AGGREGATION_LEVELS[1]) {
             return landRegistryDataForPostcodes;
-        } else if (postcodesContained > AGGREGATION_LEVELS[0] && postcodesContained > 0) {
+        } else if (postcodesContained >= AGGREGATION_LEVELS[0]) {
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 
