@@ -5,10 +5,12 @@ import * as NetLib from './NetworkingLib.js';
 
 let userKey;
 
+const authLogging = true;
+
 export function wipeUserId(){
 	Config.eraseSetting("userKey").then(function(result) {
 		// log if erase was successful or not
-		console.log("Erase success: " + result);
+		if(authLogging) log("Erase success: " + result);
 	});
 }
 	
@@ -18,17 +20,17 @@ export async function loadUserId(){
 	await Config.retrieveSetting("userKey").then(function(result){
 		// if no key is stored locally
 		if(result){
-			console.log("Key found");
+			if(authLogging) log("Key found");
 			userKey = result;
 			keyNeedsGenning = false;
 		}
 	});
 	if(keyNeedsGenning){
-		console.log("No key found, generating one");
+		if(authLogging) log("No key found, generating one");
 		await genKey();
 	}
 	
-	console.log("Key: " + userKey);
+	if(authLogging) log("Key: " + userKey);
 }
 
 async function genKey() {
@@ -74,8 +76,12 @@ async function isKeyFree(key){
 
 export function getUserKey(){
 	if(!userKey){
-		console.log("UserKey is not loaded");
+		if(authLogging) log("UserKey is not loaded");
 		return null;
 	}
 	return userKey;
+}
+
+function log(message) {
+    console.log('AUTH LOGGING: ' + message)
 }
