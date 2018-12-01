@@ -285,5 +285,4 @@ class LandRegistryServiceImplTest {
             assert false;
         }
     }
-
 }

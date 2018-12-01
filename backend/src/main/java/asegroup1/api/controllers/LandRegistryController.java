@@ -52,15 +52,6 @@ public class LandRegistryController {
         this.landRegistryService = landRegistryService;
     }
 
-    @GetMapping("get-addresses/{post-code}")
-    public ResponseEntity<?> getAddressDataForPostCode(@PathVariable("post-code") String postCode) {
-        try {
-            return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getAddressesForPostCode(formatPostCode(postCode))), HttpStatus.OK);
-        } catch (UnirestException e) {
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @GetMapping("get-display-data")
     public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
         long timer = System.currentTimeMillis();
@@ -91,20 +82,6 @@ public class LandRegistryController {
         return new ResponseEntity<>(mockResponses.getProperty("addressData"), HttpStatus.OK);
     }
 
-    @GetMapping("get-transactions/{post-code}")
-    public ResponseEntity<?> getTransactionDataForPostCode(@PathVariable("post-code") String postCode) {
-        LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-        constraint.setEqualityConstraint(Selectable.postcode, formatPostCode(postCode));
-        constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
-
-        try {
-            return new ResponseEntity<>(getLocationDataKeys(landRegistryService.getLatestTransactions(new ArrayList<>(EnumSet.allOf(Selectable.class)), constraint)),
-                    HttpStatus.OK);
-        } catch (IOException | UnirestException e) {
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @GetMapping("update-postcode/{prefix}")
     public ResponseEntity<?> updateTransactionData(String prefix) {
         if (prefix == null) {
@@ -118,24 +95,6 @@ public class LandRegistryController {
         } catch (IOException | UnirestException e) {
             e.printStackTrace();
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    private List<HashMap<String, String>> getLocationDataKeys(List<LandRegistryData> landRegistryDataList) {
-        List<HashMap<String, String>> keys = new ArrayList<>();
-        for (LandRegistryData data : landRegistryDataList) {
-            keys.add(data.getMappings());
-        }
-        return keys;
-    }
-
-    private String formatPostCode(String postCode) {
-        if (postCode.charAt(postCode.length() - 4) == 32) {
-            return postCode.toUpperCase();
-        } else if (postCode.length() > 3) {
-            return (postCode.substring(0, postCode.length() - 3) + " " + postCode.substring(postCode.length() - 3)).toUpperCase();
-        } else {
-            throw new InvalidParameterException("Postcode " + postCode + "is too short");
         }
     }
 }

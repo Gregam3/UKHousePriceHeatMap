@@ -56,7 +56,7 @@ public class LandRegistryServiceImpl {
     private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-	private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
+    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
     private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
@@ -166,8 +166,11 @@ public class LandRegistryServiceImpl {
     }
 
     private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
-        landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
-                .collect(Collectors.toList());
+        landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(entry ->
+                entry != null &&
+                        entry.getConstraint(Selectable.pricePaid) != null &&
+                        entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+")
+        ).collect(Collectors.toList());
 
         List<Double> numbers = normaliseList(
                 landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
@@ -233,8 +236,8 @@ public class LandRegistryServiceImpl {
 
         for (int i = 0; i < landRegistryDataList.size(); i++) {
             LandRegistryData lr = landRegistryDataList.get(i);
-			heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(),
-					getColoursForNormalisedValues(numbers.get(i)), lr.getRadius()));
+            heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(),
+                    getColoursForNormalisedValues(numbers.get(i)), lr.getRadius()));
         }
 
         return heatMapDataPoints;
@@ -252,6 +255,9 @@ public class LandRegistryServiceImpl {
     }
 
     private void printList(List<Double> retNum, String name) {
+        if(retNum.size() > 0)
+
+
         double min, max, avg = 0;
         min = max = retNum.get(0);
         for (Double dum : retNum) {
@@ -272,7 +278,7 @@ public class LandRegistryServiceImpl {
 
     private List<Double> standardiseList(List<Double> numbers) {
 
-		numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
+        numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
 
         // mean standard deviation
         double mean, sd, total = 0;
@@ -379,9 +385,9 @@ public class LandRegistryServiceImpl {
         double numDone = 0;
 
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
-			long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
-			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
-					estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
+            long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+            System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
+                    estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
             updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
