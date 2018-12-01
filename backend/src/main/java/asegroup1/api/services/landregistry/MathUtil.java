@@ -15,7 +15,18 @@ public class MathUtil {
 			return null;
 		} else if (numbers.isEmpty()) {
 			return new ArrayList<Double>();
-		} else if (allSame(numbers)) {
+		}
+		boolean same = true;
+		for (Double d : numbers) {
+			if (d <= 0) {
+				throw new IllegalArgumentException(
+						"All parameters must be greater than 0");
+			}
+			if (!d.equals(numbers.get(0))) {
+				same = false;
+			}
+		}
+		if (same) {
 			return numbers.stream().map(num -> 0.5)
 					.collect(Collectors.toList());
 		} else {
@@ -28,18 +39,6 @@ public class MathUtil {
 
 			return retNum;
 		}
-	}
-
-	public static <E> boolean allSame(List<E> list) {
-		if(list == null || list.isEmpty()) {
-			return false;
-		}
-		for (E o : list) {
-			if (!o.equals(list.get(0))) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	public static void printList(List<Double> retNum, String name) {
