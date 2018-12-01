@@ -23,6 +23,7 @@ import asegroup1.api.services.user.UserServiceImpl;
 
 @RestController
 @RequestMapping("/location/")
+@Api(value="User location", description = "operations related to user location data being sent to the server")
 public class LocationController {
 
 	private UserServiceImpl userService;
@@ -33,7 +34,7 @@ public class LocationController {
         this.locationService = locationService;
 		this.userService = userServiceImpl;
     }
-
+		@ApiOperation(value= "Add location data to the server")
     @PostMapping(value = {"add-location-data", "add-location-data/"})
     public ResponseEntity<String> postAddLocationData(@RequestBody LocationData location) {
 		if (userService.get(location.getUserId()) != null) {
