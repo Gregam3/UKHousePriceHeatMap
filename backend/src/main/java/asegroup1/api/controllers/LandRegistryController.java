@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponses;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,7 @@ import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 
 @RestController
 @RequestMapping("/land-registry/")
+@Api(value = "Land registry data", description = "Operations pertaining to Land Registry data")
 public class LandRegistryController {
 
     private Properties mockResponses;
@@ -52,6 +56,7 @@ public class LandRegistryController {
         this.landRegistryService = landRegistryService;
     }
 
+    @ApiOperation(value = "Get Land registry data based on map position")
     @GetMapping("get-display-data")
     public ResponseEntity<?> getDataToDisplayOnMap(@RequestParam JSONObject mapPosition) {
         long timer = System.currentTimeMillis();
@@ -77,11 +82,13 @@ public class LandRegistryController {
         }
     }
 
+    @ApiOperation(value = "Get test data sample")
     @GetMapping(value = "get-display-data-test", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getTestDisplayData() {
         return new ResponseEntity<>(mockResponses.getProperty("addressData"), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Updates average price for each postcode with defined prefix")
     @GetMapping("update-postcode/{prefix}")
     public ResponseEntity<?> updateTransactionData(String prefix) {
         if (prefix == null) {
