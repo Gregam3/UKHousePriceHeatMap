@@ -148,7 +148,11 @@ public class LandRegistryData implements Comparable{
      * @throws InvalidParameterException if the post code is invalid
      */
     public void setPostCode(String postCode) throws InvalidParameterException {
-        addAddrConstraint(Selectable.postcode, postCode);
+		if (postCode == null || postCode.length() < 3 ||
+			!postCode.matches("[0-9A-Za-z\\s]+")) {
+			throw new InvalidParameterException("Invalid ParaException");
+		}
+		addAddrConstraint(Selectable.postcode, postCode);
     }
 
     private void addTransConstraint(Selectable selectable, String name, String value, boolean isString) {
