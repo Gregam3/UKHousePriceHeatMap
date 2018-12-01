@@ -141,27 +141,6 @@ class LandRegistryServiceImplTest {
 
     }
 
-    @Test
-    void testIfPriceValuesAreNormalisedCorrectly() {
-        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            LandRegistryData landRegistryData = new LandRegistryData();
-
-            landRegistryData.setPricePaid(i * 5L);
-            landRegistryData.setLongitude(0);
-            landRegistryData.setLatitude(0);
-            landRegistryDataList.add(landRegistryData);
-        }
-
-        List<HeatMapDataPoint> heatMapDataPoints = landRegistryService.convertLandRegistryDataListToHeatMapList(landRegistryDataList);
-
-        assert heatMapDataPoints.get(0).getColour().getRed() == 255 &&
-                heatMapDataPoints.get(1).getColour().getRed() == 155 &&
-                heatMapDataPoints.get(2).getColour().getRed() == 55;
-
-    }
-
     private List<HeatMapDataPoint> getHeatMapTestData(long... values) {
         List<LandRegistryData> landRegistryDataList = new ArrayList<>();
 
@@ -185,9 +164,11 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
 
         //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-        assert heatMapDataPoints.get(0).getColour().getRed() > heatMapDataPoints.get(1).getColour().getRed()
-                && heatMapDataPoints.get(1).getColour().getRed() > heatMapDataPoints.get(2).getColour().getRed();
-    }
+		assert heatMapDataPoints.get(0).getColour().getHex().equals(
+			"#00d300") &&
+			heatMapDataPoints.get(1).getColour().getHex().equals("#d90000") &&
+			heatMapDataPoints.get(2).getColour().getHex().equals("#ff0000");
+	}
 
     @Test
     void testHowNormaliseValuesReturns0ValueForOnlyOneDistinctValue() {
@@ -205,13 +186,9 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
-        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(-5L, -15L, -10L);
-
-        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-        assert heatMapDataPoints.get(0).getColour().getRed() < heatMapDataPoints.get(2).getColour().getRed()
-                && heatMapDataPoints.get(2).getColour().getRed() < heatMapDataPoints.get(1).getColour().getRed();
-
-    }
+		Assertions.assertThrows(IllegalArgumentException.class,
+								() -> getHeatMapTestData(-5L, -15L, -10L));
+	}
 
     @SuppressWarnings("unchecked")
     @Test
