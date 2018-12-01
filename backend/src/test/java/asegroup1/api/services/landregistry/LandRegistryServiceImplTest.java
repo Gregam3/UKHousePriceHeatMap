@@ -165,6 +165,7 @@ class LandRegistryServiceImplTest {
             landRegistryData.setLongitude(0);
             landRegistryData.setLatitude(0);
 
+
             landRegistryDataList.add(landRegistryData);
         }
 

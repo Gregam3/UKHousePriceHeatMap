@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -230,14 +226,21 @@ public class LandRegistryServiceImpl {
                 .collect(Collectors.toList());
 
         List<Double> numbers = normaliseList(
-                landRegistryDataList.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
+                landRegistryDataList.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList())
+        );
 
         List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
 
         for (int i = 0; i < landRegistryDataList.size(); i++) {
             LandRegistryData lr = landRegistryDataList.get(i);
-            heatMapDataPoints.add(new HeatMapDataPoint(lr.getLatitude(), lr.getLongitude(),
-                    getColoursForNormalisedValues(numbers.get(i)), lr.getRadius()));
+            heatMapDataPoints.add(
+                    new HeatMapDataPoint(
+                            lr.getLatitude(),
+                            lr.getLongitude(),
+                            getColoursForNormalisedValues(
+                                    numbers.get(i)),
+                            lr.getRadius())
+            );
         }
 
         return heatMapDataPoints;
@@ -255,33 +258,40 @@ public class LandRegistryServiceImpl {
     }
 
     private void printList(List<Double> retNum, String name) {
-        if(retNum.size() > 0)
-
-
-        double min, max, avg = 0;
-        min = max = retNum.get(0);
-        for (Double dum : retNum) {
-            if (dum > max) {
-                max = dum;
-            } else if (dum < min) {
-                min = dum;
+        if (retNum.size() > 0) {
+            double min, max, avg = 0;
+            min = max = retNum.get(0);
+            for (Double dum : retNum) {
+                if (dum > max) {
+                    max = dum;
+                } else if (dum < min) {
+                    min = dum;
+                }
+                avg += dum;
             }
-            avg += dum;
-        }
 
-        avg /= retNum.size();
-        System.out.println(name + ":");
-        System.out.println("\tMin: " + min);
-        System.out.println("\tMax: " + max);
-        System.out.println("\tAVG: " + avg);
+            avg /= retNum.size();
+            System.out.println(name + ":");
+            System.out.println("\tMin: " + min);
+            System.out.println("\tMax: " + max);
+            System.out.println("\tAVG: " + avg);
+        }
     }
 
     private List<Double> standardiseList(List<Double> numbers) {
+        if (numbers.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-        numbers = numbers.stream().map(num -> Math.log(num)).collect(Collectors.toList());
+        //If all values are the same return a list the same size populated with 0.5
+        if (new HashSet<>(numbers).size() == 1)
+            return numbers.stream().map(n -> 0.5).collect(Collectors.toList());
+
+        numbers = numbers.stream().map(Math::log).collect(Collectors.toList());
 
         // mean standard deviation
         double mean, sd, total = 0;
+
         for (double num : numbers) {
             total += num;
         }
@@ -308,6 +318,10 @@ public class LandRegistryServiceImpl {
     }
 
     private List<Double> rescaleList(List<Double> numbers) {
+        if (numbers.isEmpty()) return new ArrayList<>();
+        if (new HashSet<>(numbers).size() == 1) return numbers.stream().map(n -> 0.5).collect(Collectors.toList());
+
+
         double max, min, total = 0;
         max = min = numbers.get(0);
 
