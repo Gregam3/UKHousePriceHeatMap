@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class LandRegistryServiceImpl {
 
-	private LandRegistryDaoImpl postCodeCoordinatesDao;
+	private final LandRegistryDaoImpl postCodeCoordinatesDao;
 
 	@Autowired
 	public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
@@ -50,6 +50,8 @@ public class LandRegistryServiceImpl {
 
 	//OTHER CONSTANTS
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	// TODO: As this is accessed from other classes move this to a configuration
+	// file value
 	static final int[] AGGREGATION_LEVELS = new int[] {0, 15, 500};
 
 	private List<LandRegistryData> getTransactions(LandRegistryQuery query)
@@ -97,6 +99,7 @@ public class LandRegistryServiceImpl {
 		return getTransactions(
 			LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
 	}
+
 	@SuppressWarnings("unused")
 	public List<LandRegistryData>
 	getLatestTransactions(LandRegistryQueryConstraint constraint)
@@ -220,10 +223,10 @@ public class LandRegistryServiceImpl {
 		return addresses;
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	private JSONObject executeSPARQLQuery(String query)
 		throws UnirestException {
 		// Navigates through JSON and returns list of addresses based on post
-		// code noinspection SpellCheckingInspection
 		return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
 			.field("output", "json")
 			.field("q", query)
