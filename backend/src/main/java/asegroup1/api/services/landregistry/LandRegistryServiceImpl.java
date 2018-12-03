@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,7 +42,6 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
  */
 
 //Does not need to extend ServiceImpl as does not use a Dao
-
 @Service
 public class LandRegistryServiceImpl {
 
@@ -51,14 +52,13 @@ public class LandRegistryServiceImpl {
         this.postCodeCoordinatesDao = postCodeCoordinatesDao;
     }
 
-    //API CONSTANTS
-    private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
     private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
-    private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
-    private static final String LR_SPACE = "%20";
 
-    //OTHER CONSTANTS
+	@Value("${google.maps.apiKey}") // Get Api Key from application.properties
+	private String googleMapsApiKey;
+
+	//OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
 
@@ -168,11 +168,19 @@ public class LandRegistryServiceImpl {
         StringBuilder addressUriBuilder = new StringBuilder();
 
         for (LandRegistryData address : addresses) {
-            addressUriBuilder.append(GOOGLE_MAPS_URL).append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+")).append("+")
-                    .append(address.getConstraintNotNull(Selectable.street).replace(" ", "+")).append("+").append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-                    .append("&key=").append(GOOGLE_MAPS_API_KEY);
+			addressUriBuilder.append(GOOGLE_MAPS_URL)
+				.append(address.getConstraintNotNull(Selectable.paon)
+							.replace(" ", "+"))
+				.append("+")
+				.append(address.getConstraintNotNull(Selectable.street)
+							.replace(" ", "+"))
+				.append("+")
+				.append(address.getConstraintNotNull(Selectable.town)
+							.replace(" ", "+"))
+				.append("&key=")
+				.append(googleMapsApiKey);
 
-            try {
+			try {
                 JSONObject response = postCodeCoordinatesDao.getGeoLocationData(addressUriBuilder.toString());
 
                 address.setLatitude(response.getDouble("lat"));
@@ -286,5 +294,4 @@ public class LandRegistryServiceImpl {
         System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
-
 }
