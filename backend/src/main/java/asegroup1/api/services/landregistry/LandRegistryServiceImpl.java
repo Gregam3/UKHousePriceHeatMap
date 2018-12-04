@@ -138,9 +138,10 @@ public class LandRegistryServiceImpl {
 			List<String> postcodes = new ArrayList<>();
 
 			for (LandRegistryData landRegistryDataForPostcode :
-				 landRegistryDataForPostcodes)
+				 landRegistryDataForPostcodes) {
 				postcodes.add(landRegistryDataForPostcode.getConstraint(
 					Selectable.postcode));
+			}
 
 			constraint.setEqualityConstraint(Selectable.postcode,
 											 postcodes.toArray(new String[0]));
@@ -206,10 +207,8 @@ public class LandRegistryServiceImpl {
 			try {
 				JSONObject response = postCodeCoordinatesDao.getGeoLocationData(
 					addressUriBuilder.toString());
-
 				address.setLatitude(response.getDouble("lat"));
 				address.setLongitude(response.getDouble("lng"));
-
 			} catch (UnirestException | JSONException e) {
 				e.printStackTrace();
 				System.err.println("Could not retrieve address for " +
@@ -239,7 +238,7 @@ public class LandRegistryServiceImpl {
 	List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(
 		List<LandRegistryData> landRegistryDataList) {
 		if (landRegistryDataList.isEmpty()) {
-			return null;
+			return new ArrayList<>();
 		}
 		landRegistryDataList =
 			landRegistryDataList.stream()
@@ -310,18 +309,23 @@ public class LandRegistryServiceImpl {
 		long startTime = System.currentTimeMillis();
 		int updatedRecords = 0;
 
-		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao
-				.getMatchingPostcodes(postcodePrefix, false, 1);
+		HashMap<String, List<String>> postcodeAreas =
+			postCodeCoordinatesDao.getMatchingPostcodes(postcodePrefix, false,
+														1);
 		double numAreas = postcodeAreas.size();
 		double numDone = 0;
 
 		for (Entry<String, List<String>> postcodeArea :
 			 postcodeAreas.entrySet()) {
 			long estTimeLeft =
-				Math.round(
-					((System.currentTimeMillis() - startTime) / numDone) *
-					(numAreas - numDone)) /
-				1000;
+				numDone == 0 ? Long.MAX_VALUE
+							 : // This accounts for if number done is 0
+							   // otherwise 0 division is possible
+					Math.round(
+						((System.currentTimeMillis() - startTime) / numDone) *
+						(numAreas - numDone)) /
+						1000;
+
 			System.out.printf(
 				"Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
 				"\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
