@@ -194,7 +194,6 @@ public class LandRegistryServiceImpl {
 
 	@SuppressWarnings("SpellCheckingInspection")
 	private JSONObject executeSPARQLQuery(String query) throws UnirestException {
-		// Navigates through JSON and returns list of addresses based on post
 		return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
 			.field("output", "json")
 			.field("q", query)
