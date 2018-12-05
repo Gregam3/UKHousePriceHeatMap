@@ -45,7 +45,7 @@ public class LandRegistryServiceImpl {
 	private static final String GOOGLE_MAPS_URL =
 		"https://maps.googleapis.com/maps/api/geocode/json?address=";
 
-	@Value("${google.maps.apiKey}") // Get Api Key from application.properties
+	@Value("${google.maps.api-key}") // Get Api Key from application.properties
 	private String googleMapsApiKey;
 
 	//OTHER CONSTANTS
