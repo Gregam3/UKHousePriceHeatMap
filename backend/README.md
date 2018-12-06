@@ -19,3 +19,5 @@
 4. `docker build -t asegroup1/backend-branch:latest .`
 5. `docker push asegroup1/backend-branch:latest`
 6. repositories can be launched on the server by running `docker run -d -p 8000:8080 --env-file enviromentVariables.list --name branch asegroup1/backend-branch:latest`
+
+edit
