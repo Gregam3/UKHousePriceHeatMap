@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity,LayoutAnimation, Animated} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 import {Button} from 'react-native';
 
@@ -32,12 +32,16 @@ const logging = true;
 const waitTimeBeforeUpdate = 2000;
 // number used to scale up the minimum size of the circlesin the heatmap
 const heatmapScaleFactor = 100;
+
+var appInstance;
+
 export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatmapScaleFactor
+        circleSize: heatmapScaleFactor,
+		optionSelected: true
     };
 
     constructor(props) {
@@ -45,6 +49,7 @@ export default class App extends Component {
         Auth.loadUserId();
         this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
+		appInstance = this;
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
@@ -122,43 +127,60 @@ export default class App extends Component {
         }
 
         return (
-            (latitude && longitude) ?
-                this.drawMapWithData(longitude, latitude)
-                :
-                <Text style={styles.centerText}>{displayedText}</Text>
+		
+				(latitude && longitude) ?
+					this.drawMapWithData(longitude, latitude)
+					:
+					<Text style={styles.centerText}>{displayedText}</Text>
+					
         );
-    }
+	
+	}
 
     drawMapWithData(longitude, latitude) {
         return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
-            <MapView
-                style={{flex: 1}}
-                showsMyLocationButton={true}
-                showsUserLocation={true}
-                provider={MapView.PROVIDER_GOOGLE}
-                customMapStyle={darkMapStyle}
-                initialRegion={{
-                    longitude: longitude,
-                    latitude: latitude,
-                    latitudeDelta: startingDeltas.latitude,
-                    longitudeDelta: startingDeltas.longitude
-                }}
-                onRegionChange={this.handleMapRegionChange}
-            >
+			<View style={{flex: 1, zIndex: 0}}>
+				<MapView
+					style={{flex: 1}}
+					showsMyLocationButton={true}
+					showsUserLocation={true}
+					provider={MapView.PROVIDER_GOOGLE}
+					customMapStyle={darkMapStyle}
+					initialRegion={{
+						longitude: longitude,
+						latitude: latitude,
+						latitudeDelta: startingDeltas.latitude,
+						longitudeDelta: startingDeltas.longitude
+					}}
+					onRegionChange={this.handleMapRegionChange}
+				>
 
-                {
-                    this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
-                        this.drawHeatmap()
-                    ) : (
-                        this.drawMarkers()
-                    )}
+					{
+						this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
+							this.drawHeatmap()
+						) : (
+							this.drawMarkers()
+						)}
 
-            </MapView>
-            <Button
-                onPress={this._getDisplayData}
-                title="Load elements"
-                color="#841584"
-            />
+				</MapView>
+				<Button
+					onPress={this._getDisplayData}
+					title="Load elements"
+					color="#841584"
+				/>
+			</View>
+			{this.state.optionSelected?
+				<OptionWindow/>
+				:
+				<View style={{flex:1, top: 10, left: 10, position: 'absolute', zIndex:1}} >
+				
+					<Button
+						onPress={() => {this.setState({optionSelected:true})}}
+						title="O"
+						color="#841584"
+					/>
+				</View>
+			}
         </View>
     }
 
@@ -197,6 +219,61 @@ export default class App extends Component {
             />
         ))
     }
+}
+
+ 
+
+class OptionWindow extends Component{
+	
+	constructor(props){
+		super(props);
+		this.close = false;
+	}
+	
+	state={
+		transAnim: new Animated.Value(0)
+	}
+	
+	
+	
+	render(){
+		return <View style={{flexDirection:'row', top: 0, bottom: 0, left: 0, right: 0, position: 'absolute', zIndex:1}}>
+			<Animated.View style={{flex: this.state.transAnim, top: 0, bottom: 0, left: 0, backgroundColor: '#000000', opacity: 0.85}}>
+			 
+			</Animated.View>
+			<TouchableOpacity style={{flex: 1, top: 0, bottom: 0, left: 0, right: 0,width:75}} onPress={this.onPress} ></TouchableOpacity>
+			
+		</View>
+	}
+	
+	componentDidMount() {
+		Animated.timing(
+		  this.state.transAnim,
+		  {
+			toValue: 3,
+			duration: 500,
+		  }
+		).start();
+	}
+	
+	onPress = () => {
+		if (this.close){
+			console.log("Pressed");
+			return;
+		} else {
+			console.log("Leave");
+			
+			Animated.timing(
+			  this.state.transAnim,
+			  {
+				toValue: 0,
+				duration: 500,
+			  }
+			).start(() => {appInstance.setState({optionSelected: false})});
+			this.close = true;
+		}
+	}
+	
 }
 
 function log(message) {
