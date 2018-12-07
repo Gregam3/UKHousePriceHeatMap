@@ -172,22 +172,27 @@ export default class App extends Component {
 
     drawMapWithData(longitude, latitude) {
         return <View style={{marginTop: 25, flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{flex: 1}}>
-                <SearchBar
-                    style={{width: 200}}
-                    darkTheme
-                    round
-                    onChangeText={this.updateSearchText}
-                />
-                <Button
-                    style={{align: SearchBar}}
-                    onPress={this.goToLocation}
-                    title="Go"
-                    color="#841584"
-                />
+            <View style={{flex: 1, flexDirection: 'row'}}>
+                <View style={{flex: 4}}>
+                    <SearchBar
+                        darkTheme
+                        round
+                        onChangeText={this.updateSearchText}
+                    />
+                </View>
+                <View style={{flex: 1}}>
+                    <View>
+                        <Button
+                            // style={{position: 'absolute', height: 200}}
+                            onPress={this.goToLocation}
+                            title="Go"
+                            color="#841584"
+                        />
+                    </View>
+                </View>
             </View>
             <MapView
-                style={{flex: 7}}
+                style={{flex: 11}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
                 provider={MapView.PROVIDER_GOOGLE}
