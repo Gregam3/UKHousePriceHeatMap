@@ -1,12 +1,12 @@
-import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView} from 'expo';
-import {Button} from 'react-native';
-
 import 'global'
 
-import * as NetLib from './lib/NetworkingLib.js';
+import {Location, MapView, Permissions} from 'expo';
+import React, {Component} from 'react';
+import {Button, StyleSheet, Text, View} from 'react-native';
+import {SearchBar} from 'react-native-elements';
+
 import * as Auth from './lib/Auth.js';
+import * as NetLib from './lib/NetworkingLib.js';
 
 
 /**
@@ -22,28 +22,37 @@ const startingDeltas = {
 const AGGREGATION_LEVELS = {
     addresses: 0,
     postcodes: 15,
-    heatmap: 500
+    heatMap: 500
 };
 
 //Turn to false to disable logging
 const logging = true;
 
 // min time without map movement before map will update
-const waitTimeBeforeUpdate = 2000;
-// number used to scale up the minimum size of the circlesin the heatmap
-const heatmapScaleFactor = 100;
+// number used to scale up the minimum size of the circles in the heat map
+const heatMapScaleFactor = 100;
+
 export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatmapScaleFactor
+        circleSize: heatMapScaleFactor
     };
 
     constructor(props) {
         super(props);
+
+        this.searchText = null;
+        this.displayedText = 'Fetching position...';
+        this.lastPosition = {
+            latitude: null,
+            longitude: null,
+            latitudeDelta: startingDeltas.latitude,
+            longitudeDelta: startingDeltas.longitude
+        };
+
         Auth.loadUserId();
-        this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
     }
 
@@ -62,18 +71,14 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                if (!this.currentMapCoordinates) {
-
-
-                    let currentMapCoordinates = {
+                if (!this.mapBounds) {
+                    this.mapBounds = {
                         top: location.coords.longitude + startingDeltas.longitude,
                         bottom: location.coords.longitude - startingDeltas.longitude,
                         right: location.coords.latitude + startingDeltas.latitude,
                         left: location.coords.latitude - startingDeltas.latitude,
                         delta: startingDeltas.longitude * 500
                     };
-
-                    this.currentMapCoordinates = currentMapCoordinates;
                 }
             } else {
                 this.setState({
@@ -84,38 +89,74 @@ export default class App extends Component {
     };
 
     _getDisplayData = async () => {
-        if (this.currentMapCoordinates) {
-            let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
+        if (this.mapBounds) {
+            let markers = await NetLib.getLandRegistryData(this.mapBounds);
 
             if (markers) {
-                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
-
-                log('Set state for new markers and new circleSize');
-                this.setState({markers, circleSize});
+                this.setState({
+                        markers,
+                        circleSize: heatMapScaleFactor * (this.mapBounds.delta / 30),
+                        //Location must be updated in state here to avoid position reverted to last searched position, alternate solution leads to scrolling on the map
+                        location: {
+                            coords: this.lastPosition
+                        }
+                    }
+                );
             }
         }
     };
 
     handleMapRegionChange = mapRegion => {
-        let currentMapCoordinates = {
-            top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
-            bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
-            right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
-            left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
-            delta: mapRegion.longitudeDelta * 500
-        };
-        this.currentMapCoordinates = currentMapCoordinates;
+        //If zoom level does not change mapRegion does not contain these, latitude and longitude always change.
+        if (mapRegion.longitudeDelta && mapRegion.latitudeDelta) {
+            this.lastPosition.longitudeDelta = mapRegion.longitudeDelta;
+            this.lastPosition.latitudeDelta = mapRegion.latitudeDelta;
+        }
 
+        this.lastPosition.latitude = mapRegion.latitude;
+        this.lastPosition.longitude = mapRegion.longitude;
+
+        this.mapBounds = {
+            top: mapRegion.longitude + (this.lastPosition.longitudeDelta / 2),
+            bottom: mapRegion.longitude - (this.lastPosition.longitudeDelta / 2),
+            right: mapRegion.latitude + (this.lastPosition.latitudeDelta / 2),
+            left: mapRegion.latitude - (this.lastPosition.latitudeDelta / 2),
+            delta: this.lastPosition.longitudeDelta * 500
+        };
+    };
+
+    goToLocation = async () => {
+        NetLib.getWithPathVariable('location/get-address-coordinates', this.searchText)
+            .then(response => {
+                let parsedResponse = JSON.parse(response);
+
+                let searchedLocation = {
+                    coords: {
+                        latitude: parsedResponse.lat,
+                        longitude: parsedResponse.lng
+                    }
+                };
+
+                this.handleMapRegionChange(searchedLocation.coords);
+
+                this.setState({location: searchedLocation});
+            }, error => {
+                if (logging) log(error);
+            });
+    };
+
+    updateSearchText = newSearchText => {
+        this.searchText = newSearchText;
     };
 
     render() {
-        let displayedText = 'Fetching position...';
-
         let latitude = null;
         let longitude = null;
 
+        if (logging) log(JSON.stringify(this.state.location));
+
         if (this.state.errorMessage) {
-            displayedText = this.state.errorMessage;
+            this.displayedText = this.state.errorMessage;
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
@@ -125,14 +166,28 @@ export default class App extends Component {
             (latitude && longitude) ?
                 this.drawMapWithData(longitude, latitude)
                 :
-                <Text style={styles.centerText}>{displayedText}</Text>
+                <Text style={styles.centerText}>{this.displayedText}</Text>
         );
     }
 
     drawMapWithData(longitude, latitude) {
-        return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+        return <View style={{marginTop: 25, flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
+            <View style={{flex: 1}}>
+                <SearchBar
+                    style={{width: 200}}
+                    darkTheme
+                    round
+                    onChangeText={this.updateSearchText}
+                />
+                <Button
+                    style={{align: SearchBar}}
+                    onPress={this.goToLocation}
+                    title="Go"
+                    color="#841584"
+                />
+            </View>
             <MapView
-                style={{flex: 1}}
+                style={{flex: 7}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
                 provider={MapView.PROVIDER_GOOGLE}
@@ -143,12 +198,18 @@ export default class App extends Component {
                     latitudeDelta: startingDeltas.latitude,
                     longitudeDelta: startingDeltas.longitude
                 }}
+                region={{
+                    longitude: longitude,
+                    latitude: latitude,
+                    latitudeDelta: this.lastPosition.latitudeDelta,
+                    longitudeDelta: this.lastPosition.longitudeDelta
+                }}
                 onRegionChange={this.handleMapRegionChange}
             >
 
                 {
-                    this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
-                        this.drawHeatmap()
+                    this.state.markers.length > AGGREGATION_LEVELS.heatMap ? (
+                        this.drawHeatMap()
                     ) : (
                         this.drawMarkers()
                     )}
@@ -162,8 +223,8 @@ export default class App extends Component {
         </View>
     }
 
-    drawHeatmap() {
-        if (logging) log("Rendering " + this.state.markers.length + " heatmap data points");
+    drawHeatMap() {
+        if (logging) log("Rendering " + this.state.markers.length + " heatMap data points");
 
         return this.state.markers.map(marker => (
             <MapView.Circle
