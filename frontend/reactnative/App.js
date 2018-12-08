@@ -1,12 +1,12 @@
-import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView} from 'expo';
-import {Button} from 'react-native';
-
 import 'global'
 
-import * as NetLib from './lib/NetworkingLib.js';
+import {Location, MapView, Permissions} from 'expo';
+import React, {Component} from 'react';
+import { StyleSheet,Text, View} from 'react-native';
+import {Button, Platform, ProgressBarAndroid, ProgressViewIOS} from 'react-native';
+
 import * as Auth from './lib/Auth.js';
+import * as NetLib from './lib/NetworkingLib.js'; 
 
 
 /**
@@ -125,7 +125,16 @@ export default class App extends Component {
             (latitude && longitude) ?
                 this.drawMapWithData(longitude, latitude)
                 :
-                <Text style={styles.centerText}>{displayedText}</Text>
+                <View>
+                    <Text style={styles.background}>{""}</Text>
+                    <Text style={styles.centerText}>{displayedText}</Text>
+                    {(Platform.OS === 'ios') ?
+                        <ProgressViewIOS style={styles.loadStyle}/> :
+                        <ProgressBarAndroid style={styles.loadStyle}/>}
+                    <Text style={styles.background}>{""}</Text>
+                </View>
+
+
         );
     }
 
@@ -135,7 +144,6 @@ export default class App extends Component {
                 style={{flex: 1}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
-                provider={MapView.PROVIDER_GOOGLE}
                 customMapStyle={darkMapStyle}
                 initialRegion={{
                     longitude: longitude,
@@ -145,7 +153,6 @@ export default class App extends Component {
                 }}
                 onRegionChange={this.handleMapRegionChange}
             >
-
                 {
                     this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
                         this.drawHeatmap()
@@ -205,17 +212,19 @@ function log(message) {
 
 const styles = StyleSheet.create({
     centerText: {
-        marginTop: 300,
-        marginLeft: 120,
+        textAlign: 'center',
         fontSize: 40,
+        height: 100,
+        color: '#ffffff',
+        backgroundColor: '#242f3e',
     },
-    coordinatesText: {
-        flex: 5,
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'white',
-        textAlign: 'center'
+    background: {
+        backgroundColor: '#242f3e',
+        height: 275
+    },
+    loadStyle: {
+        backgroundColor: '#242f3e',
+        height: 100
     }
 });
 
