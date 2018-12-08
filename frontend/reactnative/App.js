@@ -41,7 +41,7 @@ export default class App extends Component {
         errorMessage: null,
         markers: [],
         circleSize: heatmapScaleFactor,
-		optionSelected: true
+		optionSelected: false
     };
 
     constructor(props) {
@@ -172,7 +172,7 @@ export default class App extends Component {
 			{this.state.optionSelected?
 				<OptionWindow/>
 				:
-				<View style={{flex:1, top: 10, left: 10, position: 'absolute', zIndex:1}} >
+				<View style={{flex:1, top: 40, left: 10, position: 'absolute', zIndex:1}} >
 				
 					<Button
 						onPress={() => {this.setState({optionSelected:true})}}
@@ -221,7 +221,7 @@ export default class App extends Component {
     }
 }
 
- 
+const slideDuration=500;
 
 class OptionWindow extends Component{
 	
@@ -231,7 +231,7 @@ class OptionWindow extends Component{
 	}
 	
 	state={
-		transAnim: new Animated.Value(0)
+		transAnim: new Animated.Value(0.000001)
 	}
 	
 	
@@ -239,9 +239,9 @@ class OptionWindow extends Component{
 	render(){
 		return <View style={{flexDirection:'row', top: 0, bottom: 0, left: 0, right: 0, position: 'absolute', zIndex:1}}>
 			<Animated.View style={{flex: this.state.transAnim, top: 0, bottom: 0, left: 0, backgroundColor: '#000000', opacity: 0.85}}>
-			 
+			<OptionPane name="DaveyBoi"/>
 			</Animated.View>
-			<TouchableOpacity style={{flex: 1, top: 0, bottom: 0, left: 0, right: 0,width:75}} onPress={this.onPress} ></TouchableOpacity>
+			<TouchableOpacity style={{flex: 1, right: 0,width:75}} onPress={this.onPress} ></TouchableOpacity>
 			
 		</View>
 	}
@@ -251,7 +251,7 @@ class OptionWindow extends Component{
 		  this.state.transAnim,
 		  {
 			toValue: 3,
-			duration: 500,
+			duration: slideDuration,
 		  }
 		).start();
 	}
@@ -267,13 +267,50 @@ class OptionWindow extends Component{
 			  this.state.transAnim,
 			  {
 				toValue: 0,
-				duration: 500,
+				duration: slideDuration,
 			  }
 			).start(() => {appInstance.setState({optionSelected: false})});
 			this.close = true;
 		}
 	}
 	
+}
+
+class OptionPane extends Component{
+	constructor(props){
+		super(props);
+		this.shouldUpdate = true;
+		this.name = props.name;
+		console.log(props.name);
+		this.options = props.options?props.options: [];
+	}
+	
+	shouldComponentUpdate(nextProps, nextState){
+		return this.shouldUpdate;
+	}
+	
+	render(){
+		this.shouldUpdate = false;
+		return (
+			<View style={{flex:1}}>
+				<View style={{borderBottomColor:'#FFFFFF', borderBottomWidth:1, left:5, width:250, top:20}}>
+					<Text style={{color:'#FFFFFF', fontSize:20}}>{this.name}</Text>
+				</View>
+			</View>
+		);
+	}
+	
+}
+
+class Option extends Component{
+	
+	constructor(props){
+		super(props);
+	}
+	
+	render(){
+		
+	}
 }
 
 function log(message) {
