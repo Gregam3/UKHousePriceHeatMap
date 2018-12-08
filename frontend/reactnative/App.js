@@ -1,9 +1,9 @@
 import 'global'
 
-import {Location, MapView, Permissions} from 'expo';
+import { Constants,Location, MapView, Permissions} from 'expo';
 import React, {Component} from 'react';
-import { StyleSheet,Text, View} from 'react-native';
-import {Button, Platform, ProgressBarAndroid, ProgressViewIOS} from 'react-native';
+import { Button, Platform, ProgressBarAndroid, ProgressViewIOS,StyleSheet, Text, View} from 'react-native';
+import {Overlay} from 'react-native-elements';
 
 import * as Auth from './lib/Auth.js';
 import * as NetLib from './lib/NetworkingLib.js'; 
@@ -37,7 +37,8 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatmapScaleFactor
+        circleSize: heatmapScaleFactor,
+        loadingMarkers: false
     };
 
     constructor(props) {
@@ -66,10 +67,10 @@ export default class App extends Component {
 
 
                     let currentMapCoordinates = {
-                        top: location.coords.longitude + startingDeltas.longitude,
-                        bottom: location.coords.longitude - startingDeltas.longitude,
-                        right: location.coords.latitude + startingDeltas.latitude,
-                        left: location.coords.latitude - startingDeltas.latitude,
+                        top: location.coords.longitude + (startingDeltas.longitude / 2),
+                        bottom: location.coords.longitude - (startingDeltas.longitude / 2),
+                        right: location.coords.latitude + (startingDeltas.latitude / 2),
+                        left: location.coords.latitude - (startingDeltas.latitude / 2),
                         delta: startingDeltas.longitude * 500
                     };
 
@@ -83,13 +84,20 @@ export default class App extends Component {
         }
     };
 
+    loadElements =() => {
+        this.setState({loadingMarkers: true});
+
+        this._getDisplayData();
+    };
+
     _getDisplayData = async () => {
         if (this.currentMapCoordinates) {
             let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
 
             if (markers) {
-                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
+                this.setState({loadingMarkers: false});
 
+                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
                 log('Set state for new markers and new circleSize');
                 this.setState({markers, circleSize});
             }
@@ -129,8 +137,8 @@ export default class App extends Component {
                     <Text style={styles.background}>{""}</Text>
                     <Text style={styles.centerText}>{displayedText}</Text>
                     {(Platform.OS === 'ios') ?
-                        <ProgressViewIOS style={styles.loadStyle}/> :
-                        <ProgressBarAndroid style={styles.loadStyle}/>}
+                        <ProgressViewIOS style={styles.locationLoadStyle}/> :
+                        <ProgressBarAndroid style={styles.locationLoadStyle}/>}
                     <Text style={styles.background}>{""}</Text>
                 </View>
 
@@ -139,7 +147,9 @@ export default class App extends Component {
     }
 
     drawMapWithData(longitude, latitude) {
+
         return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+
             <MapView
                 style={{flex: 1}}
                 showsMyLocationButton={true}
@@ -162,10 +172,23 @@ export default class App extends Component {
 
             </MapView>
             <Button
-                onPress={this._getDisplayData}
+                onPress={this.loadElements}
                 title="Load elements"
                 color="#841584"
             />
+            <Overlay
+                overlayBackgroundColor='#242f3e'
+                height={130}
+                width={150}
+                isVisible={this.state.loadingMarkers}>
+                <Text style={{
+                    textAlign: 'center',
+                    color: '#ffffff'
+                }}>Loading elements...</Text>
+                {(Platform.OS === 'ios') ?
+                    <ProgressViewIOS style={styles.locationLoadStyle}/> :
+                    <ProgressBarAndroid style={styles.locationLoadStyle}/>}
+            </Overlay>
         </View>
     }
 
@@ -222,9 +245,20 @@ const styles = StyleSheet.create({
         backgroundColor: '#242f3e',
         height: 275
     },
-    loadStyle: {
+    locationLoadStyle: {
         backgroundColor: '#242f3e',
         height: 100
+    },
+    overlayStyle: {
+        opacity: 0.2,
+        height: 100
+    },
+    markerLoadStyle: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingTop: Constants.statusBarHeight,
+        backgroundColor: '#ecf0f1',
     }
 });
 
