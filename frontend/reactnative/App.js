@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, Dimensions} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 import {Button} from 'react-native';
 
@@ -25,6 +25,8 @@ const AGGREGATION_LEVELS = {
     heatmap: 500
 };
 
+const { width, height } = Dimensions.get('window');
+
 //Turn to false to disable logging
 const logging = true;
 
@@ -37,7 +39,8 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatmapScaleFactor
+        circleSize: heatmapScaleFactor,
+        hackHeight: height
     };
 
     constructor(props) {
@@ -45,6 +48,11 @@ export default class App extends Component {
         Auth.loadUserId();
         this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
+    }
+
+    componentWillMount() {
+        setTimeout( () => this.setState({ hackHeight: height+1}), 500);
+        setTimeout( () => this.setState({ hackHeight: height}), 1000);
     }
 
     //Must be asynchronous as it has to wait for permissions to be accepted
@@ -130,9 +138,9 @@ export default class App extends Component {
     }
 
     drawMapWithData(longitude, latitude) {
-        return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+        return <View style={{marginTop: 0, paddingTop: this.state.hackHeight, backgroundColor: '#242f3e'}}>
             <MapView
-                style={{flex: 1}}
+                style={styles.map}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
                 provider={MapView.PROVIDER_GOOGLE}
@@ -204,6 +212,9 @@ function log(message) {
 }
 
 const styles = StyleSheet.create({
+    map: {
+      ...StyleSheet.absoluteFillObject,
+    },
     centerText: {
         marginTop: 300,
         marginLeft: 120,
