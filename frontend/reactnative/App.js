@@ -180,10 +180,9 @@ export default class App extends Component {
                         onChangeText={this.updateSearchText}
                     />
                 </View>
-                <View style={{flex: 1}}>
-                    <View>
+                <View style={{flex: 1, backgroundColor:'#841584'}}>
+                    <View style={{marginTop: 10}}>
                         <Button
-                            // style={{position: 'absolute', height: 200}}
                             onPress={this.goToLocation}
                             title="Go"
                             color="#841584"
@@ -222,7 +221,7 @@ export default class App extends Component {
             </MapView>
             <Button
                 onPress={this._getDisplayData}
-                title="Load elements"
+                title="Fetch Prices"
                 color="#841584"
             />
         </View>
