@@ -1,4 +1,4 @@
-package asegroup1.api.models.landregistry.heatmap;
+package asegroup1.api.models.landregigetPositionForAddressesstry.heatmap;
 
 import asegroup1.api.models.heatmap.Colour;
 import org.junit.jupiter.api.Test;

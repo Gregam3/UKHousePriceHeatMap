@@ -27,7 +27,8 @@ import asegroup1.api.models.landregistry.LandRegistryData;
 @Repository
 @Transactional
 public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
-
+	private static final String LAND_REGISTRY_SPARQL_ENDPOINT =
+		"http://landregistry.data.gov.uk/app/root/qonsole/query";
 
 	private static final String TABLE_NAME = "postcodelatlng";
 
@@ -163,5 +164,17 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		return Unirest.get(constraintQuery).asJson().getBody().getArray()
 				.getJSONObject(0).getJSONArray("results").getJSONObject(0)
 				.getJSONObject("geometry").getJSONObject("location");
+	}
+
+	public JSONObject executeSPARQLQuery(String query) throws UnirestException {
+		// Navigates through JSON and returns list of addresses based on post
+		// code
+		return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
+			.field("output", "json")
+			.field("q", query)
+			.field("url", "/landregistry/query")
+			.asJson()
+			.getBody()
+			.getObject();
 	}
 }

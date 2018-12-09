@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
@@ -44,34 +43,27 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 @Service
 public class LandRegistryServiceImpl {
 
-    private LandRegistryDaoImpl postCodeCoordinatesDao;
+	private LandRegistryDaoImpl landRegistryDao;
 
-    @Autowired
+	@Autowired
     public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
-        this.postCodeCoordinatesDao = postCodeCoordinatesDao;
-    }
+		this.landRegistryDao = postCodeCoordinatesDao;
+	}
 
     //API CONSTANTS
-    private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
-    private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
-    private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
+	static final int[] AGGREGATION_LEVELS = new int[] {0, 15, 500};
 
-
-    public List<LandRegistryData> getTransactions(LandRegistryQuery query)
+	public List<LandRegistryData> getTransactions(LandRegistryQuery query)
             throws IOException, UnirestException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
-
         String queryStr = query.buildQuery();
-
-        JSONObject queryResponse = executeSPARQLQuery(queryStr);
-
-        ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
+		JSONObject queryResponse = landRegistryDao.executeSPARQLQuery(queryStr);
+		ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
 
         for (JsonNode jsonNode : transactionListResponse) {
             transactionsList.add(new LandRegistryData(jsonNode));
@@ -93,13 +85,16 @@ public class LandRegistryServiceImpl {
         return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
     }
 
-    public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
-        return getLatestTransactions(new ArrayList<>(), constraint);
+	public List<LandRegistryData>
+	getLatestTransactions(LandRegistryQueryConstraint constraint)
+		throws IOException, UnirestException {
+		return getLatestTransactions(new ArrayList<>(), constraint);
     }
 
     private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
-        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
-    }
+		return landRegistryDao.searchForLandRegistryDataInBoundaries(
+			top, right, bottom, left, true);
+	}
 
     public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
 
@@ -173,9 +168,10 @@ public class LandRegistryServiceImpl {
                     .append("&key=").append(GOOGLE_MAPS_API_KEY);
 
             try {
-                JSONObject response = postCodeCoordinatesDao.getGeoLocationData(addressUriBuilder.toString());
+				JSONObject response = landRegistryDao.getGeoLocationData(
+					addressUriBuilder.toString());
 
-                address.setLatitude(response.getDouble("lat"));
+				address.setLatitude(response.getDouble("lat"));
                 address.setLongitude(response.getDouble("lng"));
 
             } catch (UnirestException | JSONException e) {
@@ -188,17 +184,6 @@ public class LandRegistryServiceImpl {
         }
 
         return addresses;
-    }
-
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
-        //Navigates through JSON and returns list of addresses based on post code
-        return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
-                .field("output", "json")
-                .field("q", query)
-                .field("url", "/landregistry/query")
-                .asJson()
-                .getBody()
-                .getObject();
     }
 
     public List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
@@ -268,9 +253,9 @@ public class LandRegistryServiceImpl {
         long startTime = System.currentTimeMillis();
         int updatedRecords = 0;
 
-		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao
-				.getMatchingPostcodes(postcodePrefix, false, 1);
-        double numAreas = postcodeAreas.size();
+		HashMap<String, List<String>> postcodeAreas =
+			landRegistryDao.getMatchingPostcodes(postcodePrefix, false, 1);
+		double numAreas = postcodeAreas.size();
         double numDone = 0;
 
         for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
@@ -279,8 +264,8 @@ public class LandRegistryServiceImpl {
                     estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
             List<String> postcodes = postcodeArea.getValue();
             HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
-            updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
-            numDone++;
+			updatedRecords += landRegistryDao.updateAveragePrice(newPrices);
+			numDone++;
         }
 
         System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
