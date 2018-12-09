@@ -9,12 +9,12 @@ class LandRegistryDataHeatMapColourSetter {
 
 	static List<LandRegistryData>
 	setHeatMapColours(List<LandRegistryData> landRegistryDataList) {
-		TreeMap<Double, List<LandRegistryData>> groupedLandRegistryDataLists = groupByPricePaid(landRegistryDataList);
+		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataLists = groupByPricePaid(landRegistryDataList);
 		List<LandRegistryData> rtnDatas = new ArrayList<>();
-		Set<Map.Entry<Double, List<LandRegistryData>>> datas = groupedLandRegistryDataLists.entrySet();
+		Set<Map.Entry<Double, ArrayList<LandRegistryData>>> datas = groupedLandRegistryDataLists.entrySet();
 		int groupedSize = datas.size();
 		int groupedCount = 0;
-		for (Map.Entry<Double, List<LandRegistryData>> data : datas) {
+		for (Map.Entry<Double, ArrayList<LandRegistryData>> data : datas) {
 			for (LandRegistryData landRegistryData : data.getValue()) {
 				double value = datas.size() <= 1 ? 0.5 : (double) groupedCount / (groupedSize - 1);
 				landRegistryData.setColour(getColour(value));
@@ -39,8 +39,8 @@ class LandRegistryDataHeatMapColourSetter {
 		return new Colour(((int) Math.round(255 * value)), (int) Math.round(255 * (1 - value)));
 	}
 
-	private static TreeMap<Double, List<LandRegistryData>> groupByPricePaid(List<LandRegistryData> landRegistryDataList) {
-		TreeMap<Double, List<LandRegistryData>> groupedLandRegistryDataList = new TreeMap<>();
+	private static TreeMap<Double, ArrayList<LandRegistryData>> groupByPricePaid(List<LandRegistryData> landRegistryDataList) {
+		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataList = new TreeMap<>();
 		for (LandRegistryData data : landRegistryDataList) {
 			if (!groupedLandRegistryDataList.containsKey(data.getPricePaid())) {
 				groupedLandRegistryDataList.put(data.getPricePaid(), new ArrayList<>(Collections.singletonList(data)));
