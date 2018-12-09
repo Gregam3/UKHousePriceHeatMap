@@ -1,38 +1,26 @@
 package asegroup1.api.services.landregistry;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.*;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -151,14 +139,9 @@ public class LandRegistryServiceImpl {
                         entry.getConstraint(Selectable.pricePaid).matches("[0-9]+")
         ).collect(Collectors.toList());
 
-		List<Double> numbers = MathUtil.normaliseList(
-                landRegistryDataForPostcodes.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList()));
-
-        for (int i = 0; i < numbers.size(); i++) {
-            landRegistryDataForPostcodes.get(i).setColour(getColoursForNormalisedValues(numbers.get(i)));
-        }
-        return landRegistryDataForPostcodes;
-    }
+		return LandRegistryDataHeatMapColourSetter.SetHeatMapColours(
+			landRegistryDataForPostcodes);
+	}
 
     public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
         if (addresses.size() >= 100) {
@@ -208,31 +191,21 @@ public class LandRegistryServiceImpl {
         landRegistryDataList = landRegistryDataList.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
                 .collect(Collectors.toList());
 
-		List<Double> numbers = MathUtil
-				.normaliseList(
-                landRegistryDataList.stream().map(entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList())
-        );
+		landRegistryDataList.sort(
+			(o1, o2) -> Double.compare(o2.getPricePaid(), o1.getPricePaid()));
 
-        List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
+		List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
 
         for (int i = 0; i < landRegistryDataList.size(); i++) {
             LandRegistryData lr = landRegistryDataList.get(i);
-            heatMapDataPoints.add(
-                    new HeatMapDataPoint(
-                            lr.getLatitude(),
-                            lr.getLongitude(),
-                            getColoursForNormalisedValues(
-                                    numbers.get(i)),
-                            lr.getRadius())
-            );
-        }
+			heatMapDataPoints.add(new HeatMapDataPoint(
+				lr.getLatitude(), lr.getLongitude(),
+				LandRegistryDataHeatMapColourSetter.GetColour(
+					i / (landRegistryDataList.size() - 1)),
+				lr.getRadius()));
+		}
 
         return heatMapDataPoints;
-    }
-
-    private Colour getColoursForNormalisedValues(Double normalisedValue) {
-        //The higher the normalised value the darker the red will appear
-        return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
     private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
@@ -286,5 +259,4 @@ public class LandRegistryServiceImpl {
         System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
         System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
-
 }

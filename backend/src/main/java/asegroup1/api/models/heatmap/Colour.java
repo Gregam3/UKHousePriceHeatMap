@@ -33,31 +33,31 @@ public class Colour {
         setGreen(green);
     }
 
-    public void setGreen(int green) throws InvalidParameterException{
-        if (green > 255 || green < 0) {
+	private void setGreen(int green) throws InvalidParameterException {
+		if (green > 255 || green < 0) {
             throw new InvalidParameterException("Colour value must be between 0-255");
         }
         this.green = green;
-    }
+	}
 
-    @JsonIgnore
+	@JsonIgnore
     public int getGreen() {
         return green;
     }
 
-    @JsonIgnore
-    public int getRed() {
-        return red;
-    }
+	@JsonIgnore
+	private int getRed() {
+		return red;
+	}
 
-    public void setRed(int red) throws InvalidParameterException{
-        if (red > 255 || red < 0) {
+	private void setRed(int red) throws InvalidParameterException {
+		if (red > 255 || red < 0) {
             throw new InvalidParameterException("Colour value must be between 0-255");
         }
         this.red = red;
-    }
+	}
 
-    @JsonIgnore
+	@JsonIgnore
     public int getBlue() {
         return 0;
     }
