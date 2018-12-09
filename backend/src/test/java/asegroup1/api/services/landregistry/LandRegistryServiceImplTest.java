@@ -165,9 +165,9 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
 
         // Check for colour conversion
-		Assert.assertEquals("#008033",heatMapDataPoints.get(0).getColour().getHex());
-		Assert.assertEquals("#668000",heatMapDataPoints.get(1).getColour().getHex());
-		Assert.assertEquals("#800000",heatMapDataPoints.get(2).getColour().getHex());
+		Assert.assertEquals("#00ff00",heatMapDataPoints.get(0).getColour().getHex());
+		Assert.assertEquals("#ffff00",heatMapDataPoints.get(1).getColour().getHex());
+		Assert.assertEquals("#ff0000",heatMapDataPoints.get(2).getColour().getHex());
 	}
 
     @Test
@@ -175,7 +175,7 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 5L, 5L);
 
         for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-			Assert.assertEquals("#668000",
+			Assert.assertEquals("#ffff00",
 								heatMapDataPoint.getColour().getHex());
 		}
     }

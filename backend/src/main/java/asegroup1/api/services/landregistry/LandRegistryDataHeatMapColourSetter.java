@@ -42,7 +42,7 @@ class LandRegistryDataHeatMapColourSetter {
 		// Make sure value is between 0 and 1
 		assert (0 <= value);
 		assert (1 >= value);
-		Color colour = Color.getHSBColor((float) ((1-value)*0.4), 1, (float) 0.5); // These are percentage values represented as decimals
+		Color colour = Color.getHSBColor((float) ((1-value)/3), 1, 1); // These are percentage values represented as decimals
 		return new Colour(colour.getRed(), colour.getGreen(), colour.getBlue());
 	}
 
