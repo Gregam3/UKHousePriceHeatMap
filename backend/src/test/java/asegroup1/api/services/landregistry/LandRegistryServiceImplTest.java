@@ -9,6 +9,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -175,8 +176,9 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 5L, 5L);
 
         for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-            assert heatMapDataPoint.getColour().getHex().equals("#9b0000");
-        }
+			Assert.assertEquals("#888800",
+								heatMapDataPoint.getColour().getHex());
+		}
     }
 
     @Test

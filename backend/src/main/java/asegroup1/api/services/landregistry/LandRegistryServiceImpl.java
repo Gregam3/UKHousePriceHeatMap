@@ -139,7 +139,7 @@ public class LandRegistryServiceImpl {
                         entry.getConstraint(Selectable.pricePaid).matches("[0-9]+")
         ).collect(Collectors.toList());
 
-		return LandRegistryDataHeatMapColourSetter.SetHeatMapColours(
+		return LandRegistryDataHeatMapColourSetter.setHeatMapColours(
 			landRegistryDataForPostcodes);
 	}
 
@@ -201,7 +201,7 @@ public class LandRegistryServiceImpl {
             LandRegistryData lr = landRegistryDataList.get(i);
 			heatMapDataPoints.add(new HeatMapDataPoint(
 				lr.getLatitude(), lr.getLongitude(),
-				LandRegistryDataHeatMapColourSetter.GetColour(
+				LandRegistryDataHeatMapColourSetter.getColour(
 					(double)i / (landRegistryDataList.size() - 1)),
 				lr.getRadius()));
 		}
