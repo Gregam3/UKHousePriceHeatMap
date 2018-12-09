@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -15,11 +16,15 @@ import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.landregistry.LandRegistryData.AddrConstraint;
+import asegroup1.api.models.landregistry.LandRegistryData.TransConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
@@ -53,6 +58,62 @@ class LandRegistryDataTest {
 		// check all values equate to null
 		EnumSet.allOf(Selectable.class).forEach(v -> assertNull(lRData.getConstraint(v)));
 
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setColour(Colour)}
+	 * and {@link asegroup1.api.models.landregistry.LandRegistryData#getColour()}.
+	 */
+	@Test
+	public void testSetGetColour() {
+		Colour c = new Colour(70);
+		assertNull(lRData.getColour());
+		lRData.setColour(c);
+		assertEquals(c, lRData.getColour());
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#getId()}.
+	 */
+	@Test
+	public void testGetID() {
+		assertTrue(lRData.getId().matches("\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b"));
+	}
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#getConstraintNotNull(Selectable)}.
+	 */
+	@Test
+	public void testGetConstraintNotNull() {
+		Selectable sel = Selectable.paon;
+		String newVal = "test";
+
+		assertNull(lRData.getConstraint(sel));
+		assertEquals("", lRData.getConstraintNotNull(sel));
+		lRData.setConstraint(sel + "", newVal);
+		assertEquals(newVal.toUpperCase(), lRData.getConstraintNotNull(sel));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#removeConstraint(Selectable)}.
+	 */
+	@Test
+	public void testRemoveConstraint() {
+		Selectable sel = Selectable.paon;
+		String tmpValue = "test";
+
+		assertNull(lRData.getConstraint(sel));
+		assertFalse(lRData.removeConstraint(sel));
+
+		lRData.setConstraint(sel + "", tmpValue);
+		assertNotNull(lRData.getConstraint(sel));
+		assertTrue(lRData.removeConstraint(sel));
+		assertNull(lRData.getConstraint(sel));
 	}
 
 	/**
@@ -153,13 +214,27 @@ class LandRegistryDataTest {
 		assertStoredStringEqual(Selectable.county, countyNameStr);
 	}
 
+
 	/**
-	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
 	 */
 	@Test
 	public void testSetPostCode() {
-		String postCode = "bn21 4nv";
+		testSetValidPostCode("bn21 4nv");
+		testSetValidPostCode("b21 4nv");
+		testSetInvalidPostCode(null);
+		testSetInvalidPostCode("");
+		testSetInvalidPostCode("1234");
+		testSetInvalidPostCode("bn215nv");
+		testSetInvalidPostCode("bn21 nv");
+		testSetInvalidPostCode("bn 4nv");
+	}
 
+	/**
+	 * Test method for {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
+	 */
+	public void testSetValidPostCode(String postCode) {
 		try {
 			lRData.setPostCode(postCode);
 			assertStoredStringEqual(Selectable.postcode, postCode);
@@ -168,6 +243,14 @@ class LandRegistryDataTest {
 		}
 
 		assertStoredStringEqual(Selectable.postcode, postCode);
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
+	 */
+	public void testSetInvalidPostCode(String postCode) {
+		assertThrows(InvalidParameterException.class, () -> lRData.setPostCode(postCode));
 	}
 
 
@@ -257,9 +340,7 @@ class LandRegistryDataTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setConstraint(java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testSetConstraint() {
-		
-
+	public void testSetValidConstraint() {
 		EnumSet.allOf(Selectable.class).forEach(selectable -> {
 			String value = null;
 			Random rand = new Random(LandRegistryQueryTestUtils.randomSeed);
@@ -335,33 +416,38 @@ class LandRegistryDataTest {
 					testSetInvalidConstraint(selectable, "2018-10-1");
 					break;
 				default:
-					fail("Unexpected Selectable type: "+selectable.toString());
+					assertThrows(IllegalArgumentException.class, () -> lRData.setConstraint(selectable + "", "test"));
 			}
-			
-			
-			
-
 		});
-		
-		
 	}
 
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setConstraint(java.lang.String, java.lang.String)}.
+	 */
 	@Test
-	public void testSetConstraintInvalidKey() {
+	public void testSetInvalidConstraint() {
+		assertThrows(IllegalArgumentException.class, () -> lRData.setConstraint("", "test"));
+		assertThrows(IllegalArgumentException.class, () -> lRData.setConstraint("a", "test"));
 		// test adding value with invalid selectable
 		String invalidSelectable = "invalidSelectable";
-		try {
-			Selectable.valueOf(invalidSelectable);
-			fail("\"inValidSelectable\" is resolving to a selectable");
-		} catch (IllegalArgumentException e) {
-			// expected, as should not be parseable
-		}
-		try {
-			assertFalse(lRData.setConstraint(invalidSelectable, "someData"));
-			fail("Should throw illigalArgumentException");
-		} catch (IllegalArgumentException e) {
-			// expected, as should not be parseable
-		}
+		assertThrows(IllegalArgumentException.class, () -> Selectable.valueOf(invalidSelectable));
+		assertThrows(IllegalArgumentException.class, () -> lRData.setConstraint(invalidSelectable, "someData"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setConstraint(java.lang.String, java.lang.String)}.
+	 */
+	@Test
+	public void testSetWipeConstraint() {
+		Selectable sel = Selectable.paon;
+		String tmpValue = "test";
+
+		lRData.setConstraint(sel + "", tmpValue);
+		assertNotNull(lRData.getConstraint(sel));
+		assertTrue(lRData.setConstraint(sel + "", ""));
+		assertNull(lRData.getConstraint(sel));
 	}
 
 	private void testSetConstraint(Selectable selectable, String value) {
@@ -384,6 +470,242 @@ class LandRegistryDataTest {
 
 		// check value was not updated
 		assertEquals(oldValue, lRData.getConstraint(selectable));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#getLatitude()} and
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setLatitude(double)}.
+	 */
+	@Test
+	public void testSetGetLatitude() {
+		double newLat = 1021341.1235435D;
+		assertNull(lRData.getLatitude());
+		lRData.setLatitude(newLat);
+		assertEquals(new Double(newLat), lRData.getLatitude());
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#getLongitude()} and
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setLongitude(double)}.
+	 */
+	@Test
+	public void testSetGetLongitude() {
+		double newLng = 1021341.1235435D;
+		assertNull(lRData.getLongitude());
+		lRData.setLongitude(newLng);
+		assertEquals(new Double(newLng), lRData.getLongitude());
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#getRadius()} and
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setRadius(double)}.
+	 */
+	@Test
+	public void testSetGetRadius() {
+		double newRad = 1021341.1235435D;
+		assertNull(lRData.getRadius());
+		lRData.setRadius(newRad);
+		assertEquals(new Double(newRad), lRData.getRadius());
+	}
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setConstraintVar(Selectable,
+	 * String))}.
+	 */
+	@Test
+	public void testSetConstraintVar() {
+		EnumSet.allOf(Selectable.class).forEach(selectable -> {
+			lRData.setConstraintVar(selectable, selectable+"s");
+			String expected = null;
+			switch(selectable) {
+				case paon:
+				case saon:
+				case street:
+				case locality:
+				case town:
+				case district:
+				case county:
+				case postcode:
+				case transactionDate:
+					expected = "?addr lrcommon:%1$s ?%1$ss.";
+					break;
+				case propertyType:
+				case estateType:
+					expected = "?transx lrppi:%1$s/skos:prefLabel lrcommon:?%1$ss.";
+					break;
+				case transactionCategory:
+					expected = "?transx lrppi:%1$s/skos:prefLabel lrppi:?%1$ss.";
+					break;
+				case newBuild:
+				case pricePaid:
+					expected = "?transx lrppi:%1$s ?%1$ss.";
+					break;
+				default:
+					fail("Illegal argument exception should have been thrown");
+			}
+			assertEquals(String.format(expected, selectable.toString()), lRData.getEqualityConstraint(selectable).toString());
+			
+		});
+		
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#processConstraintList(Selectable, String...)}.
+	 */
+	@Test
+	public void testProcessConstraintList() {
+		EnumSet.allOf(Selectable.class).forEach(selectable -> {
+			String[] examples = new String[] { "test1", "test2", "test3" };
+			List<String> results = LandRegistryData.processConstraintList(selectable, examples);
+			String expectedFormat = null;
+			switch (selectable) {
+				case paon:
+				case saon:
+				case street:
+				case locality:
+				case town:
+				case district:
+				case county:
+				case postcode:
+				case transactionDate:
+					expectedFormat = "\"%1$S\"";
+					break;
+				case propertyType:
+				case estateType:
+					expectedFormat = "lrcommon:%1$s";
+					break;
+				case transactionCategory:
+					expectedFormat = "lrppi:%1$s";
+					break;
+				case newBuild:
+				case pricePaid:
+					expectedFormat = "%1$s";
+					break;
+				default:
+					fail("Illegal argument exception should have been thrown");
+			}
+
+			assertEquals(examples.length, results.size());
+			for (int i = 0; i < examples.length; i++) {
+				assertEquals(String.format(expectedFormat, examples[i]), results.get(i));
+			}
+
+		});
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#equals(Object)}.
+	 */
+	@Test
+	public void testEqualsDfferentValue() {
+		String newVal = "test";
+		Selectable selectable = Selectable.town;
+		LandRegistryData d1 = LandRegistryQueryTestUtils.genLandRegistryData();
+		LandRegistryData d2 = LandRegistryQueryTestUtils.genLandRegistryData();
+		assertEquals(d1, d2);
+		assertNotEquals(newVal, d2.getConstraint(selectable));
+		d1.setConstraint(selectable + "", newVal);
+		assertNotEquals(d1, d2);
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#equals(Object)}.
+	 */
+	@Test
+	public void testEqualsMissingValue() {
+		Selectable selectable = Selectable.town;
+		LandRegistryData d1 = LandRegistryQueryTestUtils.genLandRegistryData();
+		LandRegistryData d2 = LandRegistryQueryTestUtils.genLandRegistryData();
+		assertEquals(d1, d2);
+		assertNotNull(d2.getConstraint(selectable));
+		d1.removeConstraint(selectable);
+		assertNotEquals(d1, d2);
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#compareTo(Object)}.
+	 */
+	@Test
+	public void testCompare() {
+		LandRegistryData d1 = LandRegistryQueryTestUtils.genLandRegistryData();
+		LandRegistryData d2 = LandRegistryQueryTestUtils.genLandRegistryData();
+		assertEquals(0, d1.compareTo(d2));
+		d1.setConstraint(Selectable.pricePaid + "", d1.getConstraint(Selectable.pricePaid) + "1");
+		assertEquals(1, d1.compareTo(d2));
+
+		assertEquals(-1, d1.compareTo("Test"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData#equals(Object)}.
+	 */
+	@SuppressWarnings("unlikely-arg-type")
+	@Test
+	public void testEqualsWrongType() {
+		LandRegistryData d = LandRegistryQueryTestUtils.genLandRegistryData();
+		assertFalse(d.equals("Wrong type"));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData.AddrConstraint#equals(Object)}
+	 * and
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData.AddrConstraint#compareTo(Object)}.
+	 */
+	@Test
+	public void testAddrConstraintCompare() {
+		AddrConstraint addr = lRData.new AddrConstraint("test", "Test", true);
+		AddrConstraint addr1 = lRData.new AddrConstraint("test", "Test", true);
+		assertEquals(0, addr.compareTo(addr1));
+
+		addr1 = lRData.new AddrConstraint("test1", "Test", true);
+		assertEquals(1, addr.compareTo(addr1));
+
+
+		TransConstraint trans = lRData.new TransConstraint("test", "Test", true);
+		assertEquals(-1, addr.compareTo(trans));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData.TransConstraint#equals(Object)}
+	 * and
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData.TransConstraint#compareTo(Object)}.
+	 */
+	@Test
+	public void testTransConstraintCompare() {
+		TransConstraint addr = lRData.new TransConstraint("test", "Test", true);
+		TransConstraint addr1 = lRData.new TransConstraint("test", "Test", true);
+		assertEquals(0, addr.compareTo(addr1));
+
+		addr1 = lRData.new TransConstraint("test1", "Test", true);
+		assertEquals(-1, addr.compareTo(addr1));
+
+
+		AddrConstraint trans = lRData.new AddrConstraint("test", "Test", true);
+		assertEquals(1, addr.compareTo(trans));
+	}
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryData.EqualityConstraint#equals(Object)}
+	 * and
+	 */
+	@SuppressWarnings("unlikely-arg-type")
+	@Test
+	public void testEqualityConstraintEqualsWrongType() {
+		assertFalse(lRData.new TransConstraint("test", "Test", true).equals("Test"));
 	}
 
 }
