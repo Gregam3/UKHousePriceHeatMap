@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import {Location, Permissions, MapView} from 'expo';
 import {Button} from 'react-native';
+import { Constants, WebBrowser } from 'expo';
 
 import 'global'
 
@@ -70,7 +71,9 @@ export default class App extends Component {
                         bottom: location.coords.longitude - startingDeltas.longitude,
                         right: location.coords.latitude + startingDeltas.latitude,
                         left: location.coords.latitude - startingDeltas.latitude,
-                        delta: startingDeltas.longitude * 500
+                        delta: startingDeltas.longitude * 500,
+                        mapLat: location.coords.latitude,
+                        mapLon: location.coords.longitude
                     };
 
                     this.currentMapCoordinates = currentMapCoordinates;
@@ -96,13 +99,21 @@ export default class App extends Component {
         }
     };
 
+    _handleStreetViewButtonPress = async () => {
+
+        let streetResult = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + this.currentMapCoordinates.mapLat + ',' + this.currentMapCoordinates.mapLon);
+        this.setState({streetResult});
+    };
+
     handleMapRegionChange = mapRegion => {
         let currentMapCoordinates = {
             top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
             bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
             right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
             left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
-            delta: mapRegion.longitudeDelta * 500
+            delta: mapRegion.longitudeDelta * 500,
+            mapLat: mapRegion.latitude,
+            mapLon: mapRegion.longitude
         };
         this.currentMapCoordinates = currentMapCoordinates;
 
@@ -154,6 +165,10 @@ export default class App extends Component {
                     )}
 
             </MapView>
+            <Button
+                onPress={this._handleStreetViewButtonPress}
+                title="Street View"
+            />
             <Button
                 onPress={this._getDisplayData}
                 title="Load elements"
