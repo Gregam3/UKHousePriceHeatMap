@@ -1,24 +1,19 @@
 package asegroup1.api.models.landregistry;
 
-import java.security.InvalidParameterException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.security.InvalidParameterException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class LandRegistryData implements Comparable{
     private HashMap<Selectable, EqualityConstraint> constraints;
@@ -209,12 +204,25 @@ public class LandRegistryData implements Comparable{
         addTransConstraint(Selectable.pricePaid, "pricePaid", pricePaid + "");
     }
 
-    /**
-     * Set the transaction date
-     *
-     * @param date to set
-     */
-    public void setTransactionDate(LocalDate date) {
+	/**
+	 * Gets the price paid from the constraints hash map
+	 * @return
+	 */
+	public double getPricePaid() {
+		try {
+			return Double.parseDouble(getConstraint(Selectable.pricePaid));
+		} catch (Exception e) {
+			// TODO: Add logging
+			return 0;
+		}
+	}
+
+	/**
+	 * Set the transaction date
+	 *
+	 * @param date to set
+	 */
+	public void setTransactionDate(LocalDate date) {
         addTransConstraint(Selectable.transactionDate, "transactionDate", date.toString(), true);
     }
 
