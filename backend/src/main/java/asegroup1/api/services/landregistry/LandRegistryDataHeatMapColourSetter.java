@@ -11,13 +11,13 @@ class LandRegistryDataHeatMapColourSetter {
 	setHeatMapColours(List<LandRegistryData> landRegistryDataList) throws IllegalArgumentException {
 		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataLists = groupByPricePaid(landRegistryDataList);
 		List<LandRegistryData> rtnDataList = new ArrayList<>();
-		Set<Map.Entry<Double, ArrayList<LandRegistryData>>> datas = groupedLandRegistryDataLists.entrySet();
-		int groupedSize = datas.size();
+		Set<Map.Entry<Double, ArrayList<LandRegistryData>>> dataList = groupedLandRegistryDataLists.entrySet();
+		int groupedSize = dataList.size();
 		int groupedCount = 0;
-		for (Map.Entry<Double, ArrayList<LandRegistryData>> data : datas) {
-			if (data.getKey() < 0){throw new IllegalArgumentException("Values for price paid must not be negative");}
+		for (Map.Entry<Double, ArrayList<LandRegistryData>> data : dataList) {
+			if (data.getKey() < 0) {throw new IllegalArgumentException("Values for price paid must not be negative");}
 			for (LandRegistryData landRegistryData : data.getValue()) {
-				double value = datas.size() <= 1 ? 0.5 : (double) groupedCount / (groupedSize - 1);
+				double value = dataList.size() <= 1 ? 0.5 : (double) groupedCount / (groupedSize - 1);
 				landRegistryData.setColour(getColour(value));
 				rtnDataList.add(landRegistryData);
 			}
@@ -33,13 +33,19 @@ class LandRegistryDataHeatMapColourSetter {
 	 * @param value percentage value as a decimal between 0 and 1(inclusive)
 	 * @return a Color object between green and red
 	 */
-	static Colour getColour(double value) {
+	private static Colour getColour(double value) {
 		// Make sure value is between 0 and 1
 		assert (0 <= value);
 		assert (1 >= value);
 		return new Colour(((int) Math.round(255 * value)), (int) Math.round(255 * (1 - value)));
 	}
 
+	/**
+	 * Takes a list of LandRegistryData and groups them by price paid so that items with the same value are given the same colour
+	 *
+	 * @param landRegistryDataList List of land registry data to be grouped
+	 * @return A TreeMap(Which is inherently sorted) of lists of land registry data where the key is the price paid
+	 */
 	private static TreeMap<Double, ArrayList<LandRegistryData>> groupByPricePaid(List<LandRegistryData> landRegistryDataList) {
 		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataList = new TreeMap<>();
 		for (LandRegistryData data : landRegistryDataList) {
