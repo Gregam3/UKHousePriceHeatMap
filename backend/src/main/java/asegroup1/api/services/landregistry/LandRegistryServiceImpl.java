@@ -184,8 +184,9 @@ public class LandRegistryServiceImpl {
                 .getObject();
     }
 
-    public List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
-        if (landRegistryDataList.isEmpty()) {
+	List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(
+		List<LandRegistryData> landRegistryDataList) {
+		if (landRegistryDataList.isEmpty()) {
             return null;
         }
         landRegistryDataList = landRegistryDataList.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
@@ -201,14 +202,14 @@ public class LandRegistryServiceImpl {
 			heatMapDataPoints.add(new HeatMapDataPoint(
 				lr.getLatitude(), lr.getLongitude(),
 				LandRegistryDataHeatMapColourSetter.GetColour(
-					i / (landRegistryDataList.size() - 1)),
+					(double)i / (landRegistryDataList.size() - 1)),
 				lr.getRadius()));
 		}
 
         return heatMapDataPoints;
-    }
+	}
 
-    private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
+	private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
         List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
         HashMap<String, Long> postcodePrices = new HashMap<>();
 

@@ -206,7 +206,7 @@ public class LandRegistryData implements Comparable{
 
 	/**
 	 * Gets the price paid from the constraints hash map
-	 * @return
+	 * @return a double from the constrains field
 	 */
 	public double getPricePaid() {
 		try {
