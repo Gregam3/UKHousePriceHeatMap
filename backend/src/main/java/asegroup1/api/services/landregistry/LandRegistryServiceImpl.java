@@ -192,8 +192,7 @@ public class LandRegistryServiceImpl {
         landRegistryDataList = landRegistryDataList.stream().filter(entry -> entry != null && entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+"))
                 .collect(Collectors.toList());
 
-		landRegistryDataList.sort(
-			(o1, o2) -> Double.compare(o2.getPricePaid(), o1.getPricePaid()));
+		landRegistryDataList = LandRegistryDataHeatMapColourSetter.setHeatMapColours(landRegistryDataList);
 
 		List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
 
@@ -201,8 +200,7 @@ public class LandRegistryServiceImpl {
             LandRegistryData lr = landRegistryDataList.get(i);
 			heatMapDataPoints.add(new HeatMapDataPoint(
 				lr.getLatitude(), lr.getLongitude(),
-				LandRegistryDataHeatMapColourSetter.getColour(
-					(double)i / (landRegistryDataList.size() - 1)),
+				lr.getColour(),
 				lr.getRadius()));
 		}
 
