@@ -8,22 +8,23 @@ import java.util.*;
 class LandRegistryDataHeatMapColourSetter {
 
 	static List<LandRegistryData>
-	setHeatMapColours(List<LandRegistryData> landRegistryDataList) {
+	setHeatMapColours(List<LandRegistryData> landRegistryDataList) throws IllegalArgumentException {
 		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataLists = groupByPricePaid(landRegistryDataList);
-		List<LandRegistryData> rtnDatas = new ArrayList<>();
+		List<LandRegistryData> rtnDataList = new ArrayList<>();
 		Set<Map.Entry<Double, ArrayList<LandRegistryData>>> datas = groupedLandRegistryDataLists.entrySet();
 		int groupedSize = datas.size();
 		int groupedCount = 0;
 		for (Map.Entry<Double, ArrayList<LandRegistryData>> data : datas) {
+			if (data.getKey() < 0){throw new IllegalArgumentException("Values for price paid must not be negative");}
 			for (LandRegistryData landRegistryData : data.getValue()) {
 				double value = datas.size() <= 1 ? 0.5 : (double) groupedCount / (groupedSize - 1);
 				landRegistryData.setColour(getColour(value));
-				rtnDatas.add(landRegistryData);
+				rtnDataList.add(landRegistryData);
 			}
 			groupedCount++;
 		}
 
-		return landRegistryDataList;
+		return rtnDataList;
 	}
 
 	/**

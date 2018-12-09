@@ -184,8 +184,7 @@ public class LandRegistryServiceImpl {
                 .getObject();
     }
 
-	List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(
-		List<LandRegistryData> landRegistryDataList) {
+	List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) throws IllegalArgumentException {
 		if (landRegistryDataList.isEmpty()) {
             return null;
         }

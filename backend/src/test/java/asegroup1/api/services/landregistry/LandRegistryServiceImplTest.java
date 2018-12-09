@@ -164,11 +164,10 @@ class LandRegistryServiceImplTest {
     void testIfNormalisedValuesConvertToCorrectColours() {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
 
-        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-		assert heatMapDataPoints.get(0).getColour().getHex().equals(
-			"#00d300") &&
-			heatMapDataPoints.get(1).getColour().getHex().equals("#d90000") &&
-			heatMapDataPoints.get(2).getColour().getHex().equals("#ff0000");
+        // Check for colour conversion
+		Assert.assertEquals("#00ff00",heatMapDataPoints.get(0).getColour().getHex());
+		Assert.assertEquals("#808000",heatMapDataPoints.get(1).getColour().getHex());
+		Assert.assertEquals("#ff0000",heatMapDataPoints.get(2).getColour().getHex());
 	}
 
     @Test
@@ -176,7 +175,7 @@ class LandRegistryServiceImplTest {
         List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 5L, 5L);
 
         for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-			Assert.assertEquals("#888800",
+			Assert.assertEquals("#808000",
 								heatMapDataPoint.getColour().getHex());
 		}
     }
