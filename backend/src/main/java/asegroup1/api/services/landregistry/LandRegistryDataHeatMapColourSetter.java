@@ -3,7 +3,9 @@ package asegroup1.api.services.landregistry;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryData;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 class LandRegistryDataHeatMapColourSetter {
 
@@ -37,7 +39,8 @@ class LandRegistryDataHeatMapColourSetter {
 		// Make sure value is between 0 and 1
 		assert (0 <= value);
 		assert (1 >= value);
-		return new Colour(((int) Math.round(255 * value)), (int) Math.round(255 * (1 - value)));
+		Color colour = Color.getHSBColor((float)(1 - (value * 100)), 100, 100);
+		return new Colour(colour.getRed(), colour.getGreen());
 	}
 
 	/**
