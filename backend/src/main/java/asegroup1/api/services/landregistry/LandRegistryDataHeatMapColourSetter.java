@@ -11,11 +11,14 @@ class LandRegistryDataHeatMapColourSetter {
 
 	static List<LandRegistryData>
 	setHeatMapColours(List<LandRegistryData> landRegistryDataList) throws IllegalArgumentException {
+
 		TreeMap<Double, ArrayList<LandRegistryData>> groupedLandRegistryDataLists = groupByPricePaid(landRegistryDataList);
-		List<LandRegistryData> rtnDataList = new ArrayList<>();
+		ArrayList<LandRegistryData> rtnDataList = new ArrayList<>();
 		Set<Map.Entry<Double, ArrayList<LandRegistryData>>> dataList = groupedLandRegistryDataLists.entrySet();
+
 		int groupedSize = dataList.size();
 		int groupedCount = 0;
+
 		for (Map.Entry<Double, ArrayList<LandRegistryData>> data : dataList) {
 			if (data.getKey() < 0) {throw new IllegalArgumentException("Values for price paid must not be negative");}
 			for (LandRegistryData landRegistryData : data.getValue()) {
@@ -37,8 +40,8 @@ class LandRegistryDataHeatMapColourSetter {
 	 */
 	private static Colour getColour(double value) {
 		// Make sure value is between 0 and 1
-		assert (0 < value);
-		assert (1 > value);
+		assert (0 <= value);
+		assert (1 >= value);
 		Color colour = Color.getHSBColor((float) ((1-value)*0.4), 1, (float) 0.5); // These are percentage values represented as decimals
 		return new Colour(colour.getRed(), colour.getGreen(), colour.getBlue());
 	}
