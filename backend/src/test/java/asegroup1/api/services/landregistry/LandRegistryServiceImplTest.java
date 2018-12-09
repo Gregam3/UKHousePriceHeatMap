@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -144,7 +143,7 @@ class LandRegistryServiceImplTest {
     }
 
 	@Test
-	void testIfLongitudeForAddressesAreFetchedAndRoughlyAccurate() {
+	void testIfLongitudeForAddressesAreFetched() {
 		List<LandRegistryData> addresses =
 			generateLandRegistryDataForAddresses(1, 0, 1);
 
@@ -241,6 +240,76 @@ class LandRegistryServiceImplTest {
 
     }
 
+	@Test
+	void testIfNormalisedValuesConvertToCorrectColours() {
+		List<HeatMapDataPoint> heatMapDataPoints =
+			getHeatMapTestData(5L, 10L, 15L);
+
+		// Check if 15 converted to red is darker red than 10 converted to red,
+		// and then check if 10 converted to red is darker red than 5 converted
+		// to red
+		assert heatMapDataPoints.get(0).getColour().getHex().equals(
+			"#00d300") &&
+			heatMapDataPoints.get(1).getColour().getHex().equals("#d90000") &&
+			heatMapDataPoints.get(2).getColour().getHex().equals("#ff0000");
+	}
+
+	@Test
+	void testHowNormaliseValuesReturns0ValueForOnlyOneDistinctValue() {
+		List<HeatMapDataPoint> heatMapDataPoints =
+			getHeatMapTestData(5L, 5L, 5L);
+
+		for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
+			assert heatMapDataPoint.getColour().getHex().equals("#9b0000");
+		}
+	}
+
+	@Test
+	void testHowNormaliseValuesHandlesEmptyList() {
+		assert landRegistryService.convertLandRegistryDataListToHeatMapList(
+			new ArrayList<>()) == null;
+	}
+
+	@Test
+	void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
+		Assertions.assertThrows(IllegalArgumentException.class,
+								() -> getHeatMapTestData(-5L, -15L, -10L));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void testIfMediumSizeListGoesIntoCorrectStaticAggregationLevel() {
+		try {
+			List<LandRegistryData> positionInsideBounds =
+				(List<LandRegistryData>)getDisplayData(50, 50000, 1000000);
+
+			// If it can be cast to List<LandRegistryData> then list must either
+			// be of addresses of postcodes, but as a getLocationForAddresses is
+			// not mocked this must be a list of postcodes passing the test
+			assert true;
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			assert false;
+		}
+	}
+
+	@Test
+	void testIfEmptyListGoesIntoCorrectStaticAggregationLevel() {
+		assert getDisplayData(0, 10, 10).isEmpty();
+	}
+
+	@Test
+	void testIfHeatMapIsReturnedWhenThresholdIsPassed() {
+		List<?> dataPoints =
+			getDisplayData(LandRegistryServiceImpl.AGGREGATION_LEVELS[2], 1, 1);
+
+		assert dataPoints.size() >=
+				LandRegistryServiceImpl.AGGREGATION_LEVELS[2] &&
+			dataPoints.get(0) instanceof HeatMapDataPoint;
+	}
+
+	// UTILS
 	private JSONObject fetchMockResponse() {
 		JSONObject mockResponse = new JSONObject();
 
@@ -309,7 +378,7 @@ class LandRegistryServiceImplTest {
 
 			landRegistryData.setRadius(0.0);
 			landRegistryData.setLatitude(0.0);
-			landRegistryData.setLatitude(0.0);
+			landRegistryData.setLongitude(0.0);
 
 			landRegistryDataList.add(landRegistryData);
 		}
@@ -318,125 +387,47 @@ class LandRegistryServiceImplTest {
 	}
 
 	private List<HeatMapDataPoint> getHeatMapTestData(long... values) {
-        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
+		List<LandRegistryData> landRegistryDataList = new ArrayList<>();
 
-        for (int i = 0; i < values.length; i++) {
-            LandRegistryData landRegistryData = new LandRegistryData();
+		for (int i = 0; i < values.length; i++) {
+			LandRegistryData landRegistryData = new LandRegistryData();
 
-            landRegistryData.setPricePaid(values[i]);
-            landRegistryData.setLongitude(0);
-            landRegistryData.setLatitude(0);
-            landRegistryData.setRadius(0.0);
+			landRegistryData.setPricePaid(values[i]);
+			landRegistryData.setLongitude(0);
+			landRegistryData.setLatitude(0);
+			landRegistryData.setRadius(0.0);
 
+			landRegistryDataList.add(landRegistryData);
+		}
 
-            landRegistryDataList.add(landRegistryData);
-        }
-
-        return landRegistryService.convertLandRegistryDataListToHeatMapList(landRegistryDataList);
-    }
-
-    @Test
-    void testIfNormalisedValuesConvertToCorrectColours() {
-        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 10L, 15L);
-
-        //Check if 15 converted to red is darker red than 10 converted to red, and then check if 10 converted to red is darker red than 5 converted to red
-		assert heatMapDataPoints.get(0).getColour().getHex().equals(
-			"#00d300") &&
-			heatMapDataPoints.get(1).getColour().getHex().equals("#d90000") &&
-			heatMapDataPoints.get(2).getColour().getHex().equals("#ff0000");
+		return landRegistryService.convertLandRegistryDataListToHeatMapList(
+			landRegistryDataList);
 	}
 
-	@Test
-    void testHowNormaliseValuesReturns0ValueForOnlyOneDistinctValue() {
-        List<HeatMapDataPoint> heatMapDataPoints = getHeatMapTestData(5L, 5L, 5L);
-
-        for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-            assert heatMapDataPoint.getColour().getHex().equals("#9b0000");
-        }
-    }
-
-    @Test
-    void testHowNormaliseValuesHandlesEmptyList() {
-        assert landRegistryService.convertLandRegistryDataListToHeatMapList(new ArrayList<>()) == null;
-    }
-
-    @Test
-    void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
-		Assertions.assertThrows(IllegalArgumentException.class,
-								() -> getHeatMapTestData(-5L, -15L, -10L));
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	void testIfMediumSizeListGoesIntoCorrectStaticAggregationLevel() {
+	List<?> getDisplayData(int numberToGenerate, int lowerPriceBound,
+						   int priceRange) {
 		LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
 
 		List<LandRegistryData> landRegistryDataList =
-			generateLandRegistryDataForPostCodes(50, 50000, 1000000);
+			generateLandRegistryDataForPostCodes(numberToGenerate,
+												 lowerPriceBound, priceRange);
 
-		when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0, true))
-                .thenReturn(landRegistryDataList);
+		when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
+				 0, 0, 0, 0, true))
+			.thenReturn(landRegistryDataList);
 
-        LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+		LandRegistryServiceImpl landRegistryService =
+			new LandRegistryServiceImpl(landRegistryDataDaoMock);
 
 		JSONObject mockRequest = fetchMockRequest();
 
 		try {
-			List<LandRegistryData> positionInsideBounds =
-				(List<LandRegistryData>)
-					landRegistryService.getPositionInsideBounds(mockRequest);
-
-			// If it can be cast to List<LandRegistryData> then list must either
-			// be of addresses of postcodes, but as a getLocationForAddresses is
-			// not mocked this must be a list of postcodes passing the test
-			assert true;
-		} catch (Exception e) {
-            e.printStackTrace();
-
-            assert false;
-        }
-    }
-
-    @Test
-    void testIfHeatMapIsReturnedWhenThresholdIsPassed() {
-        Random random = new Random(RANDOM_SEED);
-
-        LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
-
-        String[] postcodes = {"BN14 7BH", "NW9 9PR", "NN12 8DT", "TW7 4QN", "L22 3YU", "RM17 6LJ", "RG14 7DF", "SE25 5RT"};
-
-
-        List<LandRegistryData> landRegistryDataList = new ArrayList<>();
-
-        for (int i = 0; i <= LandRegistryServiceImpl.AGGREGATION_LEVELS[2]; i++) {
-            LandRegistryData landRegistryData = new LandRegistryData();
-            landRegistryData.setPostCode(postcodes[i % postcodes.length]);
-            landRegistryData.setLatitude(0);
-            landRegistryData.setLongitude(0);
-            landRegistryData.setPricePaid(random.nextInt(10000000));
-			landRegistryData.setRadius(0.0);
-			landRegistryDataList.add(landRegistryData);
+			return landRegistryService.getPositionInsideBounds(mockRequest);
+		} catch (UnirestException | IOException e) {
+			e.printStackTrace();
+			assert false;
 		}
 
-        when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(0, 0, 0, 0, true))
-                .thenReturn(landRegistryDataList);
-
-        LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
-
-        JSONObject mockRequest = new JSONObject();
-
-        try {
-            mockRequest.put("top", 0);
-            mockRequest.put("right", 0);
-            mockRequest.put("bottom", 0);
-            mockRequest.put("left", 0);
-            List<?> positionsInsideBounds = landRegistryService.getPositionInsideBounds(mockRequest);
-
-            assert positionsInsideBounds.size() >= LandRegistryServiceImpl.AGGREGATION_LEVELS[2] && positionsInsideBounds.get(0) instanceof HeatMapDataPoint;
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            assert false;
-        }
-    }
+		return null;
+	}
 }

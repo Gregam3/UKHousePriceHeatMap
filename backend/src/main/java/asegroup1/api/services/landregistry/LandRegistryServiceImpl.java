@@ -107,12 +107,12 @@ public class LandRegistryServiceImpl {
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > AGGREGATION_LEVELS[2]) {
-            return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
-        } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
-            return addColoursToLandRegistryData(landRegistryDataForPostcodes);
-        } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
-            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		if (postcodesContained >= AGGREGATION_LEVELS[2]) {
+			return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
+		} else if (postcodesContained >= AGGREGATION_LEVELS[1]) {
+			return addColoursToLandRegistryData(landRegistryDataForPostcodes);
+		} else if (postcodesContained >= AGGREGATION_LEVELS[0]) {
+			LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 
             List<String> postcodes = new ArrayList<>();
