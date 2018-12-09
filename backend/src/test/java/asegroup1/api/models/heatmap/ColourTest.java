@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -48,5 +49,32 @@ class ColourTest {
 			.filter(c -> c.getBlue() > 0)
 			.collect(Collectors.toList())
 			.isEmpty();
+	}
+
+	@Test
+	void testIfHexadecimalIsGeneratedCorrectly() {
+		Colour colourRed = new Colour(255);
+		Colour colourGreen = new Colour(55);
+
+		assertEquals("#ff0000", colourRed.getHex());
+		assertEquals("#00d300", colourGreen.getHex());
+	}
+
+	@Test
+	void testIfRGBAIsGeneratedCorrectly() {
+		Colour colourRed = new Colour(255);
+		Colour colourGreen = new Colour(55);
+
+		assertEquals("rgba(255,0,0," + Colour.CIRCLE_OPACITY + ")",
+					 colourRed.getRGBA());
+		assertEquals("rgba(0,211,0," + Colour.CIRCLE_OPACITY + ")",
+					 colourGreen.getRGBA());
+	}
+
+	@Test
+	void testIfToStringReturnsToHex() {
+		Colour colour = new Colour(147);
+
+		assertEquals(colour.getHex(), colour.toString());
 	}
 }

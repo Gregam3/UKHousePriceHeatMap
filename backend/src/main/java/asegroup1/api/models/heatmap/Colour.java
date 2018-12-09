@@ -12,7 +12,9 @@ public class Colour {
     private int red;
     private int green;
 
-    public Colour(int colourValue) {
+	public static final double CIRCLE_OPACITY = 0.75;
+
+	public Colour(int colourValue) {
         int val1 = colourValue * 3;
 
         if (val1 > 400) setRed(colourValue);
@@ -52,8 +54,9 @@ public class Colour {
     }
 
     public String getRGBA() {
-		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",0.75)";
-    }
+		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + "," +
+			CIRCLE_OPACITY + ")";
+	}
 
     public String getHex() {
         return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
