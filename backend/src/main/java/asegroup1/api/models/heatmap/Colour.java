@@ -11,6 +11,7 @@ import java.security.InvalidParameterException;
 public class Colour {
     private int red;
     private int green;
+    private int blue;
 
     public Colour(int colourValue) throws InvalidParameterException{
         int val1 = colourValue * 3;
@@ -26,19 +27,36 @@ public class Colour {
      * Sets up the colours if the red and green values are already set
      * @param red the integer value for red between 0 and 255
      * @param green the integer value for green between 0 and 255
+     * @param blue the integer value for blue between 0 and 255
      * @throws InvalidParameterException if the values are between 0 and 255 this exception is thrown
      */
-    public Colour(int red, int green) throws InvalidParameterException{
+    public Colour(int red, int green, int blue) throws InvalidParameterException{
         setRed(red);
         setGreen(green);
+        setBlue(blue);
     }
 
 	private void setGreen(int green) throws InvalidParameterException {
-		if (green > 255 || green < 0) {
-            throw new InvalidParameterException("Colour value must be between 0-255");
-        }
+		checkValueWithinRGBValues(green);
         this.green = green;
 	}
+
+	private void setRed(int red) throws InvalidParameterException {
+		checkValueWithinRGBValues(red);
+		this.red = red;
+	}
+
+	private void setBlue(int blue)throws InvalidParameterException{
+    	checkValueWithinRGBValues(blue);
+    	this.blue = blue;
+	}
+
+	private void checkValueWithinRGBValues(int value) throws InvalidParameterException{
+		if (value > 255 || value < 0) {
+			throw new InvalidParameterException("Colour value must be between 0-255");
+		}
+	}
+
 
 	@JsonIgnore
     public int getGreen() {
@@ -50,17 +68,10 @@ public class Colour {
 		return red;
 	}
 
-	private void setRed(int red) throws InvalidParameterException {
-		if (red > 255 || red < 0) {
-            throw new InvalidParameterException("Colour value must be between 0-255");
-        }
-        this.red = red;
-	}
+
 
 	@JsonIgnore
-    public int getBlue() {
-        return 0;
-    }
+    public int getBlue() {return blue;}
 
 
     @Override
@@ -77,9 +88,7 @@ public class Colour {
     }
 
     private String toHexColourString(int value) throws InvalidParameterException{
-        if (value > 255 || value < 0) {
-            throw new InvalidParameterException("Colour value must be between 0-255");
-        }
+        checkValueWithinRGBValues(value);
 
         String hexValue = Integer.toHexString(value);
 
