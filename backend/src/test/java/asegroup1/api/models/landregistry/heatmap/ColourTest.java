@@ -33,6 +33,5 @@ class ColourTest {
         Colour colour = new Colour(155);
 
         assert colour.getBlue() == 0;
-        assert colour.getGreen() == 0;
     }
 }
