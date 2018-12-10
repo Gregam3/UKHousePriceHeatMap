@@ -17,10 +17,9 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,8 +33,6 @@ class LandRegistryServiceImplTest {
 	private static LandRegistryServiceImpl landRegistryService;
 
 	private static final long RANDOM_SEED = 8312595207343625996L;
-
-	private Properties properties;
 
 	@BeforeAll
 	private static void setUpService() {
