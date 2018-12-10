@@ -1,26 +1,25 @@
 package asegroup1.api.models.landregistry;
 
-import java.security.InvalidParameterException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.security.InvalidParameterException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class LandRegistryData implements Comparable{
+    private final static Logger logger = Logger.getLogger(LandRegistryData.class.getName());
+
     private HashMap<Selectable, EqualityConstraint> constraints;
 
     private Double latitude, longitude;
@@ -239,7 +238,7 @@ public class LandRegistryData implements Comparable{
      */
     public String getConstraint(Selectable selectable) {
         if (hasConstraint(selectable)) {
-            return constraints.get(selectable).getvalue();
+            return constraints.get(selectable).getValue();
         } else {
             return null;
         }
@@ -295,6 +294,7 @@ public class LandRegistryData implements Comparable{
             }
             selectable = Selectable.valueOf(name.substring(0, 1).toLowerCase() + name.substring(1));
         } catch (IllegalArgumentException e) {
+            logger.log(Level.SEVERE, "Unable to set constraint value", e);
             throw new IllegalArgumentException("Constraint Name is Invalid");
         }
         if (value.length() == 0) {
@@ -477,7 +477,7 @@ public class LandRegistryData implements Comparable{
      */
     public HashMap<String, String> getMappings() {
         HashMap<String, String> retMap = new HashMap<>();
-        constraints.forEach((k, v) -> retMap.put(k.toString(), v.getvalue()));
+        constraints.forEach((k, v) -> retMap.put(k.toString(), v.getValue()));
         if (longitude != null) {
             retMap.put("longitude", longitude + "");
         }
@@ -491,7 +491,7 @@ public class LandRegistryData implements Comparable{
         return retMap;
     }
 
-    /*
+    /**
      * (non-Javadoc)
      *
      * @see java.lang.Object#equals(java.lang.Object)
@@ -590,7 +590,7 @@ public class LandRegistryData implements Comparable{
             return type + ":" + name;
         }
 
-        public String getvalue() {
+        public String getValue() {
             return value;
         }
 
@@ -628,7 +628,7 @@ public class LandRegistryData implements Comparable{
         }
 
         @Override
-        public String getvalue() {
+        public String getValue() {
             if (value.contains(":")) {
                 return value.substring(value.indexOf(':') + 1).replace('-', '_');
             } else {

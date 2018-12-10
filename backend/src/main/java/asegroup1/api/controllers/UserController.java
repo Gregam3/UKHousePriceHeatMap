@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import asegroup1.api.models.UserData;
 import asegroup1.api.services.user.UserServiceImpl;
 
+import java.util.logging.Logger;
+
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
  * @author Rikkey Paal
@@ -24,6 +26,7 @@ import asegroup1.api.services.user.UserServiceImpl;
 public class UserController {
 
 	private UserServiceImpl userService;
+	private final static Logger logger = Logger.getLogger(UserController.class.getName());
 
 	@Autowired
 	public UserController(UserServiceImpl userService) {
@@ -39,7 +42,7 @@ public class UserController {
 	@ApiOperation(value="Add the user's data")
 	@GetMapping(value = { "add-user-data/{key}" })
 	public ResponseEntity<String> addUserData(@PathVariable String key) {
-		System.out.println(key);
+		logger.info("Key: "+key);
 		switch (userService.add(key)) {
 			case 0:
 				return new ResponseEntity<>("User Added", HttpStatus.OK);
