@@ -134,12 +134,12 @@ export default class App extends Component {
                 this.drawMapWithData(longitude, latitude)
                 :
                 <View>
-                    <Text style={styles.background}>{""}</Text>
+                    <View style={styles.background}/>
                     <Text style={styles.centerText}>{displayedText}</Text>
                     {(Platform.OS === 'ios') ?
                         <ProgressViewIOS style={styles.locationLoadStyle}/> :
                         <ProgressBarAndroid style={styles.locationLoadStyle}/>}
-                    <Text style={styles.background}>{""}</Text>
+                    <View style={styles.background}/>
                 </View>
 
 
@@ -178,13 +178,10 @@ export default class App extends Component {
             />
             <Overlay
                 overlayBackgroundColor='#242f3e'
-                height={130}
-                width={150}
+                height={'18.5%'}
+                width={'35%'}
                 isVisible={this.state.loadingMarkers}>
-                <Text style={{
-                    textAlign: 'center',
-                    color: '#ffffff'
-                }}>Loading elements...</Text>
+                <Text style={styles.loadingText}>Loading elements...</Text>
                 {(Platform.OS === 'ios') ?
                     <ProgressViewIOS style={styles.locationLoadStyle}/> :
                     <ProgressBarAndroid style={styles.locationLoadStyle}/>}
@@ -241,17 +238,17 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         backgroundColor: '#242f3e',
     },
+    loadingText: {
+        textAlign: 'center',
+        color: '#ffffff'
+    },
     background: {
         backgroundColor: '#242f3e',
         height: 275
     },
     locationLoadStyle: {
         backgroundColor: '#242f3e',
-        height: 100
-    },
-    overlayStyle: {
-        opacity: 0.2,
-        height: 100
+        height: '90%'
     },
     markerLoadStyle: {
         flex: 1,
