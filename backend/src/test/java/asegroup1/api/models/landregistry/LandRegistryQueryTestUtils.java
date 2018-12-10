@@ -17,7 +17,7 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 
 public class LandRegistryQueryTestUtils {
 
-	public static final long randomSeed = 8312595207343625996L;
+	public static long randomSeed = 8312595207343625996L;
 
 	static String generateRandomString() {
 		return "Random: " + new Random(randomSeed).nextLong();

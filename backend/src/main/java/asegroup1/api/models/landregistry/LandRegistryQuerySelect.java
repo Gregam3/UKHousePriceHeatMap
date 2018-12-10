@@ -45,7 +45,7 @@ public class LandRegistryQuerySelect {
 		}
 	}
 
-	private SelectObj getSelectObj(String referenceName) {
+	SelectObj getSelectObj(String referenceName) {
 		return selectValues.get(referenceName);
 	}
 
@@ -95,7 +95,7 @@ public class LandRegistryQuerySelect {
 
 
 
-	private class SelectObj {
+	class SelectObj {
 		String referenceName;
 		String aggregationName;
 		Aggregation aggregation;
@@ -146,6 +146,25 @@ public class LandRegistryQuerySelect {
 		@Override
 		public String toString() {
 			return toString(false);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof SelectObj) {
+				SelectObj sel = (SelectObj) obj;
+				return testEqualsWithNull(sel.aggregation, aggregation) && testEqualsWithNull(sel.referenceName, referenceName)
+						&& testEqualsWithNull(sel.aggregationName, aggregationName);
+			} else {
+				return false;
+			}
+		}
+
+		private <E> boolean testEqualsWithNull(E object1, E object2) {
+			if (object1 == null || object2 == null) {
+				return object1 == object2;
+			} else {
+				return object1.equals(object2);
+			}
 		}
 	}
 }
