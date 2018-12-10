@@ -21,6 +21,8 @@ import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 public class LandRegistryServiceImpl {
 
 	private final LandRegistryDaoImpl postCodeCoordinatesDao;
+	private final static Logger logger = Logger.getLogger(LandRegistryServiceImpl.class.getName());
+
 
 	@Autowired
 	public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
@@ -161,6 +165,9 @@ public class LandRegistryServiceImpl {
 
 	private List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
 		if (addresses.size() >= 100) {
+			logger.warning(
+				LandRegistryServiceImpl.class.getEnclosingMethod().getName() + "Called with more than 100 addresses"
+			);
 			throw new InvalidParameterException("This method should never be passed more than 100 addresses");
 		}
 
@@ -181,8 +188,7 @@ public class LandRegistryServiceImpl {
 				address.setLatitude(response.getDouble("lat"));
 				address.setLongitude(response.getDouble("lng"));
 			} catch (UnirestException | JSONException e) {
-				e.printStackTrace();
-				System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
+				logger.log(Level.SEVERE, "Could not retrieve address for " + addressUriBuilder.toString(), e);
 			}
 
 			// Clear the StringBuilder buffer
@@ -251,7 +257,7 @@ public class LandRegistryServiceImpl {
 					Long pricePaid = Long.parseLong(priceStr);
 					postcodePrices.put(postcode, pricePaid);
 				} catch (NumberFormatException e) {
-					e.printStackTrace();
+					logger.log(Level.WARNING, "Unable to parse price paid", e);
 				}
 			}
 		}
@@ -281,12 +287,14 @@ public class LandRegistryServiceImpl {
 				? Long.MAX_VALUE
 				: Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
 
-			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
-				"\"" + postcodeArea.getKey() + "\"",
-				(numDone / numAreas) * 100,
-				estTimeLeft / 3600,
-				(estTimeLeft % 3600) / 60,
-				(estTimeLeft % 60)
+			logger.info(
+				String.format(
+					"Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
+					"\"" + postcodeArea.getKey() + "\"",
+					(numDone / numAreas) * 100,
+					estTimeLeft / 3600,
+					(estTimeLeft % 3600) / 60,
+					(estTimeLeft % 60))
 			);
 			List<String> postcodes = postcodeArea.getValue();
 			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
@@ -294,7 +302,7 @@ public class LandRegistryServiceImpl {
 			numDone++;
 		}
 
-		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
-		System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
+		logger.info("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
+		logger.info("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
 	}
 }

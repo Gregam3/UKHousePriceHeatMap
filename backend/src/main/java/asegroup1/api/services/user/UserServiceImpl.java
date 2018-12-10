@@ -1,11 +1,12 @@
 package asegroup1.api.services.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import asegroup1.api.daos.user.UserDaoImpl;
 import asegroup1.api.models.UserData;
 import asegroup1.api.services.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.logging.Logger;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -15,6 +16,8 @@ import asegroup1.api.services.ServiceImpl;
 public class UserServiceImpl extends ServiceImpl<UserData> {
 
 	private UserDaoImpl userDataDao;
+	private final static Logger logger = Logger.getLogger(UserServiceImpl.class.getName());
+
 
 	@Autowired
 	public UserServiceImpl(UserDaoImpl dao) {
@@ -26,7 +29,7 @@ public class UserServiceImpl extends ServiceImpl<UserData> {
 		if(userDataDao.get(key) != null) {
 			return -1;
 		}
-		System.out.println("Adding: " + key);
+		logger.info("Adding: " + key);
 		userDataDao.add(new UserData(key));
 		return (userDataDao.get(key) == null ? 1 : 0);
 	}
