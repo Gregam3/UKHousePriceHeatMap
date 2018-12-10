@@ -43,21 +43,25 @@ public class Colour {
 		}
 	}
 
+	@SuppressWarnings("WeakerAccess")
     public void setGreen(int green) {
 		if (isColourValueValid(green))
 			this.green = green;
 	}
 
     @JsonIgnore
+    @SuppressWarnings("WeakerAccess")
     public int getGreen() {
         return green;
     }
 
     @JsonIgnore
+    @SuppressWarnings("WeakerAccess")
     public int getRed() {
         return red;
     }
 
+	@SuppressWarnings("WeakerAccess")
 	public void setRed(int red) {
 		if (isColourValueValid(red)) {
 			this.red = red;
