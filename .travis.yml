@@ -1,22 +1,6 @@
 sudo: required
 matrix:
   include:
-    - language: node_js
-      node_js:
-        - node
-        - lts/*
-      cache:
-        directories:
-          - ~/.npm
-      before_script:
-        - cd frontend/reactnative/
-        - npm install -g npm@latest
-        - npm install
-      script:
-        - npm ci
-        - npx expo login -u $Expo_User -p $Expo_password
-        - npx expo publish --non-interactive
-        - expo build:android
     - language: java
       services:
         - docker
@@ -36,4 +20,20 @@ matrix:
           fi
         - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
         - docker push asegroup1/backend-$DOCKER_BRANCH:latest
+    - language: node_js
+      node_js:
+        - node
+        - lts/*
+      cache:
+        directories:
+          - ~/.npm
+      before_script:
+        - cd frontend/reactnative/
+        - npm install -g npm@latest
+        - npm install
+      script:
+        - npm ci
+        - npx expo login -u $Expo_User -p $Expo_password
+        - npx expo publish --non-interactive
+        - expo build:android
 
