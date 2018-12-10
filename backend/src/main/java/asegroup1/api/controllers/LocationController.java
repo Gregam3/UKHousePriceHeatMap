@@ -1,28 +1,20 @@
 package asegroup1.api.controllers;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.List;
-
+import asegroup1.api.models.LocationData;
+import asegroup1.api.services.location.LocationServiceImpl;
+import asegroup1.api.services.user.UserServiceImpl;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import jdk.nashorn.api.scripting.JSObject;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import asegroup1.api.models.LocationData;
-import asegroup1.api.services.location.LocationServiceImpl;
-import asegroup1.api.services.user.UserServiceImpl;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.List;
 
 /**
  * @author James Fernando, Rikkey Paal
@@ -31,6 +23,7 @@ import asegroup1.api.services.user.UserServiceImpl;
 @RestController
 @RequestMapping("/location/")
 @Api(value="User location", description = "Operations related to user location data being sent to the server")
+@SuppressWarnings("unused")
 public class LocationController {
 
 	private UserServiceImpl userService;

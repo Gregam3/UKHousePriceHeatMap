@@ -1,23 +1,19 @@
 package asegroup1.api.services.location;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.List;
-
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import jdk.nashorn.internal.ir.ObjectNode;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import asegroup1.api.daos.location.LocationDaoImpl;
 import asegroup1.api.models.LocationData;
 import asegroup1.api.services.ServiceImpl;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.List;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com

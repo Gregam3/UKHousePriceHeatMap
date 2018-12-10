@@ -28,7 +28,6 @@ const AGGREGATION_LEVELS = {
 //Turn to false to disable logging
 const logging = true;
 
-// min time without map movement before map will update
 // number used to scale up the minimum size of the circles in the heat map
 const heatMapScaleFactor = 100;
 
