@@ -41,13 +41,13 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
 	@Override
 	public void delete(String id) {
-		throw new AssertionError(
+		throw new UnsupportedOperationException(
 				"Items cannot be deleted from postcodelatlng table");
 	}
 
 	@Override
 	public List<PostCodeCoordinates> list() {
-		throw new AssertionError(
+		throw new UnsupportedOperationException(
 				"All Postcodes cannot be listed due to magnitude, use searchForLandRegistryDataInBoundaries instead.");
 	}
 
