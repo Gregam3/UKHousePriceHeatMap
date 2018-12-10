@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 import static org.mockito.Mockito.mock;
@@ -33,7 +34,9 @@ class LandRegistryServiceImplTest {
 
     private static final long RANDOM_SEED = 8312595207343625996L;
 
-    @BeforeAll
+	private Properties properties;
+
+	@BeforeAll
     private static void setUpService() {
         landRegistryService = new LandRegistryServiceImpl(null);
     }
@@ -47,43 +50,8 @@ class LandRegistryServiceImplTest {
 			LandRegistryDaoImpl landRegistryDataDaoMock =
 				mock(LandRegistryDaoImpl.class);
 
-			when(
-				landRegistryDataDaoMock.executeSPARQLQuery(
-					"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n"
-					+ "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-					+ "prefix owl: <http://www.w3.org/2002/07/owl#> \n"
-					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-					+
-					"prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n"
-					+
-					"prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
-					+
-					"prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n"
-					+ "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
-					+
-					"prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>\n"
-					+ "SELECT ?pricePaid\n"
-					+ "WHERE { \n"
-					+ "\t\n"
-					+ "\t?addr lrcommon:postcode \"BN14 7BH\".\n"
-					+ "\t?transx lrppi:propertyAddress ?addr ; \n"
-					+ "\t\tlrppi:propertyType/skos:prefLabel ?propertyType ; \n"
-					+ "\t\tlrppi:estateType/skos:prefLabel ?estateType ; \n"
-					+ "\t\tlrppi:transactionDate ?transactionDate ; \n"
-					+ "\t\tlrppi:pricePaid ?pricePaid ; \n"
-					+ "\t\tlrppi:newBuild ?newBuild ; \n"
-					+
-					"\t\tlrppi:transactionCategory/skos:prefLabel ?transactionCategory.\n"
-					+ "\tOPTIONAL {?addr lrcommon:paon ?paon} \n"
-					+ "\tOPTIONAL {?addr lrcommon:saon ?saon} \n"
-					+ "\tOPTIONAL {?addr lrcommon:street ?street} \n"
-					+ "\tOPTIONAL {?addr lrcommon:locality ?locality} \n"
-					+ "\tOPTIONAL {?addr lrcommon:town ?town} \n"
-					+ "\tOPTIONAL {?addr lrcommon:district ?district} \n"
-					+ "\tOPTIONAL {?addr lrcommon:county ?county} \n"
-					+ "\tOPTIONAL {?addr lrcommon:postcode ?postcode}\n"
-					+ "\t\n"
-					+ "}"))
+			when(landRegistryDataDaoMock.executeSPARQLQuery(getProperty(
+					 "testIfSearchTransactionsByPostCodeReturnsValidPricesIn")))
 				.thenReturn(new JSONObject(
 					"{\"result\":\"{\\n  \\\"head\\\": {\\n    \\\"vars\\\": [ \\\"paon\\\" , \\\"saon\\\" , \\\"street\\\" , "
 					+
@@ -120,9 +88,25 @@ class LandRegistryServiceImplTest {
         }
     }
 
-    @Test
-    void testIfSettingInvalidPostcodeThrowsInvalidParameterException() {
-        try {
+	private String getProperty(String propertyName) {
+		if (properties == null) {
+			try {
+				properties = new Properties();
+
+				properties.load(getClass().getClassLoader().getResourceAsStream(
+					"test-data.properties"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		assert properties != null;
+		return properties.getProperty(propertyName);
+	}
+
+	@Test
+	void testIfSettingInvalidPostcodeThrowsInvalidParameterException() {
+		try {
             //Provides the invalid postcode of "0"
             LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
 
