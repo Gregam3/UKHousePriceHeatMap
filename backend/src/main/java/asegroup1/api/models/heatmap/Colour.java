@@ -25,13 +25,10 @@ public class Colour {
 	public Colour(int colourValue) throws InvalidParameterException {
 		int colourGenValue = (int)(colourValue * SHADES_OF_COLOURS);
 
-		// Tweak to change how much read appears
-		double redScaling = 2.98;
-
-		if (colourGenValue > MAX_COLOUR_VAL * redScaling) {
+		if (colourGenValue > MAX_COLOUR_VAL * RED_SCALING) {
 			setRed(colourValue);
 		} else if (colourGenValue > MAX_COLOUR_VAL &&
-				   colourGenValue < MAX_COLOUR_VAL * redScaling) {
+				   colourGenValue < MAX_COLOUR_VAL * RED_SCALING) {
 			setRed((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
 			setGreen((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
 		} else {
