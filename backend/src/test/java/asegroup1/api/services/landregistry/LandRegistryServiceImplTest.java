@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,101 +31,78 @@ import static org.mockito.Mockito.when;
 
 class LandRegistryServiceImplTest {
 
-    private static LandRegistryServiceImpl landRegistryService;
+	private static LandRegistryServiceImpl landRegistryService;
 
-    private static final long RANDOM_SEED = 8312595207343625996L;
+	private static final long RANDOM_SEED = 8312595207343625996L;
 
 	private Properties properties;
 
 	@BeforeAll
-    private static void setUpService() {
-        landRegistryService = new LandRegistryServiceImpl(null);
-    }
+	private static void setUpService() {
+		landRegistryService = new LandRegistryServiceImpl(null);
+	}
 
-    @Test
-    void testIfSearchTransactionsByPostCodeReturnsValidPrices() {
-        try {
-            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
-            constraint.getEqualityConstraints().setPostCode("BN14 7BH");
+	@Test
+	void testIfSearchTransactionsByPostCodeReturnsValidPrices() {
+		try {
+			LandRegistryQueryConstraint constraint =
+				new LandRegistryQueryConstraint();
+			constraint.getEqualityConstraints().setPostCode("BN14 7BH");
 
 			LandRegistryDaoImpl landRegistryDataDaoMock =
 				mock(LandRegistryDaoImpl.class);
 
-			when(landRegistryDataDaoMock.executeSPARQLQuery(getProperty(
-					 "testIfSearchTransactionsByPostCodeReturnsValidPricesIn")))
-				.thenReturn(new JSONObject(
-					"{\"result\":\"{\\n  \\\"head\\\": {\\n    \\\"vars\\\": [ \\\"paon\\\" , \\\"saon\\\" , \\\"street\\\" , "
-					+
-					"\\\"postcode\\\" , \\\"TransactionDate\\\" , \\\"Town\\\" , \\\"PricePaid\\\" ]\\n  } ,\\n  \\\"results\\\": {\\n    \\\"bindings\\\": [\\n     "
-					+
-					" {\\n        \\\"paon\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"SUSSEX COURT\\\" } ,\\n        \\\"saon\\\": { \\\"type\\\": \\\"literal\\\" , "
-					+
-					"\\\"value\\\": \\\"FLAT 2\\\" } ,\\n        \\\"street\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"TENNYSON ROAD\\\" } ,\\n        "
-					+
-					"\\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN11 4BT\\\" } ,\\n        \\\"TransactionDate\\\": { \\\"type\\\": \\\"literal\\\" , "
-					+
-					"\\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#date\\\" , \\\"value\\\": \\\"2016-10-07\\\" } ,\\n        \\\"Town\\\": { \\\"type\\\": \\\"literal\\\" , "
-					+
-					"\\\"value\\\": \\\"WORTHING\\\" } ,\\n        \\\"PricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#integer\\\" , "
-					+
-					"\\\"value\\\": \\\"155000\\\" }\\n      }\\n    ]\\n  }\\n}\\n\",\"status\":200}"));
+			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull()))
+				.thenReturn(getSPARQLResponse());
 
 			LandRegistryServiceImpl landRegistryService =
 				new LandRegistryServiceImpl(landRegistryDataDaoMock);
 
 			List<LandRegistryData> addressByPostCode = landRegistryService.getTransactions(new LandRegistryQuerySelect(Selectable.pricePaid), constraint);
 
-            //Checking not only if results are returned but that results contain valid data
-            if (Integer.parseInt(addressByPostCode.get(0).getConstraint(Selectable.pricePaid)) <= 0) {
-                System.err.println("Transaction has invalid price");
-                assert false;
-            }
+			// Checking not only if results are returned but that results
+			// contain valid data
+			if (Integer.parseInt(addressByPostCode.get(0).getConstraint(
+					Selectable.pricePaid)) <= 0) {
+				System.err.println("Transaction has invalid price");
+				assert false;
+			}
 
-            assert true;
+			assert true;
 		} catch (IOException | UnirestException | NumberFormatException |
 				 JSONException e) {
 			e.printStackTrace();
-            assert false;
-        }
-    }
-
-	private String getProperty(String propertyName) {
-		if (properties == null) {
-			try {
-				properties = new Properties();
-
-				properties.load(getClass().getClassLoader().getResourceAsStream(
-					"test-data.properties"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			assert false;
 		}
-
-		assert properties != null;
-		return properties.getProperty(propertyName);
 	}
 
 	@Test
 	void testIfSettingInvalidPostcodeThrowsInvalidParameterException() {
 		try {
-            //Provides the invalid postcode of "0"
-            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+			// Provides the invalid postcode of "0"
+			LandRegistryQueryConstraint constraint =
+				new LandRegistryQueryConstraint();
 
-            Assertions.assertThrows(InvalidParameterException.class, () -> constraint.getEqualityConstraints().setPostCode("0"));
-        } catch (InvalidParameterException e) {
-            assert true;
-        }
-    }
+			Assertions.assertThrows(
+				InvalidParameterException.class,
+				() -> constraint.getEqualityConstraints().setPostCode("0"));
+		} catch (InvalidParameterException e) {
+			assert true;
+		}
+	}
 
-    @Test
-    void testIfSetPostcodeAcceptsValidPostcode() {
-        //Provides the invalid postcode of "0"
-        LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+	@Test
+	void testIfSetPostcodeAcceptsValidPostcode() {
+		// Provides the invalid postcode of "0"
+		LandRegistryQueryConstraint constraint =
+			new LandRegistryQueryConstraint();
 
-        constraint.getEqualityConstraints().setPostCode("BH9 2SL");
+		constraint.getEqualityConstraints().setPostCode("BH9 2SL");
 
-        assert constraint.getEqualityConstraints().getConstraint(Selectable.postcode).equals("BH9 2SL");
-    }
+		assert constraint.getEqualityConstraints()
+			.getConstraint(Selectable.postcode)
+			.equals("BH9 2SL");
+	}
 
 	@Test
 	void testIfLongitudeForAddressesAreFetched() {
@@ -136,64 +114,8 @@ class LandRegistryServiceImplTest {
 		JSONObject mockRequest = fetchMockRequest();
 
 		try {
-			when(
-				landRegistryDataDaoMock.executeSPARQLQuery(
-					"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n"
-					+ "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-					+ "prefix owl: <http://www.w3.org/2002/07/owl#> \n"
-					+ "prefix xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-					+
-					"prefix sr: <http://data.ordnancesurvey.co.uk/ontology/spatialrelations/> \n"
-					+
-					"prefix ukhpi: <http://landregistry.data.gov.uk/def/ukhpi/> \n"
-					+
-					"prefix lrppi: <http://landregistry.data.gov.uk/def/ppi/> \n"
-					+ "prefix skos: <http://www.w3.org/2004/02/skos/core#> \n"
-					+
-					"prefix lrcommon: <http://landregistry.data.gov.uk/def/common/>\n"
-					+
-					"SELECT ?paon ?saon ?street ?postcode (MAX(?transactionDate) AS ?TransactionDate) (SAMPLE(?town) AS ?Town) (SAMPLE(?pricePaid) AS ?PricePaid)\n"
-					+ "WHERE { \n"
-					+ "\t\n"
-					+ "\t?addr lrcommon:postcode \"BN14 7BH\".\n"
-					+ "\t?transx lrppi:propertyAddress ?addr ; \n"
-					+ "\t\tlrppi:propertyType/skos:prefLabel ?propertyType ; \n"
-					+ "\t\tlrppi:estateType/skos:prefLabel ?estateType ; \n"
-					+ "\t\tlrppi:transactionDate ?transactionDate ; \n"
-					+ "\t\tlrppi:pricePaid ?pricePaid ; \n"
-					+ "\t\tlrppi:newBuild ?newBuild ; \n"
-					+
-					"\t\tlrppi:transactionCategory/skos:prefLabel ?transactionCategory.\n"
-					+ "\tOPTIONAL {?addr lrcommon:paon ?paon} \n"
-					+ "\tOPTIONAL {?addr lrcommon:saon ?saon} \n"
-					+ "\tOPTIONAL {?addr lrcommon:street ?street} \n"
-					+ "\tOPTIONAL {?addr lrcommon:locality ?locality} \n"
-					+ "\tOPTIONAL {?addr lrcommon:town ?town} \n"
-					+ "\tOPTIONAL {?addr lrcommon:district ?district} \n"
-					+ "\tOPTIONAL {?addr lrcommon:county ?county} \n"
-					+ "\tOPTIONAL {?addr lrcommon:postcode ?postcode}\n"
-					+ "\t\n"
-					+ "\tFILTER (\n"
-					+ "\t\t?transactionDate > \"2013-12-09\"^^xsd:date\n"
-					+ "\t)\n"
-					+ "}\n"
-					+ "GROUP BY ?paon ?saon ?street ?postcode"))
-				.thenReturn(new JSONObject(
-					"{\"result\":\"{\\n  \\\"head\\\": {\\n    \\\"vars\\\": [ \\\"paon\\\" , \\\"saon\\\" , \\\"street\\\" , \n"
-					+
-					"\\\"postcode\\\" , \\\"TransactionDate\\\" , \\\"Town\\\" , \\\"PricePaid\\\" ]\\n  } ,\\n  \\\"results\\\": {\\n    \\\"bindings\\\": [\\n     \n"
-					+
-					" {\\n        \\\"paon\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"SUSSEX COURT\\\" } ,\\n        \\\"saon\\\": { \\\"type\\\": \\\"literal\\\" , \n"
-					+
-					"\\\"value\\\": \\\"FLAT 2\\\" } ,\\n        \\\"street\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"TENNYSON ROAD\\\" } ,\\n        \n"
-					+
-					"\\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN11 4BT\\\" } ,\\n        \\\"TransactionDate\\\": { \\\"type\\\": \\\"literal\\\" , \n"
-					+
-					"\\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#date\\\" , \\\"value\\\": \\\"2016-10-07\\\" } ,\\n        \\\"Town\\\": { \\\"type\\\": \\\"literal\\\" , \n"
-					+
-					"\\\"value\\\": \\\"WORTHING\\\" } ,\\n        \\\"PricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#integer\\\" , \n"
-					+
-					"\\\"value\\\": \\\"155000\\\" }\\n      }\\n    ]\\n  }\\n}\\n\",\"status\":200}"));
+			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull()))
+				.thenReturn(getSPARQLResponse());
 
 			when(
 				landRegistryDataDaoMock.getGeoLocationData(
@@ -201,28 +123,27 @@ class LandRegistryServiceImplTest {
 				.thenReturn(fetchMockResponse());
 
 			when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
-                    mockRequest.getDouble("top"),
-                    mockRequest.getDouble("right"),
-                    mockRequest.getDouble("bottom"),
-                    mockRequest.getDouble("left"),
-                    true
-            )).thenReturn(addresses);
+					 mockRequest.getDouble("top"),
+					 mockRequest.getDouble("right"),
+					 mockRequest.getDouble("bottom"),
+					 mockRequest.getDouble("left"), true))
+				.thenReturn(addresses);
 
+			LandRegistryServiceImpl landRegistryServiceLocal =
+				new LandRegistryServiceImpl(landRegistryDataDaoMock);
 
-            LandRegistryServiceImpl landRegistryServiceLocal = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+			addresses = (List<LandRegistryData>)landRegistryServiceLocal
+							.getPositionInsideBounds(mockRequest);
 
-            addresses = (List<LandRegistryData>) landRegistryServiceLocal.getPositionInsideBounds(mockRequest);
+			LandRegistryData address = addresses.get(0);
 
-            LandRegistryData address = addresses.get(0);
+			assert address.getLongitude() == 0 && address.getLatitude() == 0;
+		} catch (UnirestException | JSONException | IOException e) {
+			e.printStackTrace();
 
-            assert address.getLongitude() == 0 && address.getLatitude() == 0;
-        } catch (UnirestException | JSONException | IOException e) {
-            e.printStackTrace();
-
-            assert false;
-        }
-
-    }
+			assert false;
+		}
+	}
 
 	@Test
 	void testIfNormalisedValuesConvertToCorrectColours() {
@@ -413,5 +334,24 @@ class LandRegistryServiceImplTest {
 		}
 
 		return null;
+	}
+
+	private JSONObject getSPARQLResponse() throws JSONException {
+		return new JSONObject(
+			"{\"result\":\"{\\n  \\\"head\\\": {\\n    \\\"vars\\\": [ \\\"paon\\\" , \\\"saon\\\" , \\\"street\\\" , "
+			+
+			"\\\"postcode\\\" , \\\"TransactionDate\\\" , \\\"Town\\\" , \\\"PricePaid\\\" ]\\n  } ,\\n  \\\"results\\\": {\\n    \\\"bindings\\\": [\\n     "
+			+
+			" {\\n        \\\"paon\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"SUSSEX COURT\\\" } ,\\n        \\\"saon\\\": { \\\"type\\\": \\\"literal\\\" , "
+			+
+			"\\\"value\\\": \\\"FLAT 2\\\" } ,\\n        \\\"street\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"TENNYSON ROAD\\\" } ,\\n        "
+			+
+			"\\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN11 4BT\\\" } ,\\n        \\\"TransactionDate\\\": { \\\"type\\\": \\\"literal\\\" , "
+			+
+			"\\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#date\\\" , \\\"value\\\": \\\"2016-10-07\\\" } ,\\n        \\\"Town\\\": { \\\"type\\\": \\\"literal\\\" , "
+			+
+			"\\\"value\\\": \\\"WORTHING\\\" } ,\\n        \\\"PricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#integer\\\" , "
+			+
+			"\\\"value\\\": \\\"155000\\\" }\\n      }\\n    ]\\n  }\\n}\\n\",\"status\":200}");
 	}
 }
