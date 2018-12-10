@@ -215,7 +215,7 @@ public class LandRegistryServiceImpl {
 
 		for (int i = 0; i < landRegistryDataList.size(); i++) {
 			LandRegistryData lr = landRegistryDataList.get(i);
-			heatMapDataPoints.add(new HeatMapDataPoint(r
+			heatMapDataPoints.add(new HeatMapDataPoint(
 					lr.getLatitude(),
 					lr.getLongitude(),
 					getColoursForNormalisedValues(numbers.get(i)),
