@@ -1,23 +1,17 @@
 package asegroup1.api.controllers;
 
-import java.security.InvalidParameterException;
-import java.util.List;
-
+import asegroup1.api.models.LocationData;
+import asegroup1.api.services.location.LocationServiceImpl;
+import asegroup1.api.services.user.UserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import asegroup1.api.models.LocationData;
-import asegroup1.api.services.location.LocationServiceImpl;
-import asegroup1.api.services.user.UserServiceImpl;
+import java.security.InvalidParameterException;
+import java.util.List;
 
 /**
  * @author James Fernando, Rikkey Paal
@@ -30,6 +24,7 @@ public class LocationController {
 
 	private UserServiceImpl userService;
     private LocationServiceImpl locationService;
+    
 
     @Autowired
 	public LocationController(LocationServiceImpl locationService, UserServiceImpl userServiceImpl) {
@@ -45,6 +40,7 @@ public class LocationController {
 				locationService.create(location);
 				return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 			} catch (InvalidParameterException e) {
+
 				return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		} else {
