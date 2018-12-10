@@ -1,8 +1,8 @@
 package asegroup1.api.models.heatmap;
 
-import java.security.InvalidParameterException;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.security.InvalidParameterException;
 
 /**
  * @author Greg Mitten
@@ -22,6 +22,13 @@ public class Colour {
 	private static final double GREEN_BRIGHTENING_COEFFICIENT =
 		MAX_COLOUR_VAL / ((MAX_COLOUR_VAL) / SHADES_OF_COLOURS);
 
+
+	/**
+	 * Places it on a scale from green -> yellow -> red
+	 * depending on how large it is converts to corresponding colour
+	 * @param colourValue value between 0-255
+	 * @throws InvalidParameterException
+	 */
 	public Colour(int colourValue) throws InvalidParameterException {
 		int colourGenValue = (int)(colourValue * SHADES_OF_COLOURS);
 
@@ -52,14 +59,14 @@ public class Colour {
     }
 
 	public void setRed(int red) {
-		if (isColourValueValid(red))
+		if (isColourValueValid(red)) {
 			this.red = red;
+		}
 	}
 
 	private boolean isColourValueValid(int value) {
 		if (value > 255 || value < 0) {
-			throw new InvalidParameterException(
-				"Colour value must be between 0-255");
+			throw new InvalidParameterException("Colour value must be between 0-255");
 		}
 
 		return true;
@@ -77,8 +84,7 @@ public class Colour {
     }
 
     public String getRGBA() {
-		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() +
-			",0.75)";
+		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",0.75)";
 	}
 
     public String getHex() {
