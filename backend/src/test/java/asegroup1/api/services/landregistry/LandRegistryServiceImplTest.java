@@ -75,17 +75,11 @@ class LandRegistryServiceImplTest {
 
 	@Test
 	void testIfSettingInvalidPostcodeThrowsInvalidParameterException() {
-		try {
-			// Provides the invalid postcode of "0"
-			LandRegistryQueryConstraint constraint =
-				new LandRegistryQueryConstraint();
-
-			Assertions.assertThrows(
-				InvalidParameterException.class,
-				() -> constraint.getEqualityConstraints().setPostCode("0"));
-		} catch (InvalidParameterException e) {
-			assert true;
-		}
+		Assertions.assertThrows(InvalidParameterException.class,
+								()
+									-> new LandRegistryQueryConstraint()
+										   .getEqualityConstraints()
+										   .setPostCode("0"));
 	}
 
 	@Test
@@ -102,6 +96,7 @@ class LandRegistryServiceImplTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void testIfLongitudeForAddressesAreFetched() {
 		List<LandRegistryData> addresses =
 			generateLandRegistryDataForAddresses(1, 0, 1);
@@ -114,9 +109,7 @@ class LandRegistryServiceImplTest {
 			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull()))
 				.thenReturn(getSPARQLResponse());
 
-			when(
-				landRegistryDataDaoMock.getGeoLocationData(
-					"https://maps.googleapis.com/maps/api/geocode/json?address=SUSSEX+COURT+TENNYSON+ROAD+WORTHING&key=AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA"))
+			when(landRegistryDataDaoMock.getGeoLocationData(notNull()))
 				.thenReturn(fetchMockResponse());
 
 			when(landRegistryDataDaoMock.searchForLandRegistryDataInBoundaries(
