@@ -92,6 +92,7 @@ public class LandRegistryServiceImpl {
 	@SuppressWarnings("unused")
 	public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint)
 			throws IOException, UnirestException {
+
 		return getLatestTransactions(new ArrayList<>(), constraint);
 	}
 
@@ -171,6 +172,7 @@ public class LandRegistryServiceImpl {
 
 			try {
 				JSONObject response = landRegistryDao.getGeoLocationData(addressUriBuilder.toString());
+        
 				address.setLatitude(response.getDouble("lat"));
 				address.setLongitude(response.getDouble("lng"));
 			} catch (UnirestException | JSONException e) {
@@ -213,7 +215,7 @@ public class LandRegistryServiceImpl {
 
 		for (int i = 0; i < landRegistryDataList.size(); i++) {
 			LandRegistryData lr = landRegistryDataList.get(i);
-			heatMapDataPoints.add(new HeatMapDataPoint(
+			heatMapDataPoints.add(new HeatMapDataPoint(r
 					lr.getLatitude(),
 					lr.getLongitude(),
 					getColoursForNormalisedValues(numbers.get(i)),
