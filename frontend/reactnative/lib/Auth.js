@@ -63,12 +63,12 @@ function getSha256(key){
 }
 	
 async function isKeyFree(key){
-	let res = await NetLib.get("user/check-user-exists/", key);
+	let res = await NetLib.getWithPathVariable("user/check-user-exists/", key);
 	var free = (res == "false");
 	if(!free){
 		return free;
 	} else {
-		let res = await NetLib.get("user/add-user-data/", key);
+		let res = await NetLib.getWithPathVariable("user/add-user-data/", key);
 		res = res.text;
 		return (res == "User Added");
 	}

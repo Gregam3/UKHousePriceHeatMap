@@ -13,7 +13,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,21 +31,17 @@ import java.util.stream.Collectors;
 @Service
 public class LandRegistryServiceImpl {
 
-	private final LandRegistryDaoImpl postCodeCoordinatesDao;
+	private final LandRegistryDaoImpl landRegistryDao;
 
 	@Autowired
-	public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
-		this.postCodeCoordinatesDao = postCodeCoordinatesDao;
+	public LandRegistryServiceImpl(LandRegistryDaoImpl landRegistryDao) {
+		this.landRegistryDao = landRegistryDao;
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")
 	private static final String LAND_REGISTRY_SPARQL_ENDPOINT =
-		"http://landregistry.data.gov.uk/app/root/qonsole/query";
-	private static final String GOOGLE_MAPS_URL =
-		"https://maps.googleapis.com/maps/api/geocode/json?address=";
+			"http://landregistry.data.gov.uk/app/root/qonsole/query";
 
-	@Value("${google.maps.api-key}") // Get Api Key from application.properties
-	private String googleMapsApiKey;
 
 	//OTHER CONSTANTS
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -61,10 +56,10 @@ public class LandRegistryServiceImpl {
 		JSONObject queryResponse = executeSPARQLQuery(queryStr);
 
 		ArrayNode transactionListResponse =
-			(ArrayNode) OBJECT_MAPPER
-				.readTree(queryResponse.get("result").toString())
-				.get("results")
-				.get("bindings");
+				(ArrayNode) OBJECT_MAPPER
+						.readTree(queryResponse.get("result").toString())
+						.get("results")
+						.get("bindings");
 
 		for (JsonNode jsonNode : transactionListResponse) {
 			transactionsList.add(new LandRegistryData(jsonNode));
@@ -75,44 +70,45 @@ public class LandRegistryServiceImpl {
 
 	@SuppressWarnings("unused")
 	private List<LandRegistryData> getTransactions(
-		LandRegistryQuerySelect select,
-		LandRegistryQueryConstraint constraint,
-		LandRegistryQueryGroup group
+			LandRegistryQuerySelect select,
+			LandRegistryQueryConstraint constraint,
+			LandRegistryQueryGroup group
 	) throws IOException, UnirestException {
 		return getTransactions(new LandRegistryQuery(constraint, group, select));
 	}
 
 	List<LandRegistryData> getTransactions(LandRegistryQuerySelect select, LandRegistryQueryConstraint constraint)
-		throws IOException, UnirestException {
+			throws IOException, UnirestException {
 		return getTransactions(new LandRegistryQuery(constraint, null, select));
 	}
 
 	private List<LandRegistryData> getLatestTransactions(
-		List<Selectable> values,
-		LandRegistryQueryConstraint constraint
+			List<Selectable> values,
+			LandRegistryQueryConstraint constraint
 	) throws IOException, UnirestException {
 		return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
 	}
 
 	@SuppressWarnings("unused")
 	public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint)
-	throws IOException, UnirestException {
+			throws IOException, UnirestException {
+
 		return getLatestTransactions(new ArrayList<>(), constraint);
 	}
 
 	private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(
-		double top, double right, double bottom, double left
+			double top, double right, double bottom, double left
 	) {
-		return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
+		return landRegistryDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
 	}
 
-	public List<?> getPositionInsideBounds(JSONObject mapPosition)throws UnirestException, IOException {
+	public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
 
 		List<LandRegistryData> landRegistryDataForPostcodes = fetchPostCodesInsideCoordinateBox(
-			mapPosition.getDouble("top"),
-			mapPosition.getDouble("right"),
-			mapPosition.getDouble("bottom"),
-			mapPosition.getDouble("left")
+				mapPosition.getDouble("top"),
+				mapPosition.getDouble("right"),
+				mapPosition.getDouble("bottom"),
+				mapPosition.getDouble("left")
 		);
 
 		int postcodesContained = landRegistryDataForPostcodes.size();
@@ -134,9 +130,9 @@ public class LandRegistryServiceImpl {
 			constraint.setEqualityConstraint(Selectable.postcode, postcodes.toArray(new String[0]));
 
 			return addColoursToLandRegistryData(getPositionForAddresses(getTransactions(
-				LandRegistryQuery.buildQueryLatestSalesOnly(
-					constraint, Arrays.asList(Selectable.paon, Selectable.street, Selectable.town, Selectable.pricePaid)
-			))));
+					LandRegistryQuery.buildQueryLatestSalesOnly(
+							constraint, Arrays.asList(Selectable.paon, Selectable.street, Selectable.town, Selectable.pricePaid)
+					))));
 		} else {
 			return new ArrayList<>();
 		}
@@ -144,13 +140,13 @@ public class LandRegistryServiceImpl {
 
 	private List<LandRegistryData> addColoursToLandRegistryData(List<LandRegistryData> landRegistryDataForPostcodes) {
 		landRegistryDataForPostcodes = landRegistryDataForPostcodes.stream().filter(
-			entry -> entry != null
-				&& entry.getConstraint(Selectable.pricePaid) != null
-				&& entry.getConstraint(Selectable.pricePaid).matches("[0-9]+")
+				entry -> entry != null
+						&& entry.getConstraint(Selectable.pricePaid) != null
+						&& entry.getConstraint(Selectable.pricePaid).matches("[0-9]+")
 		).collect(Collectors.toList());
 
 		List<Double> numbers = MathUtil.normaliseList(landRegistryDataForPostcodes.stream().map(
-			entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))
+				entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))
 		).collect(Collectors.toList()));
 
 		for (int i = 0; i < numbers.size(); i++) {
@@ -167,17 +163,16 @@ public class LandRegistryServiceImpl {
 		StringBuilder addressUriBuilder = new StringBuilder();
 
 		for (LandRegistryData address : addresses) {
-			addressUriBuilder.append(GOOGLE_MAPS_URL)
-				.append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
-				.append("+")
-				.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+"))
-				.append("+")
-				.append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"))
-				.append("&key=")
-				.append(googleMapsApiKey);
+			addressUriBuilder
+					.append(address.getConstraintNotNull(Selectable.paon).replace(" ", "+"))
+					.append("+")
+					.append(address.getConstraintNotNull(Selectable.street).replace(" ", "+"))
+					.append("+")
+					.append(address.getConstraintNotNull(Selectable.town).replace(" ", "+"));
 
 			try {
-				JSONObject response = postCodeCoordinatesDao.getGeoLocationData(addressUriBuilder.toString());
+				JSONObject response = landRegistryDao.getGeoLocationData(addressUriBuilder.toString());
+        
 				address.setLatitude(response.getDouble("lat"));
 				address.setLongitude(response.getDouble("lng"));
 			} catch (UnirestException | JSONException e) {
@@ -195,12 +190,12 @@ public class LandRegistryServiceImpl {
 	@SuppressWarnings("SpellCheckingInspection")
 	private JSONObject executeSPARQLQuery(String query) throws UnirestException {
 		return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
-			.field("output", "json")
-			.field("q", query)
-			.field("url", "/landregistry/query")
-			.asJson()
-			.getBody()
-			.getObject();
+				.field("output", "json")
+				.field("q", query)
+				.field("url", "/landregistry/query")
+				.asJson()
+				.getBody()
+				.getObject();
 	}
 
 	List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
@@ -208,12 +203,12 @@ public class LandRegistryServiceImpl {
 			return new ArrayList<>();
 		}
 		landRegistryDataList = landRegistryDataList.stream().filter(
-			entry -> entry != null
-				&& entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+")
+				entry -> entry != null
+						&& entry.getConstraint(Selectable.pricePaid).matches("[-0-9]+")
 		).collect(Collectors.toList());
 
 		List<Double> numbers = MathUtil.normaliseList(landRegistryDataList.stream().map(
-			entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList())
+				entry -> Double.parseDouble(entry.getConstraint(Selectable.pricePaid))).collect(Collectors.toList())
 		);
 
 		List<HeatMapDataPoint> heatMapDataPoints = new ArrayList<>();
@@ -221,10 +216,10 @@ public class LandRegistryServiceImpl {
 		for (int i = 0; i < landRegistryDataList.size(); i++) {
 			LandRegistryData lr = landRegistryDataList.get(i);
 			heatMapDataPoints.add(new HeatMapDataPoint(
-				lr.getLatitude(),
-				lr.getLongitude(),
-				getColoursForNormalisedValues(numbers.get(i)),
-				lr.getRadius()
+					lr.getLatitude(),
+					lr.getLongitude(),
+					getColoursForNormalisedValues(numbers.get(i)),
+					lr.getRadius()
 			));
 		}
 
@@ -238,7 +233,7 @@ public class LandRegistryServiceImpl {
 
 	private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
 		List<LandRegistryData> transactions = getTransactions(
-			LandRegistryQuery.buildQueryAveragePricePostcode(postcodes)
+				LandRegistryQuery.buildQueryAveragePricePostcode(postcodes)
 		);
 		HashMap<String, Long> postcodePrices = new HashMap<>();
 
@@ -272,25 +267,25 @@ public class LandRegistryServiceImpl {
 		int updatedRecords = 0;
 
 		HashMap<String, List<String>> postcodeAreas =
-			postCodeCoordinatesDao.getMatchingPostcodes(postcodePrefix, false, 1);
+				landRegistryDao.getMatchingPostcodes(postcodePrefix, false, 1);
 		double numAreas = postcodeAreas.size();
 		double numDone = 0;
 
 		for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
 			long estTimeLeft = numDone == 0 // This accounts for if number done is 0 otherwise 0 division is possible
-				? Long.MAX_VALUE
-				: Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+					? Long.MAX_VALUE
+					: Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
 
 			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
-				"\"" + postcodeArea.getKey() + "\"",
-				(numDone / numAreas) * 100,
-				estTimeLeft / 3600,
-				(estTimeLeft % 3600) / 60,
-				(estTimeLeft % 60)
+					"\"" + postcodeArea.getKey() + "\"",
+					(numDone / numAreas) * 100,
+					estTimeLeft / 3600,
+					(estTimeLeft % 3600) / 60,
+					(estTimeLeft % 60)
 			);
 			List<String> postcodes = postcodeArea.getValue();
 			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
-			updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
+			updatedRecords += landRegistryDao.updateAveragePrice(newPrices);
 			numDone++;
 		}
 
