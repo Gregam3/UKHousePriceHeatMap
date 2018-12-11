@@ -29,7 +29,7 @@ matrix:
         - docker login -u $DOCKER_USER -p $DOCKER_PASS
         - |
           if [ $TRAVIS_BRANCH == "master" ];
-          then export DOCKER_BRANCH = master;
+          then export DOCKER_BRANCH=master;
           elif [ $TRAVIS_BRANCH == "development" ];
           then export DOCKER_BRANCH=development;
           else export DOCKER_BRANCH=branch;
