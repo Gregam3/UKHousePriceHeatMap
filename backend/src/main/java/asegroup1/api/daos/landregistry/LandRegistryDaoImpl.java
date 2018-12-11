@@ -33,6 +33,9 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 	@Value("${google.maps.api-key}") // Get Api Key from application.properties
 	private String googleMapsApiKey;
 
+	private static final String LAND_REGISTRY_SPARQL_ENDPOINT =
+		"http://landregistry.data.gov.uk/app/root/qonsole/query";
+
 	private static final String TABLE_NAME = "postcodelatlng";
 
 	public LandRegistryDaoImpl() {
@@ -188,5 +191,17 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		return Unirest.get(GOOGLE_MAPS_URL + builtAddress + "&key=" + googleMapsApiKey).asJson().getBody().getArray()
 				.getJSONObject(0).getJSONArray("results").getJSONObject(0)
 				.getJSONObject("geometry").getJSONObject("location");
+	}
+
+	public JSONObject executeSPARQLQuery(String query) throws UnirestException {
+		// Navigates through JSON and returns list of addresses based on post
+		// code
+		return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
+			.field("output", "json")
+			.field("q", query)
+			.field("url", "/landregistry/query")
+			.asJson()
+			.getBody()
+			.getObject();
 	}
 }
