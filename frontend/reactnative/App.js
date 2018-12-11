@@ -1,8 +1,8 @@
 import 'global'
-
-import {Location, MapView, Permissions} from 'expo';
+import {Constants, Location, MapView, Permissions} from 'expo';
 import React, {Component} from 'react';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
+import {Overlay} from 'react-native-elements';
 import {SearchBar} from 'react-native-elements';
 
 import * as Auth from './lib/Auth.js';
@@ -36,12 +36,13 @@ export default class App extends Component {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatMapScaleFactor
+        circleSize: heatMapScaleFactor,
+        loadingMarkers: false
     };
 
     constructor(props) {
         super(props);
-
+		StatusBar.setHidden(true);
         this.searchText = null;
         this.displayedText = 'Fetching position...';
         this.lastPosition = {
@@ -69,13 +70,12 @@ export default class App extends Component {
 
             if (location) {
                 this.setState({location});
-
                 if (!this.mapBounds) {
                     this.mapBounds = {
-                        top: location.coords.longitude + startingDeltas.longitude,
-                        bottom: location.coords.longitude - startingDeltas.longitude,
-                        right: location.coords.latitude + startingDeltas.latitude,
-                        left: location.coords.latitude - startingDeltas.latitude,
+                        top: location.coords.longitude + (startingDeltas.longitude / 2),
+                        bottom: location.coords.longitude - (startingDeltas.longitude / 2),
+                        right: location.coords.latitude + (startingDeltas.latitude / 2),
+                        left: location.coords.latitude - (startingDeltas.latitude / 2),
                         delta: startingDeltas.longitude * 500
                     };
                 }
@@ -88,6 +88,8 @@ export default class App extends Component {
     };
 
     _getDisplayData = async () => {
+        this.setState({loadingMarkers: true});
+
         if (this.mapBounds) {
             let markers = await NetLib.getLandRegistryData(this.mapBounds);
 
@@ -98,7 +100,8 @@ export default class App extends Component {
                         //Location must be updated in state here to avoid position reverted to last searched position, alternate solution leads to scrolling on the map
                         location: {
                             coords: this.lastPosition
-                        }
+                        },
+                        loadingMarkers: false
                     }
                 );
             }
@@ -165,37 +168,36 @@ export default class App extends Component {
             (latitude && longitude) ?
                 this.drawMapWithData(longitude, latitude)
                 :
-                <Text style={styles.centerText}>{this.displayedText}</Text>
+                <View>
+                    <View style={styles.background}/>
+                    <Text style={styles.centerText}>{this.displayedText}</Text>
+                    {(Platform.OS === 'ios') ?
+                        <ProgressViewIOS style={styles.coordinatesLoadStyle}/> :
+                        <ProgressBarAndroid style={styles.coordinatesLoadStyle}/>}
+                    <View style={styles.background}/>
+                </View>
         );
     }
 
     drawMapWithData(longitude, latitude) {
         return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{backgroundColor: '#242f3e', flex: 1}} />
-            <View style={{flex: 1.7, flexDirection: 'row'}}>
-                <View style={{flex: 4}}>
+            <View style={{flexDirection: 'row', height:46}}>
+                <View style={{flex: 4, top:-1}}>
                     <SearchBar
                         darkTheme
                         round
                         onChangeText={this.updateSearchText}
                     />
                 </View>
-                <View style={{flex: 1, backgroundColor: '#841584'}}>
-                    <View style={{marginTop: 6}}>
-                        <Button
-                            styles={{fontSize: 20}}
-                            onPress={this.goToLocation}
-                            title="→"
-                            color="#841584"
-                        />
-                    </View>
-                </View>
+                <TouchableOpacity style={{flex: 1, backgroundColor: '#841584'}} onPress={this.goToLocation}>
+					<Text style={{flex:1, color: '#ffffff', fontSize:27, textAlign: 'center'}}>→</Text>
+                </TouchableOpacity>
             </View>
+
             <MapView
                 style={{flex: 22}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
-                provider={MapView.PROVIDER_GOOGLE}
                 customMapStyle={darkMapStyle}
                 initialRegion={{
                     longitude: longitude,
@@ -211,7 +213,6 @@ export default class App extends Component {
                 }}
                 onRegionChange={this.handleMapRegionChange}
             >
-
                 {
                     this.state.markers.length > AGGREGATION_LEVELS.heatMap ? (
                         this.drawHeatMap()
@@ -222,9 +223,19 @@ export default class App extends Component {
             </MapView>
             <Button
                 onPress={this._getDisplayData}
-                title="Fetch Prices"
+                title="Load elements"
                 color="#841584"
             />
+            <Overlay
+                overlayBackgroundColor='#242f3e'
+                height={'18.5%'}
+                width={'35%'}
+                isVisible={this.state.loadingMarkers}>
+                <Text style={styles.loadingText}>Loading elements...</Text>
+                {(Platform.OS === 'ios') ?
+                    <ProgressViewIOS style={styles.dataLoadStyle}/> :
+                    <ProgressBarAndroid style={styles.dataLoadStyle}/>}
+            </Overlay>
         </View>
     }
 
@@ -271,17 +282,29 @@ function log(message) {
 
 const styles = StyleSheet.create({
     centerText: {
-        marginTop: 300,
-        marginLeft: 120,
+        textAlign: 'center',
         fontSize: 40,
+        height: 100,
+        color: '#ffffff',
+        backgroundColor: '#242f3e',
     },
-    coordinatesText: {
-        flex: 5,
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'white',
-        textAlign: 'center'
+    loadingText: {
+        textAlign: 'center',
+        color: '#ffffff'
+    },
+    background: {
+        backgroundColor: '#242f3e',
+        height: 275
+    },
+    dataLoadStyle: {
+        backgroundColor: '#242f3e',
+        height: '90%'
+    },
+    coordinatesLoadStyle: {
+        height: '15%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#242f3e'
     }
 });
 
