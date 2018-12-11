@@ -4,6 +4,7 @@ import React, {Component} from 'react';
 import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
 import {Overlay} from 'react-native-elements';
 import {SearchBar} from 'react-native-elements';
+import { Constants, WebBrowser } from 'expo';
 
 import * as Auth from './lib/Auth.js';
 import * as NetLib from './lib/NetworkingLib.js';
@@ -106,6 +107,11 @@ export default class App extends Component {
                 );
             }
         }
+    };
+
+    _handleStreetViewButtonPress = async (streetLatitude, streetLongitude) => {
+        let streetResult = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + streetLatitude + ',' + streetLongitude);
+        this.setState({streetResult});
     };
 
     handleMapRegionChange = mapRegion => {
@@ -271,7 +277,21 @@ export default class App extends Component {
                     marker.mappings.postcode :
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                 pinColor={marker.colour.hex}
-            />
+            >
+                <MapView.Callout onPress={() => this._handleStreetViewButtonPress((parseFloat(marker.mappings.latitude)), (parseFloat(marker.mappings.longitude)))}>
+                    <Text style={{fontWeight: 'bold', textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            "Average Price: £" + marker.mappings.pricePaid :
+                            "£" + marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+                     </Text>
+                     <Text style={{textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            marker.mappings.postcode :
+                            marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                     </Text>
+                    <Text style={{textAlign: 'center', color: '#0000ff', textDecorationLine: 'underline'}}>Take me to the Street</Text>
+                </MapView.Callout>
+            </MapView.Marker>
         ))
     }
 }
