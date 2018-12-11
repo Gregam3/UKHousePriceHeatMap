@@ -1,8 +1,11 @@
 package asegroup1.api.services.landregistry;
 
+import asegroup1.api.controllers.LandRegistryController;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -11,7 +14,7 @@ import java.util.stream.Collectors;
  */
 public class MathUtil {
 
-	private final static Logger logger = Logger.getLogger(MathUtil.class.getName());
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
 
 
 	public static List<Double> normaliseList(List<Double> numbers) {

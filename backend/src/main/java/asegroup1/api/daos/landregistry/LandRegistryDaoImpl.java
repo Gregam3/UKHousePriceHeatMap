@@ -1,10 +1,13 @@
 package asegroup1.api.daos.landregistry;
 
+import asegroup1.api.controllers.LandRegistryController;
 import asegroup1.api.daos.DaoImpl;
 import asegroup1.api.models.PostCodeCoordinates;
 import asegroup1.api.models.landregistry.LandRegistryData;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +30,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
 
 	private static final String TABLE_NAME = "postcodelatlng";
-	private final static Logger logger = Logger.getLogger(LandRegistryDaoImpl.class.getName());
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
 
 
 	public LandRegistryDaoImpl() {
@@ -37,14 +39,14 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
 	@Override
 	public void delete(String id) {
-		logger.warning("Attempted Deletion of PostCode data");
+		logger.warn("Attempted Deletion of PostCode data");
 		throw new AssertionError(
 				"Items cannot be deleted from postcodelatlng table");
 	}
 
 	@Override
 	public List<PostCodeCoordinates> list() {
-		logger.warning("Attempted to list all postcode data");
+		logger.warn("Attempted to list all postcode data");
 		throw new AssertionError(
 				"All Postcodes cannot be listed due to magnitude, use searchForLandRegistryDataInBoundaries instead.");
 	}

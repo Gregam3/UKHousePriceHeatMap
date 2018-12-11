@@ -5,6 +5,8 @@ import asegroup1.api.services.location.LocationServiceImpl;
 import asegroup1.api.services.user.UserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author James Fernando, Rikkey Paal
@@ -26,7 +26,7 @@ public class LocationController {
 
 	private UserServiceImpl userService;
     private LocationServiceImpl locationService;
-	private final static Logger logger = Logger.getLogger(LocationController.class.getName());
+	private final static Logger logger = LogManager.getLogger(LocationController.class);
 
 
 
@@ -44,7 +44,7 @@ public class LocationController {
 				locationService.create(location);
 				return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 			} catch (InvalidParameterException e) {
-				logger.log(Level.SEVERE, "Unable to add location to database", e);
+				logger.error( "Unable to add location to database", e);
 				return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		} else {

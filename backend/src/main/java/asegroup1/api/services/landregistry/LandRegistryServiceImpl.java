@@ -1,5 +1,6 @@
 package asegroup1.api.services.landregistry;
 
+import asegroup1.api.controllers.LandRegistryController;
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
@@ -10,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +24,6 @@ import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 public class LandRegistryServiceImpl {
 
 	private final LandRegistryDaoImpl postCodeCoordinatesDao;
-	private final static Logger logger = Logger.getLogger(LandRegistryServiceImpl.class.getName());
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
 
 
 	@Autowired
@@ -165,7 +166,7 @@ public class LandRegistryServiceImpl {
 
 	private List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
 		if (addresses.size() >= 100) {
-			logger.warning(
+			logger.warn(
 				LandRegistryServiceImpl.class.getEnclosingMethod().getName() + "Called with more than 100 addresses"
 			);
 			throw new InvalidParameterException("This method should never be passed more than 100 addresses");
@@ -188,7 +189,7 @@ public class LandRegistryServiceImpl {
 				address.setLatitude(response.getDouble("lat"));
 				address.setLongitude(response.getDouble("lng"));
 			} catch (UnirestException | JSONException e) {
-				logger.log(Level.SEVERE, "Could not retrieve address for " + addressUriBuilder.toString(), e);
+				logger.error("Could not retrieve address for " + addressUriBuilder.toString(), e);
 			}
 
 			// Clear the StringBuilder buffer
@@ -257,7 +258,7 @@ public class LandRegistryServiceImpl {
 					Long pricePaid = Long.parseLong(priceStr);
 					postcodePrices.put(postcode, pricePaid);
 				} catch (NumberFormatException e) {
-					logger.log(Level.WARNING, "Unable to parse price paid", e);
+					logger.warn("Unable to parse price paid", e);
 				}
 			}
 		}
