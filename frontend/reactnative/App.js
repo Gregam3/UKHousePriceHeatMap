@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
 import {Overlay} from 'react-native-elements';
 import {SearchBar} from 'react-native-elements';
-import { Constants, WebBrowser } from 'expo';
+import {WebBrowser} from 'expo';
 
 import * as Auth from './lib/Auth.js';
 import * as NetLib from './lib/NetworkingLib.js';
