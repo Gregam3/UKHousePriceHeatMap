@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.mock;
@@ -142,10 +143,9 @@ class LandRegistryServiceImplTest {
 		// Check if 15 converted to red is darker red than 10 converted to red,
 		// and then check if 10 converted to red is darker red than 5 converted
 		// to red
-		assert heatMapDataPoints.get(0).getColour().getHex().equals(
-			"#00d300") &&
-			heatMapDataPoints.get(1).getColour().getHex().equals("#d90000") &&
-			heatMapDataPoints.get(2).getColour().getHex().equals("#ff0000");
+		assertEquals("#00a500", heatMapDataPoints.get(0).getColour().getHex());
+        assertEquals("#dada00", heatMapDataPoints.get(1).getColour().getHex());
+        assertEquals("#ff0000", heatMapDataPoints.get(2).getColour().getHex());
 	}
 
 	@Test
@@ -154,7 +154,7 @@ class LandRegistryServiceImplTest {
 			getHeatMapTestData(5L, 5L, 5L);
 
 		for (HeatMapDataPoint heatMapDataPoint : heatMapDataPoints) {
-			assert heatMapDataPoint.getColour().getHex().equals("#9b0000");
+			assertEquals("#9c9c00", heatMapDataPoint.getColour().getHex());
 		}
 	}
 

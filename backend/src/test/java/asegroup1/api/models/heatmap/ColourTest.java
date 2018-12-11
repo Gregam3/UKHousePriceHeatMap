@@ -57,7 +57,7 @@ class ColourTest {
 		Colour colourGreen = new Colour(55);
 
 		assertEquals("#ff0000", colourRed.getHex());
-		assertEquals("#00d300", colourGreen.getHex());
+		assertEquals("#00a500", colourGreen.getHex());
 	}
 
 	@Test
@@ -67,7 +67,7 @@ class ColourTest {
 
 		assertEquals("rgba(255,0,0," + Colour.CIRCLE_OPACITY + ")",
 					 colourRed.getRGBA());
-		assertEquals("rgba(0,211,0," + Colour.CIRCLE_OPACITY + ")",
+		assertEquals("rgba(0,165,0," + Colour.CIRCLE_OPACITY + ")",
 					 colourGreen.getRGBA());
 	}
 
