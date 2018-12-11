@@ -54,28 +54,6 @@ public class LandRegistryQuerySelect {
 		return obj == null ? null : new String[] { obj.referenceName, obj.aggregation.toString(), obj.aggregationName };
 	}
 
-	public String getSelectValueAggregationName(String reference) {
-		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggregationName(obj);
-	}
-
-	public Aggregation getSelectValueAggregation(String reference) {
-		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggregation(obj);
-	}
-
-	public static String getSelectValueAggregationName(SelectObj reference) {
-		return reference.aggregationName;
-	}
-
-	public static String getSelectValueReferencenName(SelectObj reference) {
-		return reference.referenceName;
-	}
-
-	public static Aggregation getSelectValueAggregation(SelectObj reference) {
-		return reference.aggregation;
-	}
-
 	public LinkedHashMap<String, SelectObj> getSelectValues() {
 		return selectValues;
 	}
@@ -160,8 +138,10 @@ public class LandRegistryQuerySelect {
 		}
 
 		private <E> boolean testEqualsWithNull(E object1, E object2) {
-			if (object1 == null || object2 == null) {
-				return object1 == object2;
+			if (object1 == null && object2 == null) {
+				return true;
+			} else if (object1 == null || object2 == null) {
+				return false;
 			} else {
 				return object1.equals(object2);
 			}

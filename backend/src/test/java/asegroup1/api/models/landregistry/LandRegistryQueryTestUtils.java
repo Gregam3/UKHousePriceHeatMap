@@ -101,18 +101,11 @@ public class LandRegistryQueryTestUtils {
 
 	/* REGEX */
 
+	
 	static String buildQuerySelectRegex(boolean ignoreAggregation) {
 		String start = "SELECT";
 
-		List<String> options = new ArrayList<>();
-		for (Selectable selectable : EnumSet.allOf(Selectable.class)) {
-			String str = selectable.toString();
-			options.add(str);
-			options.add(str.substring(0, 1).toUpperCase() + str.substring(1));
-		}
-
-		String optionList = regexOptionalList(options);
-		String option = "\\?" + optionList;
+		String option = "\\?\\w+";
 
 		ArrayList<Aggregation> aggregations = new ArrayList<Aggregation>(EnumSet.allOf(Aggregation.class));
 		aggregations.remove(Aggregation.NONE);
@@ -138,6 +131,20 @@ public class LandRegistryQueryTestUtils {
 		List<E> list = new ArrayList<>();
 		data.forEach(v -> list.add(operation.apply(v)));
 		return list;
+	}
+	
+	static String buildQueryRegex(int depth) {
+		return regexAddWithDelim("\\s+", buildPrefixRegex(), buildQueryRegexInternal(depth));
+	}
+	
+	static String buildPrefixRegex() {
+		String start = "prefix";
+		String namespace = "\\w+:";
+		// gotten from https://www.regextester.com/20
+		String urlprefix = "(http:\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?";
+		String prefix = regexAddWithDelim("\\s+", start, namespace, "<"+urlprefix+">");
+		String met = regexAddWithDelim("\\s*", "(", prefix, ")+");
+		return met;
 	}
 	
 	static String buildQueryConstraintRegex() {

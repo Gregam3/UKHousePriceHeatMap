@@ -56,7 +56,7 @@ class LandRegistryQuerySelectTest {
 		select = new LandRegistryQuerySelect(selectables.toArray(new Selectable[selectables.size()]));
 		assertEquals(selectables.size(), select.getSelectValues().size());
 		for (Selectable selectable : selectables) {
-			assertEquals(Aggregation.SAMPLE, select.getSelectValueAggregation(selectable.toString()));
+			assertEquals(Aggregation.SAMPLE, select.getSelectObj(selectable.toString()).aggregation);
 		}
 	}
 
@@ -119,46 +119,27 @@ class LandRegistryQuerySelectTest {
 
 	/**
 	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#getSelectValueAggregation(String)}.
-	 */
-	@Test
-	void testGetSelectValueAggregation() {
-		String ref = "test";
-		Aggregation aggregation = Aggregation.AVG;
-		select.addSelectValue(ref, aggregation, null);
-		assertEquals(aggregation, select.getSelectValueAggregation(ref));
-		select.removeValue(ref);
-		assertNull(select.getSelectValueAggregation(ref));
-	}
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#getSelectValueAggregationName(String)}.
-	 */
-	@Test
-	void testGetSelectValueAggregationName() {
-		String ref = "test";
-		Aggregation aggregation = Aggregation.AVG;
-		String name = "something";
-		select.addSelectValue(ref, aggregation, name);
-		assertEquals(name, select.getSelectValueAggregationName(ref));
-		select.removeValue(ref);
-		assertNull(select.getSelectValueAggregationName(ref));
-	}
-
-	/**
-	 * Test method for
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect#buildQuerySelect(boolean)}.
 	 */
 	@Test
 	void testBuildQuerySelect() {
 		select = LandRegistryQueryTestUtils.genLandRegistryQuerySelect();
+		select.addSelectValue("avg", Aggregation.AVG, "AVG");
+		select.addSelectValue("count", Aggregation.COUNT, "COUNT");
+		select.addSelectValue("max", Aggregation.MAX, "MAX");
+		select.addSelectValue("min", Aggregation.MIN, "MIN");
+		select.addSelectValue("none", Aggregation.NONE, "NONE");
+		select.addSelectValue("sample", Aggregation.SAMPLE, "SAMPLE");
+		select.addSelectValue("sum", Aggregation.SUM, "SUM");
 
 		String buildGroup = select.buildQuerySelect(false);
 
 		String regex = LandRegistryQueryTestUtils.buildQuerySelectRegex(false);
-
+		System.out.println(buildGroup);
 		assertTrue(buildGroup.matches(regex));
+		for (SelectObj obj : select.getSelectValues().values()) {
+			assertTrue(("SELECT " + obj).toString().matches(regex));
+		}
 	}
 
 	/**
@@ -172,4 +153,45 @@ class LandRegistryQuerySelectTest {
 		assertEquals(select.new SelectObj("test", null, Aggregation.NONE), obj);
 	}
 
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQuerySelect.SelectObj#equals(Object)}.
+	 */
+	@SuppressWarnings("unlikely-arg-type")
+	@Test
+	void testSelectObjEquals() {
+		SelectObj o1 = select.new SelectObj("avg", "AVG", Aggregation.AVG);
+		SelectObj o6 = select.new SelectObj("avg", "AVG", Aggregation.AVG);
+
+		SelectObj o2 = select.new SelectObj("count", "COUNT", Aggregation.COUNT);
+		SelectObj o3 = select.new SelectObj("null", null, Aggregation.AVG);
+		SelectObj o4 = select.new SelectObj(null, "AVG", Aggregation.MIN);
+		SelectObj o5 = select.new SelectObj("avg", "NONE", Aggregation.NONE);
+
+		SelectObj o7 = select.new SelectObj("avg", "AVG", Aggregation.SUM);
+		SelectObj o8 = select.new SelectObj("null", "AVG", Aggregation.AVG);
+		SelectObj o9 = select.new SelectObj("avg", "null", Aggregation.AVG);
+
+		SelectObj o10 = select.new SelectObj(null, "null", Aggregation.AVG);
+		SelectObj o11 = select.new SelectObj(null, "null", Aggregation.AVG);
+		SelectObj o12 = select.new SelectObj("null", "null", Aggregation.AVG);
+
+		assertTrue(o1.equals(o1));
+		assertTrue(o1.equals(o6));
+		assertTrue(o10.equals(o11));
+		
+		assertFalse(o10.equals(o12));
+
+		assertFalse(o1.equals(o2));
+		assertFalse(o1.equals(o3));
+		assertFalse(o1.equals(o4));
+		assertFalse(o1.equals(o5));
+
+		assertFalse(o1.equals(o7));
+		assertFalse(o1.equals(o8));
+		assertFalse(o1.equals(o9));
+
+		assertFalse(o1.equals("wrong"));
+
+	}
 }
