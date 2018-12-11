@@ -9,8 +9,8 @@ import java.security.InvalidParameterException;
  * gregoryamitten@gmail.com
  */
 public class Colour {
-    private int red;
-    private int green;
+	private int red;
+	private int green;
 
 	private final static double RED_SCALING = 2.98;
 
@@ -74,30 +74,31 @@ public class Colour {
 		}
 
 		return true;
+
 	}
 
-    @JsonIgnore
-    public int getBlue() {
-        return 0;
-    }
+	@JsonIgnore
+	public int getBlue() {
+		return 0;
+	}
 
 
-    @Override
-    public String toString() {
-        return getHex();
-    }
+	@Override
+	public String toString() {
+		return getHex();
+	}
 
-    public String getRGBA() {
+	public String getRGBA() {
 		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",0.75)";
 	}
 
-    public String getHex() {
-        return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
-    }
+	public String getHex() {
+		return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
+	}
 
     private String toHexColourString(int value) {
         String hexValue = Integer.toHexString(value);
 
-        return (hexValue.length() < 2) ? "0" + hexValue : hexValue;
-    }
+		return (hexValue.length() < 2) ? "0" + hexValue : hexValue;
+	}
 }

@@ -181,8 +181,10 @@ class LandRegistryServiceImplTest {
 
     @Test
     void testHowNormaliseValuesHandlesEmptyList() {
-        assert landRegistryService.convertLandRegistryDataListToHeatMapList(new ArrayList<>()) == null;
-    }
+		assert landRegistryService
+			.convertLandRegistryDataListToHeatMapList(new ArrayList<>())
+			.isEmpty();
+	}
 
     @Test
     void testIfNormalisedValuesConvertToCorrectColoursWithNegativeValues() {
