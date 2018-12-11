@@ -72,10 +72,10 @@ export default class App extends Component {
                 this.setState({location});
                 if (!this.mapBounds) {
                     this.mapBounds = {
-                        top: location.coords.longitude + startingDeltas.longitude,
-                        bottom: location.coords.longitude - startingDeltas.longitude,
-                        right: location.coords.latitude + startingDeltas.latitude,
-                        left: location.coords.latitude - startingDeltas.latitude,
+                        top: location.coords.longitude + (startingDeltas.longitude / 2),
+                        bottom: location.coords.longitude - (startingDeltas.longitude / 2),
+                        right: location.coords.latitude + (startingDeltas.latitude / 2),
+                        left: location.coords.latitude - (startingDeltas.latitude / 2),
                         delta: startingDeltas.longitude * 500
                     };
                 }
