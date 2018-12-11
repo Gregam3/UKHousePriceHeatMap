@@ -181,7 +181,7 @@ export default class App extends Component {
 
     drawMapWithData(longitude, latitude) {
         return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{flex: 1.6, flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', height:47}}>
                 <View style={{flex: 4}}>
                     <SearchBar
                         darkTheme
