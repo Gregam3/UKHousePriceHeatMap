@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -22,6 +23,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 
@@ -336,6 +339,12 @@ class LandRegistryServiceImplTest {
 	 */
 	@Test
 	void testUpdatePostcodeDatabase() {
-		
+		LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+		ArgumentCaptor<HashMap<String, Long>> captor = ArgumentCaptor.forClass(HashMap.class);
+		verify(landRegistryDataDaoMock).updateAveragePrice(captor.capture());
+		when(landRegistryDataDaoMock.updateAveragePrice(Mockito.any())).thenReturn(1);
+
+		LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+		assert
 	}
 }
