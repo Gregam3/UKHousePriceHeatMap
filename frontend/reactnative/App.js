@@ -1,7 +1,7 @@
 import 'global'
 import {Constants, Location, MapView, Permissions} from 'expo';
 import React, {Component} from 'react';
-import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View} from 'react-native';
+import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar} from 'react-native';
 import {Overlay} from 'react-native-elements';
 import {SearchBar} from 'react-native-elements';
 
@@ -42,7 +42,7 @@ export default class App extends Component {
 
     constructor(props) {
         super(props);
-
+		StatusBar.setHidden(true);
         this.searchText = null;
         this.displayedText = 'Fetching position...';
         this.lastPosition = {
@@ -182,7 +182,6 @@ export default class App extends Component {
     drawMapWithData(longitude, latitude) {
 
         return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{backgroundColor: '#242f3e', flex: 1}}/>
             <View style={{flex: 1.7, flexDirection: 'row'}}>
                 <View style={{flex: 4}}>
                     <SearchBar
@@ -192,7 +191,7 @@ export default class App extends Component {
                     />
                 </View>
                 <View style={{flex: 1, backgroundColor: '#841584'}}>
-                    <View style={{marginTop: 6}}>
+                    <View>
                         <Button
                             styles={{fontSize: 20}}
                             onPress={this.goToLocation}
