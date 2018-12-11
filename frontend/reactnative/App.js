@@ -180,9 +180,8 @@ export default class App extends Component {
     }
 
     drawMapWithData(longitude, latitude) {
-
         return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{flex: 1.7, flexDirection: 'row'}}>
+            <View style={{flex: 1.6, flexDirection: 'row'}}>
                 <View style={{flex: 4}}>
                     <SearchBar
                         darkTheme
@@ -191,7 +190,7 @@ export default class App extends Component {
                     />
                 </View>
                 <View style={{flex: 1, backgroundColor: '#841584'}}>
-                    <View>
+                    <View style={{marginTop: 6}}>
                         <Button
                             styles={{fontSize: 20}}
                             onPress={this.goToLocation}
