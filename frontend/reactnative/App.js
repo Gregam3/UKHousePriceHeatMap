@@ -71,9 +71,7 @@ export default class App extends Component {
                         bottom: location.coords.longitude - startingDeltas.longitude,
                         right: location.coords.latitude + startingDeltas.latitude,
                         left: location.coords.latitude - startingDeltas.latitude,
-                        delta: startingDeltas.longitude * 500,
-                        mapLat: location.coords.latitude,
-                        mapLon: location.coords.longitude
+                        delta: startingDeltas.longitude * 500
                     };
 
                     this.currentMapCoordinates = currentMapCoordinates;
@@ -99,9 +97,8 @@ export default class App extends Component {
         }
     };
 
-    _handleStreetViewButtonPress = async () => {
-
-        let streetResult = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + this.currentMapCoordinates.mapLat + ',' + this.currentMapCoordinates.mapLon);
+    _handleStreetViewButtonPress = async (streetLatitude, streetLongitude) => {
+        let streetResult = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + streetLatitude + ',' + streetLongitude);
         this.setState({streetResult});
     };
 
@@ -111,9 +108,7 @@ export default class App extends Component {
             bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
             right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
             left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
-            delta: mapRegion.longitudeDelta * 500,
-            mapLat: mapRegion.latitude,
-            mapLon: mapRegion.longitude
+            delta: mapRegion.longitudeDelta * 500
         };
         this.currentMapCoordinates = currentMapCoordinates;
 
@@ -166,10 +161,6 @@ export default class App extends Component {
 
             </MapView>
             <Button
-                onPress={this._handleStreetViewButtonPress}
-                title="Street View"
-            />
-            <Button
                 onPress={this._getDisplayData}
                 title="Load elements"
                 color="#841584"
@@ -209,7 +200,21 @@ export default class App extends Component {
                     marker.mappings.postcode :
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                 pinColor={marker.colour.hex}
-            />
+            >
+                <MapView.Callout onPress={() => this._handleStreetViewButtonPress((parseFloat(marker.mappings.latitude)), (parseFloat(marker.mappings.longitude)))}>
+                    <Text style={{fontWeight: 'bold', textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            "Average Price: £" + marker.mappings.pricePaid :
+                            "£" + marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+                     </Text>
+                     <Text style={{textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            marker.mappings.postcode :
+                            marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                     </Text>
+                    <Text style={{textAlign: 'center', color: '#0000ff', textDecorationLine: 'underline'}}>Take me to the Street</Text>
+                </MapView.Callout>
+            </MapView.Marker>
         ))
     }
 }
