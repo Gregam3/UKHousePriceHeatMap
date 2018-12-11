@@ -1,27 +1,37 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 /**
  * @author Greg Mitten
@@ -272,4 +282,60 @@ class LandRegistryServiceImplTest {
             assert false;
         }
     }
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getAllPostcodePrices(String...)}.
+	 */
+	@Test
+	void testGetAllPostcodePrices() {
+		String[] postcodes = new String[] { "BN23 7LE", "BN23 7LL", "BN23 7LN", "BN23 7LQ", "BN23 7LX", "BN23 7LZ" };
+		try {
+			HashMap<String, Long> prices = landRegistryService.getAllPostcodePrices(postcodes);
+			assertNotNull(prices);
+			assertTrue(prices.size() == 6);
+			for (Entry<String, Long> entry : prices.entrySet()) {
+				assertNotNull(entry.getKey());
+				if(entry.getValue() == null) {
+					assertEquals("BN23 7LX", entry.getKey());
+				}
+			}
+		} catch (IOException | UnirestException e) {
+			fail(e);
+		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getTransactions(asegroup1.api.models.landregistry.LandRegistryQuery)}.
+	 */
+	@Test
+	void testGetTransaction() {
+		String[] postcodes = new String[] { "BN23 7LE", "BN23 7LL", "BN23 7LN", "BN23 7LQ", "BN23 7LT", "BN23 7LZ" };
+		try {
+			for (LandRegistryData transaction : landRegistryService.getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes))) {
+				assertNotNull(transaction);
+				assertEquals(2, transaction.getAllConstraints().size());
+				assertTrue(transaction.hasConstraint(Selectable.pricePaid));
+				assertTrue(transaction.hasConstraint(Selectable.postcode));
+				assertNull(transaction.getLatitude());
+				assertNull(transaction.getLongitude());
+				assertNull(transaction.getRadius());
+
+			}
+
+		} catch (IOException | UnirestException e) {
+			fail(e);
+		}
+	}
+	
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getTransactions(asegroup1.api.models.landregistry.LandRegistryQuery)}.
+	 */
+	@Test
+	void testUpdatePostcodeDatabase() {
+		
+	}
 }
