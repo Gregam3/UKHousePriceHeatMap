@@ -12,32 +12,69 @@ public class Colour {
 	private int red;
 	private int green;
 
-	public Colour(int colourValue) {
-		int val1 = colourValue * 3;
+	private final static double RED_SCALING = 2.98;
 
-		if (val1 > 400) setRed(colourValue);
-		else if (val1 > 200 && val1 < 400) {
-			setRed((int) (colourValue * 1.9));
-			setGreen((int) (colourValue * 1.9));
-		} else if (val1 < 200) setGreen((int) (colourValue * 3.85));
+	private final static double SHADES_OF_COLOURS = 3.0;
+
+	private static final int MAX_COLOUR_VAL = 255;
+	private static final double YELLOW_BRIGHTENING_COEFFICIENT =
+		MAX_COLOUR_VAL / ((MAX_COLOUR_VAL * RED_SCALING) / SHADES_OF_COLOURS);
+	private static final double GREEN_BRIGHTENING_COEFFICIENT =
+		MAX_COLOUR_VAL / ((MAX_COLOUR_VAL) / SHADES_OF_COLOURS);
+
+
+	/**
+	 * Places it on a scale from green -> yellow -> red
+	 * depending on how large it is converts to corresponding colour
+	 * @param colourValue value between 0-255
+	 * @throws InvalidParameterException
+	 */
+	public Colour(int colourValue) throws InvalidParameterException {
+		int colourGenValue = (int)(colourValue * SHADES_OF_COLOURS);
+
+		if (colourGenValue > MAX_COLOUR_VAL * RED_SCALING) {
+			setRed(colourValue);
+		} else if (colourGenValue > MAX_COLOUR_VAL &&
+				   colourGenValue < MAX_COLOUR_VAL * RED_SCALING) {
+			setRed((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
+			setGreen((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
+		} else {
+			setGreen((int)(colourValue * GREEN_BRIGHTENING_COEFFICIENT));
+		}
 	}
 
-	public void setGreen(int green) {
-		this.green = green;
+	@SuppressWarnings("WeakerAccess")
+    public void setGreen(int green) {
+		if (isColourValueValid(green))
+			this.green = green;
 	}
 
-	@JsonIgnore
-	public int getGreen() {
-		return green;
+    @JsonIgnore
+    @SuppressWarnings("WeakerAccess")
+    public int getGreen() {
+        return green;
+    }
+
+    @JsonIgnore
+    @SuppressWarnings("WeakerAccess")
+    public int getRed() {
+        return red;
+    }
+
+	@SuppressWarnings("WeakerAccess")
+	public void setRed(int red) {
+		if (isColourValueValid(red)) {
+			this.red = red;
+		}
 	}
 
-	@JsonIgnore
-	public int getRed() {
-		return red;
-	}
+	private boolean isColourValueValid(int value) {
+		if (value > 255 || value < 0) {
+			throw new InvalidParameterException("Colour value must be between 0-255");
+		}
 
-	public void setRed(int green) {
-		this.red = green;
+		return true;
+
 	}
 
 	@JsonIgnore
@@ -59,12 +96,8 @@ public class Colour {
 		return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
 	}
 
-	private String toHexColourString(int value) {
-		if (value > 255 || value < 0) {
-			throw new InvalidParameterException("Colour value must be between 0-255");
-		}
-
-		String hexValue = Integer.toHexString(value);
+    private String toHexColourString(int value) {
+        String hexValue = Integer.toHexString(value);
 
 		return (hexValue.length() < 2) ? "0" + hexValue : hexValue;
 	}
