@@ -1,7 +1,7 @@
 import 'global'
 import {Constants, Location, MapView, Permissions} from 'expo';
 import React, {Component} from 'react';
-import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar} from 'react-native';
+import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
 import {Overlay} from 'react-native-elements';
 import {SearchBar} from 'react-native-elements';
 
@@ -181,24 +181,17 @@ export default class App extends Component {
 
     drawMapWithData(longitude, latitude) {
         return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
-            <View style={{flexDirection: 'row', height:47}}>
-                <View style={{flex: 4}}>
+            <View style={{flexDirection: 'row', height:46}}>
+                <View style={{flex: 4, top:-1}}>
                     <SearchBar
                         darkTheme
                         round
                         onChangeText={this.updateSearchText}
                     />
                 </View>
-                <View style={{flex: 1, backgroundColor: '#841584'}}>
-                    <View style={{marginTop: 6}}>
-                        <Button
-                            styles={{fontSize: 20}}
-                            onPress={this.goToLocation}
-                            title="→"
-                            color="#841584"
-                        />
-                    </View>
-                </View>
+                <TouchableOpacity style={{flex: 1, backgroundColor: '#841584'}} onPress={this.goToLocation}>
+					<Text style={{flex:1, color: '#ffffff', fontSize:27, textAlign: 'center'}}>→</Text>
+                </TouchableOpacity>
             </View>
 
             <MapView
