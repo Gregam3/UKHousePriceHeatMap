@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,8 +62,7 @@ class LandRegistryServiceImplTest {
 			// contain valid data
 			if (Integer.parseInt(addressByPostCode.get(0).getConstraint(
 					Selectable.pricePaid)) <= 0) {
-				System.err.println("Transaction has invalid price");
-				assert false;
+				fail("Transaction has invalid price");
 			}
 
 			assert true;
@@ -76,8 +76,7 @@ class LandRegistryServiceImplTest {
 	@Test
 	void testIfSettingInvalidPostcodeThrowsInvalidParameterException() {
 		Assertions.assertThrows(InvalidParameterException.class,
-								()
-									-> new LandRegistryQueryConstraint()
+								() -> new LandRegistryQueryConstraint()
 										   .getEqualityConstraints()
 										   .setPostCode("0"));
 	}
