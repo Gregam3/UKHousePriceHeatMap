@@ -1,10 +1,8 @@
 import 'global'
-import {Constants, Location, MapView, Permissions} from 'expo';
+import {Constants, Location, MapView, Permissions, WebBrowser} from 'expo';
 import React, {Component} from 'react';
 import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
-import {Overlay} from 'react-native-elements';
-import {SearchBar} from 'react-native-elements';
-import {WebBrowser} from 'expo';
+import {Overlay, SearchBar} from 'react-native-elements';
 
 import * as Auth from './lib/Auth.js';
 import * as NetLib from './lib/NetworkingLib.js';
@@ -110,8 +108,8 @@ export default class App extends Component {
     };
 
     _handleStreetViewButtonPress = async (streetLatitude, streetLongitude) => {
-        let streetResult = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + streetLatitude + ',' + streetLongitude);
-        this.setState({streetResult});
+        let streetViewBrowserData = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + streetLatitude + ',' + streetLongitude);
+        this.setState({streetViewBrowserData});
     };
 
     handleMapRegionChange = mapRegion => {
@@ -204,6 +202,7 @@ export default class App extends Component {
                 style={{flex: 22}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
+                provider={MapView.PROVIDER_GOOGLE}
                 customMapStyle={darkMapStyle}
                 initialRegion={{
                     longitude: longitude,
@@ -278,7 +277,7 @@ export default class App extends Component {
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                 pinColor={marker.colour.hex}
             >
-                <MapView.Callout onPress={() => this._handleStreetViewButtonPress((parseFloat(marker.mappings.latitude)), (parseFloat(marker.mappings.longitude)))}>
+                <MapView.Callout onPress={() => this._handleStreetViewButtonPress((marker.mappings.latitude), (marker.mappings.longitude))}>
                     <Text style={{fontWeight: 'bold', textAlign: 'center'}}>
                         {(!marker.mappings.street) ?
                             "Average Price: £" + marker.mappings.pricePaid :
