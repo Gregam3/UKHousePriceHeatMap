@@ -18,48 +18,51 @@ public class Colour {
 
 	private static final int MAX_COLOUR_VAL = 255;
 	private static final double YELLOW_BRIGHTENING_COEFFICIENT =
-		MAX_COLOUR_VAL / ((MAX_COLOUR_VAL * RED_SCALING) / SHADES_OF_COLOURS);
+			MAX_COLOUR_VAL / ((MAX_COLOUR_VAL * RED_SCALING) / SHADES_OF_COLOURS);
 	private static final double GREEN_BRIGHTENING_COEFFICIENT =
-		MAX_COLOUR_VAL / ((MAX_COLOUR_VAL) / SHADES_OF_COLOURS);
+			MAX_COLOUR_VAL / ((MAX_COLOUR_VAL) / SHADES_OF_COLOURS);
+
+	static final double CIRCLE_OPACITY = 0.75;
 
 
 	/**
 	 * Places it on a scale from green -> yellow -> red
 	 * depending on how large it is converts to corresponding colour
+	 *
 	 * @param colourValue value between 0-255
 	 * @throws InvalidParameterException
 	 */
 	public Colour(int colourValue) throws InvalidParameterException {
-		int colourGenValue = (int)(colourValue * SHADES_OF_COLOURS);
+		int colourGenValue = (int) (colourValue * SHADES_OF_COLOURS);
 
 		if (colourGenValue > MAX_COLOUR_VAL * RED_SCALING) {
 			setRed(colourValue);
 		} else if (colourGenValue > MAX_COLOUR_VAL &&
-				   colourGenValue < MAX_COLOUR_VAL * RED_SCALING) {
-			setRed((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
-			setGreen((int)(colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
+				colourGenValue < MAX_COLOUR_VAL * RED_SCALING) {
+			setRed((int) (colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
+			setGreen((int) (colourValue * YELLOW_BRIGHTENING_COEFFICIENT));
 		} else {
-			setGreen((int)(colourValue * GREEN_BRIGHTENING_COEFFICIENT));
+			setGreen((int) (colourValue * GREEN_BRIGHTENING_COEFFICIENT));
 		}
 	}
 
 	@SuppressWarnings("WeakerAccess")
-    public void setGreen(int green) {
+	public void setGreen(int green) {
 		if (isColourValueValid(green))
 			this.green = green;
 	}
 
-    @JsonIgnore
-    @SuppressWarnings("WeakerAccess")
-    public int getGreen() {
-        return green;
-    }
+	@JsonIgnore
+	@SuppressWarnings("WeakerAccess")
+	public int getGreen() {
+		return green;
+	}
 
-    @JsonIgnore
-    @SuppressWarnings("WeakerAccess")
-    public int getRed() {
-        return red;
-    }
+	@JsonIgnore
+	@SuppressWarnings("WeakerAccess")
+	public int getRed() {
+		return red;
+	}
 
 	@SuppressWarnings("WeakerAccess")
 	public void setRed(int red) {
@@ -74,7 +77,6 @@ public class Colour {
 		}
 
 		return true;
-
 	}
 
 	@JsonIgnore
@@ -89,15 +91,16 @@ public class Colour {
 	}
 
 	public String getRGBA() {
-		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + ",0.75)";
+		return "rgba(" + getRed() + "," + getGreen() + "," + getBlue() + "," +
+				CIRCLE_OPACITY + ")";
 	}
 
 	public String getHex() {
 		return "#" + toHexColourString(getRed()) + toHexColourString(getGreen()) + toHexColourString(getBlue());
 	}
 
-    private String toHexColourString(int value) {
-        String hexValue = Integer.toHexString(value);
+	private String toHexColourString(int value) {
+		String hexValue = Integer.toHexString(value);
 
 		return (hexValue.length() < 2) ? "0" + hexValue : hexValue;
 	}
