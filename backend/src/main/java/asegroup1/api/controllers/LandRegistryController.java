@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,7 +82,7 @@ public class LandRegistryController {
 
     @ApiOperation(value = "Updates average price for each postcode with defined prefix")
     @GetMapping("update-postcode/{prefix}")
-    public ResponseEntity<?> updateTransactionData(String prefix) {
+    public ResponseEntity<?> updateTransactionData(@PathVariable String prefix) {
         if (prefix == null) {
             prefix = "";
 		} else {
