@@ -100,7 +100,7 @@ public class LandRegistryServiceImpl {
 			top, right, bottom, left, true);
 	}
 
-    public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
+	public List getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
 
         List<LandRegistryData> landRegistryDataForPostcodes = fetchPostCodesInsideCoordinateBox(
                 mapPosition.getDouble("top"),

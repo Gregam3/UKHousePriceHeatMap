@@ -48,14 +48,4 @@ class LocationServiceImplTest {
 		
 	}
 
-	@Test
-	void testGetLocationData() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetAddressCoordinates() {
-		fail("Not yet implemented");
-	}
-
 }
