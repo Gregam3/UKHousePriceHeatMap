@@ -1,14 +1,5 @@
 package asegroup1.api.controllers;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.swagger.annotations.Api;
@@ -31,10 +22,8 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Properties;
-
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
