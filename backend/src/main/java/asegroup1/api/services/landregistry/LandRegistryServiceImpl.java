@@ -1,26 +1,35 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.*;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -49,9 +58,16 @@ public class LandRegistryServiceImpl {
 	public List<LandRegistryData> getTransactions(LandRegistryQuery query)
             throws IOException, UnirestException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
+
         String queryStr = query.buildQuery();
+		System.out.println("------------------------------------------------------------------------------------------------\nQuery:\n" + queryStr);
+
 		JSONObject queryResponse = landRegistryDao.executeSPARQLQuery(queryStr);
-		ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
+
+		System.out.println("\nResponce: " + queryResponse.toString()
+				+ "\n-----------------------------------------------------------------------------------------------------");
+
+        ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
 
         for (JsonNode jsonNode : transactionListResponse) {
             transactionsList.add(new LandRegistryData(jsonNode));
@@ -208,7 +224,7 @@ public class LandRegistryServiceImpl {
         return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
-    private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
+	HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
         List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
         HashMap<String, Long> postcodePrices = new HashMap<>();
 

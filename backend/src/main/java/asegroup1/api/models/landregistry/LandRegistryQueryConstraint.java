@@ -68,10 +68,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 		return values.get(varName);
 	}
 
-
-
 	/* RANGE CONSTRAINTS */
-
 
 	private void setDateConstraint(boolean isMax, LocalDate date) {
 		rangeConstraints.add(new RangeConstraint("xsd:date", "transactionDate", isMax ? "<" : ">", "\"" + date.toString() + "\""));
@@ -84,7 +81,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 	 * @param comparator that is being used to constrain the variable
 	 * @return the constraint if one exists in the instance
 	 */
-	public RangeConstraint getRangeConstraint(String name, String comparator) {
+	RangeConstraint getRangeConstraint(String name, String comparator) {
 		for (RangeConstraint constraint : rangeConstraints) {
 			if (constraint.getName().equals(name) && constraint.getComparator().equals(comparator)) {
 				return constraint;
@@ -134,10 +131,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 		setPriceConstraint(false, price);
 	}
 
-
-
 	/* POSTCODE */
-
 
 	/**
 	 * Get all post codes that entries can have.
