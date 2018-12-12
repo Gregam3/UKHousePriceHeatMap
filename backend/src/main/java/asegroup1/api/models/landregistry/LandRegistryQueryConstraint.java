@@ -1,14 +1,10 @@
 package asegroup1.api.models.landregistry;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import asegroup1.api.models.landregistry.LandRegistryData.EqualityConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * Contains the constraints to be passed
@@ -68,10 +64,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 		return values.get(varName);
 	}
 
-
-
 	/* RANGE CONSTRAINTS */
-
 
 	private void setDateConstraint(boolean isMax, LocalDate date) {
 		rangeConstraints.add(new RangeConstraint("xsd:date", "transactionDate", isMax ? "<" : ">", "\"" + date.toString() + "\""));
@@ -84,7 +77,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 	 * @param comparator that is being used to constrain the variable
 	 * @return the constraint if one exists in the instance
 	 */
-	public RangeConstraint getRangeConstraint(String name, String comparator) {
+	RangeConstraint getRangeConstraint(String name, String comparator) {
 		for (RangeConstraint constraint : rangeConstraints) {
 			if (constraint.getName().equals(name) && constraint.getComparator().equals(comparator)) {
 				return constraint;
@@ -134,10 +127,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 		setPriceConstraint(false, price);
 	}
 
-
-
 	/* POSTCODE */
-
 
 	/**
 	 * Get all post codes that entries can have.
@@ -193,7 +183,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 
 		StringBuilder whereStringBuilder = new StringBuilder();
 		for (EqualityConstraint constraint : constraintList) {
-			whereStringBuilder.append(constraint.toString() + " \n");
+			whereStringBuilder.append(constraint.toString()).append(" \n");
 		}
 		return whereStringBuilder.toString().trim();
 	}
@@ -216,7 +206,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 			if (hasPoscodes) {
 				filterStringBuilder.append("REGEX(?postcode, \"");
 				for (i = 0; i < postcodes.size(); i++) {
-					filterStringBuilder.append("(" + postcodes.get(i).toUpperCase() + ")");
+					filterStringBuilder.append("(").append(postcodes.get(i).toUpperCase()).append(")");
 					if (i != postcodes.size() - 1) {
 						filterStringBuilder.append("|");
 					}

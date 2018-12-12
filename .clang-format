@@ -9,3 +9,7 @@ Language: JavaScript
 DisableFormat: true
 ---
 Language: Java
+DisableFormat: true
+ColumnLimit: 100
+BinPackParameters: true
+IndentWrappedFunctionNames: true

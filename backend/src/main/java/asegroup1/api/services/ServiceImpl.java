@@ -43,7 +43,7 @@ public class ServiceImpl<T> {
 
 	private void checkIfDaoIsValid() {
 		if (dao == null) {
-			throw new AssertionError("In order to use this method you must set the class in constructor. " +
+			throw new UnsupportedOperationException("In order to use this method you must set the class in constructor. " +
 					"E.g. for UserServiceImpl extends ServiceImpl<User>, you should put super(userDao) in your constructor." +
 					"If userDao does not yet exist you must create it and then @Autowire it to give it its state");
 		}

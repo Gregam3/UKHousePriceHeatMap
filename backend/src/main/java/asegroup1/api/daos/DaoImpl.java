@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.List;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +99,7 @@ public class DaoImpl<T> implements Dao<T> {
 
     private void checkIfCurrentClassIsValid() {
         if (currentClass == null) {
-            throw new AssertionError("In order to use this method you must set the class with setCurrentClass(). " +
+            throw new UnsupportedOperationException("In order to use this method you must set the class with setCurrentClass(). " +
                     "E.g. for UserDaoImpl extends DaoImpl<User>, you should have setCurrentClass(User.class) in your constructor.");
         }
     }
