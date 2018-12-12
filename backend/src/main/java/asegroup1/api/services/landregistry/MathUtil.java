@@ -1,5 +1,9 @@
 package asegroup1.api.services.landregistry;
 
+import asegroup1.api.controllers.LandRegistryController;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +13,9 @@ import java.util.stream.Collectors;
  * @author Rikkey Paal
  */
 public class MathUtil {
+
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
+
 
 	public static List<Double> normaliseList(List<Double> numbers) {
 		if (numbers == null) {
@@ -30,7 +37,7 @@ public class MathUtil {
 			return numbers.stream().map(num -> 0.5)
 					.collect(Collectors.toList());
 		} else {
-			System.out.println("Start");
+			logger.info("Start");
 			List<Double> retNum = rescaleList(standardiseList(numbers));
 
 			retNum = makePositive(retNum);
@@ -54,16 +61,16 @@ public class MathUtil {
 		}
 
 		avg /= retNum.size();
-		System.out.println(name + ":");
-		System.out.println("\tMin: " + min);
-		System.out.println("\tMax: " + max);
-		System.out.println("\tAVG: " + avg);
+
+		logger.info(name + ":");
+		logger.info("\tMin: " + min);
+		logger.info("\tMax: " + max);
+		logger.info("\tAVG: " + avg);
 	}
 
 	public static List<Double> standardiseList(List<Double> numbers) {
 
-		numbers = numbers.stream().map(num -> Math.log(num))
-				.collect(Collectors.toList());
+		numbers = numbers.stream().map(Math::log).collect(Collectors.toList());
 
 		// mean standard deviation
 		double mean, sd, total = 0;

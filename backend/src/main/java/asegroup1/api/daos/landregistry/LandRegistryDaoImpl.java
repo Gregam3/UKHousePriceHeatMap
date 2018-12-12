@@ -11,6 +11,18 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import asegroup1.api.controllers.LandRegistryController;
+import asegroup1.api.daos.DaoImpl;
+import asegroup1.api.models.PostCodeCoordinates;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+import org.springframework.stereotype.Repository;
+
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +49,8 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 		"http://landregistry.data.gov.uk/app/root/qonsole/query";
 
 	private static final String TABLE_NAME = "postcodelatlng";
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
+
 
 	public LandRegistryDaoImpl() {
 		setCurrentClass(PostCodeCoordinates.class);
@@ -44,12 +58,14 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
 	@Override
 	public void delete(String id) {
+		logger.warn("Attempted Deletion of PostCode data");
 		throw new UnsupportedOperationException(
 				"Items cannot be deleted from postcodelatlng table");
 	}
 
 	@Override
 	public List<PostCodeCoordinates> list() {
+		logger.warn("Attempted to list all postcode data");
 		throw new UnsupportedOperationException(
 				"All Postcodes cannot be listed due to magnitude, use searchForLandRegistryDataInBoundaries instead.");
 	}

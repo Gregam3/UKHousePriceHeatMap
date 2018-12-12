@@ -6,6 +6,8 @@ import asegroup1.api.services.user.UserServiceImpl;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,8 +30,11 @@ public class LocationController {
 
 	private UserServiceImpl userService;
     private LocationServiceImpl locationService;
+	private final static Logger logger = LogManager.getLogger(LocationController.class);
 
-    @Autowired
+
+
+	@Autowired
 	public LocationController(LocationServiceImpl locationService, UserServiceImpl userServiceImpl) {
         this.locationService = locationService;
 		this.userService = userServiceImpl;
@@ -43,9 +48,11 @@ public class LocationController {
 				locationService.create(location);
 				return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 			} catch (InvalidParameterException e) {
+				logger.error( "Unable to add location to database", e);
 				return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 			}
 		} else {
+			logger.info("Cannot add location as user: "+ location.getUserId() + " does not exist in database");
 			return new ResponseEntity<>("Could not add to database: User does not exist", HttpStatus.BAD_REQUEST);
 		}
 
