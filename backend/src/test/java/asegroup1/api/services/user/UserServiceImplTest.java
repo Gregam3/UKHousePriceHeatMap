@@ -18,10 +18,7 @@ class UserServiceImplTest {
 		UserDaoImpl mockedDao = mock(UserDaoImpl.class);
 		doNothing().when(mockedDao).add(any());
 		when(mockedDao.get(any())).thenReturn(new UserData());
-
-
-		UserServiceImpl impl = new UserServiceImpl(mockedDao);
-		assertEquals(-1, impl.add("test"));
+		assertEquals(-1, new UserServiceImpl(mockedDao).add("test"));
 	}
 
 	@Test
@@ -29,9 +26,7 @@ class UserServiceImplTest {
 		UserDaoImpl mockedDao = mock(UserDaoImpl.class);
 		doNothing().when(mockedDao).add(any());
 		when(mockedDao.get(any())).thenReturn(null);
-
-		UserServiceImpl impl = new UserServiceImpl(mockedDao);
-		assertEquals(1, impl.add("test"));
+		assertEquals(1, new UserServiceImpl(mockedDao).add("test"));
 	}
 
 	@Test
@@ -39,9 +34,7 @@ class UserServiceImplTest {
 		UserDaoImpl mockedDao = mock(UserDaoImpl.class);
 		doNothing().when(mockedDao).add(any());
 		when(mockedDao.get(any())).thenReturn(null).thenReturn(new UserData());
-
-		UserServiceImpl impl = new UserServiceImpl(mockedDao);
-		assertEquals(0, impl.add("test"));
+		assertEquals(0, new UserServiceImpl(mockedDao).add("test"));
 	}
 
 }
