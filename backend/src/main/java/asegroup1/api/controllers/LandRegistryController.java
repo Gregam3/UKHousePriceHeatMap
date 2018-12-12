@@ -2,34 +2,28 @@ package asegroup1.api.controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponses;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
 import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -77,7 +71,7 @@ public class LandRegistryController {
 
             return new ResponseEntity<>(positionsInsideBounds, HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
+			e.printStackTrace();
             return new ResponseEntity<>("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }
     }
@@ -93,8 +87,12 @@ public class LandRegistryController {
     public ResponseEntity<?> updateTransactionData(String prefix) {
         if (prefix == null) {
             prefix = "";
-        } else if (!prefix.matches("[\\p{Alnum} ]+")) {
-            return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
+		} else {
+			Pattern postCodePattern = Pattern.compile("[A-Za-z]{1,2}[0-9][0-9A-Za-z]?[ ][0-9][A-Za-z]{2}");
+			Matcher m = postCodePattern.matcher(prefix);
+			if (!(m.matches() || m.hitEnd())) {
+				return new ResponseEntity<>("Invalid postcode pattern", HttpStatus.BAD_REQUEST);
+			}
         }
         try {
             landRegistryService.updatePostcodeDatabase(prefix);
@@ -104,4 +102,5 @@ public class LandRegistryController {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
+
 }

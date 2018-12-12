@@ -1,19 +1,21 @@
 package asegroup1.api.services.location;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.daos.location.LocationDaoImpl;
-import asegroup1.api.models.LocationData;
-import asegroup1.api.services.ServiceImpl;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.daos.location.LocationDaoImpl;
+import asegroup1.api.models.LocationData;
+import asegroup1.api.services.ServiceImpl;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -39,10 +41,10 @@ public class LocationServiceImpl extends ServiceImpl<LocationData> {
 	public void create(LocationData t) {
 		if (locationDao.getLocationDataById(t.getUserId(), t.getTimelog()).size() == 0) {
 			super.create(t);
-		}else {
+		} else {
 			throw new InvalidParameterException("Entry already exists");
 		}
-		
+
 	}
 
 	public List<LocationData> getLocationData(String userID){

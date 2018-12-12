@@ -1,29 +1,41 @@
 package asegroup1.api.services.landregistry;
 
-import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
-import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
-import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
+import asegroup1.api.models.heatmap.HeatMapDataPoint;
+import asegroup1.api.models.landregistry.LandRegistryData;
+import asegroup1.api.models.landregistry.LandRegistryQuery;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
 
 /**
  * @author Greg Mitten
@@ -343,4 +355,125 @@ class LandRegistryServiceImplTest {
 			+
 			"\\\"value\\\": \\\"155000\\\" }\\n      }\\n    ]\\n  }\\n}\\n\",\"status\":200}");
 	}
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getAllPostcodePrices(String...)}.
+	 */
+	@Test
+	void testGetAllPostcodePrices() {
+		String[] postcodes = new String[] { "BN23 7LE", "BN23 7LL", "BN23 7LN", "BN23 7LQ", "BN23 7LX", "BN23 7LZ" };
+		try {
+			LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+
+			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull())).thenReturn(getSPARQLPostcodePriceResponse());
+
+			LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+			HashMap<String, Long> prices = landRegistryService.getAllPostcodePrices(postcodes);
+			assertNotNull(prices);
+			assertTrue(prices.size() == 6);
+			for (Entry<String, Long> entry : prices.entrySet()) {
+				assertNotNull(entry.getKey());
+				if(entry.getValue() == null) {
+					assertEquals("BN23 7LX", entry.getKey());
+				}
+			}
+		} catch (IOException | UnirestException | JSONException e) {
+			fail(e);
+		}
+	}
+
+
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getTransactions(asegroup1.api.models.landregistry.LandRegistryQuery)}.
+	 */
+	@Test
+	void testGetTransaction() {
+		String[] postcodes = new String[] { "BN23 7LE", "BN23 7LL", "BN23 7LN", "BN23 7LQ", "BN23 7LT", "BN23 7LZ" };
+		try {
+			LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+
+			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull())).thenReturn(getSPARQLPostcodePriceResponse());
+
+			LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+			for (LandRegistryData transaction : landRegistryService.getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes))) {
+				assertNotNull(transaction);
+				assertEquals(2, transaction.getAllConstraints().size());
+				assertTrue(transaction.hasConstraint(Selectable.pricePaid));
+				assertTrue(transaction.hasConstraint(Selectable.postcode));
+				assertNull(transaction.getLatitude());
+				assertNull(transaction.getLongitude());
+				assertNull(transaction.getRadius());
+
+			}
+
+		} catch (IOException | UnirestException | JSONException e) {
+			fail(e);
+		}
+	}
+	
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getTransactions(asegroup1.api.models.landregistry.LandRegistryQuery)}.
+	 */
+	@Test
+	void testUpdatePostcodeDatabase() {
+		try {
+
+			LandRegistryDaoImpl landRegistryDataDaoMock = mock(LandRegistryDaoImpl.class);
+			ArgumentCaptor<HashMap<String, Long>> captor = ArgumentCaptor.forClass(HashMap.class);
+
+			HashMap<String, List<String>> postcodeAreas = new HashMap<>();
+			postcodeAreas.put("BN23 7L", Arrays.asList("BN23 7LE", "BN23 7LL", "BN23 7LN", "BN23 7LQ", "BN23 7LT", "BN23 7LZ"));
+
+
+			when(landRegistryDataDaoMock.updateAveragePrice(Mockito.any())).thenReturn(1);
+			when(landRegistryDataDaoMock.executeSPARQLQuery(notNull())).thenReturn(getSPARQLPostcodePriceResponse());
+			when(landRegistryDataDaoMock.getMatchingPostcodes("BN23 7L", false, 1)).thenReturn(postcodeAreas);
+
+
+			LandRegistryServiceImpl landRegistryService = new LandRegistryServiceImpl(landRegistryDataDaoMock);
+
+			landRegistryService.updatePostcodeDatabase("BN23 7L");
+
+			verify(landRegistryDataDaoMock).updateAveragePrice(captor.capture());
+
+			HashMap<String, Long> expectedData = new HashMap<>();
+			expectedData.put("BN23 7LL", 142863L);
+			expectedData.put("BN23 7LN", 124317L);
+			expectedData.put("BN23 7LZ", 106227L);
+			expectedData.put("BN23 7LT", null);
+			expectedData.put("BN23 7LE", 88650L);
+			expectedData.put("BN23 7LQ", 132828L);
+
+			assertEquals(expectedData, captor.getAllValues().get(0));
+
+		} catch (UnirestException | JSONException | IOException e) {
+			fail(e);
+		}
+	}
+
+
+	private JSONObject getSPARQLPostcodePriceResponse() throws JSONException {
+		return new JSONObject("{\"status\":200,\"result\":\"{\r\n" + "  \\\"head\\\": {\r\n" + "    \\\"vars\\\": [ \\\"postcode\\\" , \\\"pricePaid\\\" ]\r\n"
+				+ "  } ,\r\n" + "  \\\"results\\\": {\r\n" + "    \\\"bindings\\\": [\r\n" + "      {\r\n"
+				+ "        \\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN23 7LQ\\\" } ,\r\n"
+				+ "        \\\"pricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#decimal\\\" , \\\"value\\\": \\\"132827.777777777777777777777777\\\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN23 7LE\\\" } ,\r\n"
+				+ "        \\\"pricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#decimal\\\" , \\\"value\\\": \\\"88650.0\\\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN23 7LZ\\\" } ,\r\n"
+				+ "        \\\"pricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#decimal\\\" , \\\"value\\\": \\\"106227.272727272727272727272727\\\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN23 7LL\\\" } ,\r\n"
+				+ "        \\\"pricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#decimal\\\" , \\\"value\\\": \\\"142862.5\\\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \\\"postcode\\\": { \\\"type\\\": \\\"literal\\\" , \\\"value\\\": \\\"BN23 7LN\\\" } ,\r\n"
+				+ "        \\\"pricePaid\\\": { \\\"type\\\": \\\"literal\\\" , \\\"datatype\\\": \\\"http://www.w3.org/2001/XMLSchema#decimal\\\" , \\\"value\\\": \\\"124316.666666666666666666666666\\\" }\r\n"
+				+ "      }\r\n" + "    ]\r\n" + "  }\r\n" + "}\r\n" + "\"}");
+	}
+
+
+
 }

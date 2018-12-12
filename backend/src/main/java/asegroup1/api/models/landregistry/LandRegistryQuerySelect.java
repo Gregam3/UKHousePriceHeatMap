@@ -45,35 +45,13 @@ public class LandRegistryQuerySelect {
 		}
 	}
 
-	private SelectObj getSelectObj(String referenceName) {
+	SelectObj getSelectObj(String referenceName) {
 		return selectValues.get(referenceName);
 	}
 
 	public String[] getSelectValues(String reference) {
 		SelectObj obj = getSelectObj(reference);
 		return obj == null ? null : new String[] { obj.referenceName, obj.aggregation.toString(), obj.aggregationName };
-	}
-
-	public String getSelectValueAggregationName(String reference) {
-		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggregationName(obj);
-	}
-
-	public Aggregation getSelectValueAggregation(String reference) {
-		SelectObj obj = getSelectObj(reference);
-		return obj == null ? null : getSelectValueAggregation(obj);
-	}
-
-	public static String getSelectValueAggregationName(SelectObj reference) {
-		return reference.aggregationName;
-	}
-
-	public static String getSelectValueReferencenName(SelectObj reference) {
-		return reference.referenceName;
-	}
-
-	public static Aggregation getSelectValueAggregation(SelectObj reference) {
-		return reference.aggregation;
 	}
 
 	public LinkedHashMap<String, SelectObj> getSelectValues() {
@@ -95,7 +73,7 @@ public class LandRegistryQuerySelect {
 
 
 
-	private class SelectObj {
+	class SelectObj {
 		String referenceName;
 		String aggregationName;
 		Aggregation aggregation;
@@ -146,6 +124,27 @@ public class LandRegistryQuerySelect {
 		@Override
 		public String toString() {
 			return toString(false);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof SelectObj) {
+				SelectObj sel = (SelectObj) obj;
+				return testEqualsWithNull(sel.aggregation, aggregation) && testEqualsWithNull(sel.referenceName, referenceName)
+						&& testEqualsWithNull(sel.aggregationName, aggregationName);
+			} else {
+				return false;
+			}
+		}
+
+		private <E> boolean testEqualsWithNull(E object1, E object2) {
+			if (object1 == null && object2 == null) {
+				return true;
+			} else if (object1 == null || object2 == null) {
+				return false;
+			} else {
+				return object1.equals(object2);
+			}
 		}
 	}
 }

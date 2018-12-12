@@ -1,6 +1,7 @@
 package asegroup1.api.models.landregistry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -74,6 +75,20 @@ class LandRegistryQueryConstraintTest {
 			assertTrue(constraint.setEqualityConstraint(s, str));
 			assertEquals(str.toUpperCase(), constraint.getEqualityConstraints().getConstraint(s));
 		}
+	}
+
+	/**
+	 * Test method for
+	 * {@link LandRegistryQueryConstraint#getRangeConstraint(String, String)}
+	 */
+	@Test
+	public void testGetRangeConstraint() {
+		assertNull(constraint.getRangeConstraint("Test", "="));
+		constraint.setMaxPricePaid(12);
+		constraint.setMinDate(LocalDate.now());
+		assertNull(constraint.getRangeConstraint("pricePaid", "="));
+		assertNull(constraint.getRangeConstraint("pricePaid", ">"));
+		assertEquals(12 + "", constraint.getRangeConstraint("pricePaid", "<").getValue());
 	}
 
 	/**
@@ -204,6 +219,16 @@ class LandRegistryQueryConstraintTest {
 	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
 	 */
 	@Test
+	public void testBuildQueryWhereValues() {
+		constraint.setEqualityConstraint(Selectable.postcode, "BN23 7LY", "BN23 7LZ", "BN23 7LG");
+		assertTrue(constraint.buildQueryContent().matches(LandRegistryQueryTestUtils.buildQueryConstraintRegex()));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint#buildQueryContent()}.
+	 */
+	@Test
 	public void testBuildQueryWhereNoFilters() {
 		LandRegistryData data = LandRegistryQueryTestUtils.genLandRegistryData();
 		constraint = new LandRegistryQueryConstraint(data);
@@ -237,6 +262,29 @@ class LandRegistryQueryConstraintTest {
 		regex = regexBuilder.toString();
 
 		assertTrue(constraint.buildUniqueGrouping().matches(regex));
+	}
+
+	/**
+	 * Test method for
+	 * {@link asegroup1.api.models.landregistry.LandRegistryQueryConstraint.RangeConstraint#equals(Object)}.
+	 */
+	@SuppressWarnings("unlikely-arg-type")
+	@Test
+	public void testRangeConstraintEquals() {
+		RangeConstraint[] constraints = new RangeConstraint[6];
+		constraints[0] = constraint.new RangeConstraint("type", "name", "=", "value");
+		constraints[1] = constraint.new RangeConstraint("type", "name", "=", "value");
+		constraints[2] = constraint.new RangeConstraint("type1", "name", "=", "value");
+		constraints[3] = constraint.new RangeConstraint("type", "name1", "=", "value");
+		constraints[4] = constraint.new RangeConstraint("type", "name", "==", "value");
+		constraints[5] = constraint.new RangeConstraint("type", "name", "=", "value1");
+
+		assertTrue(constraints[0].equals(constraints[1]));
+		assertFalse(constraints[0].equals(constraints[2]));
+		assertFalse(constraints[0].equals(constraints[3]));
+		assertFalse(constraints[0].equals(constraints[4]));
+		assertTrue(constraints[0].equals(constraints[5]));
+		assertFalse(constraints[0].equals("test"));
 	}
 
 }
