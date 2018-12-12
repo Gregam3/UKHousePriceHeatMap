@@ -1,6 +1,6 @@
 import request from 'superagent';
 
-const ip = 'http://192.168.0.2:8080/';
+const ip = 'http://ec2-35-176-126-234.eu-west-2.compute.amazonaws.com:8080/';
 
 const networkLogging = true;
 

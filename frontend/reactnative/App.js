@@ -42,8 +42,10 @@ export default class App extends Component {
     constructor(props) {
         super(props);
 		StatusBar.setHidden(true);
+
         this.searchText = null;
         this.displayedText = 'Fetching position...';
+
         this.lastPosition = {
             latitude: null,
             longitude: null,
@@ -69,6 +71,10 @@ export default class App extends Component {
 
             if (location) {
                 this.setState({location});
+
+                this.lastPosition.latitude = location.coords.latitude;
+                this.lastPosition.longitude = location.coords.longitude;
+
                 if (!this.mapBounds) {
                     this.mapBounds = {
                         top: location.coords.longitude + (startingDeltas.longitude / 2),
