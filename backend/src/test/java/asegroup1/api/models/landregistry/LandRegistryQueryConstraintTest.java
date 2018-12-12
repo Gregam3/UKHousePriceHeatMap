@@ -271,19 +271,20 @@ class LandRegistryQueryConstraintTest {
 	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void testRangeConstraintEquals() {
-		RangeConstraint r1 = constraint.new RangeConstraint("type", "name", "=", "value");
-		RangeConstraint r2 = constraint.new RangeConstraint("type", "name", "=", "value");
-		RangeConstraint r3 = constraint.new RangeConstraint("type1", "name", "=", "value");
-		RangeConstraint r4 = constraint.new RangeConstraint("type", "name1", "=", "value");
-		RangeConstraint r5 = constraint.new RangeConstraint("type", "name", "==", "value");
-		RangeConstraint r6 = constraint.new RangeConstraint("type", "name", "=", "value1");
+		RangeConstraint[] constraints = new RangeConstraint[6];
+		constraints[0] = constraint.new RangeConstraint("type", "name", "=", "value");
+		constraints[1] = constraint.new RangeConstraint("type", "name", "=", "value");
+		constraints[2] = constraint.new RangeConstraint("type1", "name", "=", "value");
+		constraints[3] = constraint.new RangeConstraint("type", "name1", "=", "value");
+		constraints[4] = constraint.new RangeConstraint("type", "name", "==", "value");
+		constraints[5] = constraint.new RangeConstraint("type", "name", "=", "value1");
 
-		assertTrue(r1.equals(r2));
-		assertFalse(r1.equals(r3));
-		assertFalse(r1.equals(r4));
-		assertFalse(r1.equals(r5));
-		assertTrue(r1.equals(r6));
-		assertFalse(r1.equals("test"));
+		assertTrue(constraints[0].equals(constraints[1]));
+		assertFalse(constraints[0].equals(constraints[2]));
+		assertFalse(constraints[0].equals(constraints[3]));
+		assertFalse(constraints[0].equals(constraints[4]));
+		assertTrue(constraints[0].equals(constraints[5]));
+		assertFalse(constraints[0].equals("test"));
 	}
 
 }

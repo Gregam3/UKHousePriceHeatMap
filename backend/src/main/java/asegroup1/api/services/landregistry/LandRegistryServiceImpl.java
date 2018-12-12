@@ -68,6 +68,9 @@ public class LandRegistryServiceImpl {
         List<LandRegistryData> transactionsList = new LinkedList<>();
 
         String queryStr = query.buildQuery();
+		System.out.println("Query : ");
+		System.out.println(queryStr);
+		System.out.println("\n\n\n");
 
         JSONObject queryResponse = executeSPARQLQuery(queryStr);
 
@@ -235,7 +238,7 @@ public class LandRegistryServiceImpl {
         return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
-    private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
+	HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
         List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
         HashMap<String, Long> postcodePrices = new HashMap<>();
 

@@ -160,38 +160,35 @@ class LandRegistryQuerySelectTest {
 	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	void testSelectObjEquals() {
-		SelectObj o1 = select.new SelectObj("avg", "AVG", Aggregation.AVG);
-		SelectObj o6 = select.new SelectObj("avg", "AVG", Aggregation.AVG);
+		SelectObj[] selectObjs = new SelectObj[12];
 
-		SelectObj o2 = select.new SelectObj("count", "COUNT", Aggregation.COUNT);
-		SelectObj o3 = select.new SelectObj("null", null, Aggregation.AVG);
-		SelectObj o4 = select.new SelectObj(null, "AVG", Aggregation.MIN);
-		SelectObj o5 = select.new SelectObj("avg", "NONE", Aggregation.NONE);
+		selectObjs[0] = select.new SelectObj("avg", "AVG", Aggregation.AVG);
+		selectObjs[1] = select.new SelectObj("avg", "AVG", Aggregation.AVG);
 
-		SelectObj o7 = select.new SelectObj("avg", "AVG", Aggregation.SUM);
-		SelectObj o8 = select.new SelectObj("null", "AVG", Aggregation.AVG);
-		SelectObj o9 = select.new SelectObj("avg", "null", Aggregation.AVG);
+		selectObjs[2] = select.new SelectObj(null, "null", Aggregation.AVG);
+		selectObjs[3] = select.new SelectObj(null, "null", Aggregation.AVG);
+		selectObjs[4] = select.new SelectObj("null", "null", Aggregation.AVG);
 
-		SelectObj o10 = select.new SelectObj(null, "null", Aggregation.AVG);
-		SelectObj o11 = select.new SelectObj(null, "null", Aggregation.AVG);
-		SelectObj o12 = select.new SelectObj("null", "null", Aggregation.AVG);
+		selectObjs[5] = select.new SelectObj("count", "COUNT", Aggregation.COUNT);
+		selectObjs[6] = select.new SelectObj("null", null, Aggregation.AVG);
+		selectObjs[7] = select.new SelectObj(null, "AVG", Aggregation.MIN);
+		selectObjs[8] = select.new SelectObj("avg", "NONE", Aggregation.NONE);
+		selectObjs[9] = select.new SelectObj("avg", "AVG", Aggregation.SUM);
+		selectObjs[10] = select.new SelectObj("null", "AVG", Aggregation.AVG);
+		selectObjs[11] = select.new SelectObj("avg", "null", Aggregation.AVG);
 
-		assertTrue(o1.equals(o1));
-		assertTrue(o1.equals(o6));
-		assertTrue(o10.equals(o11));
-		
-		assertFalse(o10.equals(o12));
 
-		assertFalse(o1.equals(o2));
-		assertFalse(o1.equals(o3));
-		assertFalse(o1.equals(o4));
-		assertFalse(o1.equals(o5));
 
-		assertFalse(o1.equals(o7));
-		assertFalse(o1.equals(o8));
-		assertFalse(o1.equals(o9));
+		assertTrue(selectObjs[0].equals(selectObjs[0]));
+		assertTrue(selectObjs[0].equals(selectObjs[1]));
 
-		assertFalse(o1.equals("wrong"));
+		assertTrue(selectObjs[2].equals(selectObjs[3]));
+		assertFalse(selectObjs[2].equals(selectObjs[4]));
 
+		for (int i = 2; i < 12; i++) {
+			assertFalse(selectObjs[0].equals(selectObjs[i]));
+		}
+
+		assertFalse(selectObjs[0].equals("wrong"));
 	}
 }

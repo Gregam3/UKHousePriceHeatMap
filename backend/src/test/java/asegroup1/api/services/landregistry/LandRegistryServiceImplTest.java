@@ -306,6 +306,21 @@ class LandRegistryServiceImplTest {
 		}
 	}
 
+	private JSONObject getSPARQLPostcodePriceResponse() throws JSONException {
+		return new JSONObject("{\r\n" + "  \"head\": {\r\n" + "    \"vars\": [ \"postcode\" , \"pricePaid\" ]\r\n" + "  } ,\r\n" + "  \"results\": {\r\n"
+				+ "    \"bindings\": [\r\n" + "      {\r\n" + "        \"postcode\": { \"type\": \"literal\" , \"value\": \"BN23 7LQ\" } ,\r\n"
+				+ "        \"pricePaid\": { \"type\": \"literal\" , \"datatype\": \"http://www.w3.org/2001/XMLSchema#decimal\" , \"value\": \"132827.777777777777777777777777\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \"postcode\": { \"type\": \"literal\" , \"value\": \"BN23 7LE\" } ,\r\n"
+				+ "        \"pricePaid\": { \"type\": \"literal\" , \"datatype\": \"http://www.w3.org/2001/XMLSchema#decimal\" , \"value\": \"88650.0\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \"postcode\": { \"type\": \"literal\" , \"value\": \"BN23 7LZ\" } ,\r\n"
+				+ "        \"pricePaid\": { \"type\": \"literal\" , \"datatype\": \"http://www.w3.org/2001/XMLSchema#decimal\" , \"value\": \"106227.272727272727272727272727\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \"postcode\": { \"type\": \"literal\" , \"value\": \"BN23 7LL\" } ,\r\n"
+				+ "        \"pricePaid\": { \"type\": \"literal\" , \"datatype\": \"http://www.w3.org/2001/XMLSchema#decimal\" , \"value\": \"142862.5\" }\r\n"
+				+ "      } ,\r\n" + "      {\r\n" + "        \"postcode\": { \"type\": \"literal\" , \"value\": \"BN23 7LN\" } ,\r\n"
+				+ "        \"pricePaid\": { \"type\": \"literal\" , \"datatype\": \"http://www.w3.org/2001/XMLSchema#decimal\" , \"value\": \"124316.666666666666666666666666\" }\r\n"
+				+ "      }\r\n" + "    ]\r\n" + "  }\r\n" + "}\r\n" + "");
+	}
+
 	/**
 	 * Test method for
 	 * {@link asegroup1.api.services.landregistry.LandRegistryServiceImpl#getTransactions(asegroup1.api.models.landregistry.LandRegistryQuery)}.

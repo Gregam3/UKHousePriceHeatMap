@@ -223,12 +223,10 @@ class LandRegistryDataTest {
 	public void testSetPostCode() {
 		testSetValidPostCode("bn21 4nv");
 		testSetValidPostCode("b21 4nv");
-		testSetInvalidPostCode(null);
-		testSetInvalidPostCode("");
-		testSetInvalidPostCode("1234");
-		testSetInvalidPostCode("bn215nv");
-		testSetInvalidPostCode("bn21 nv");
-		testSetInvalidPostCode("bn 4nv");
+		
+		for (String str : new String[] { null, "", "1234", "bn215nv", "bn21 nv", "bn 4nv" }) {
+			testSetInvalidPostCode(str);
+		}
 	}
 
 	/**
@@ -239,7 +237,7 @@ class LandRegistryDataTest {
 			lRData.setPostCode(postCode);
 			assertStoredStringEqual(Selectable.postcode, postCode);
 		} catch (InvalidParameterException e) {
-			fail("Did not accpet well formatted string");
+			fail("Did not accept well formatted string");
 		}
 
 		assertStoredStringEqual(Selectable.postcode, postCode);
