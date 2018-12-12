@@ -1,12 +1,11 @@
-import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
-import {Location, Permissions, MapView} from 'expo';
-import {Button} from 'react-native';
-
 import 'global'
+import {Constants, Location, MapView, Permissions, WebBrowser} from 'expo';
+import React, {Component} from 'react';
+import {Button, Platform, ProgressBarAndroid, ProgressViewIOS, StyleSheet, Text, View, StatusBar, TouchableOpacity} from 'react-native';
+import {Overlay, SearchBar} from 'react-native-elements';
 
-import * as NetLib from './lib/NetworkingLib.js';
 import * as Auth from './lib/Auth.js';
+import * as NetLib from './lib/NetworkingLib.js';
 
 
 /**
@@ -22,28 +21,39 @@ const startingDeltas = {
 const AGGREGATION_LEVELS = {
     addresses: 0,
     postcodes: 15,
-    heatmap: 500
+    heatMap: 500
 };
 
 //Turn to false to disable logging
 const logging = true;
 
-// min time without map movement before map will update
-const waitTimeBeforeUpdate = 2000;
-// number used to scale up the minimum size of the circlesin the heatmap
-const heatmapScaleFactor = 100;
+// number used to scale up the minimum size of the circles in the heat map
+const heatMapScaleFactor = 100;
+
 export default class App extends Component {
     state = {
         location: null,
         errorMessage: null,
         markers: [],
-        circleSize: heatmapScaleFactor
+        circleSize: heatMapScaleFactor,
+        loadingMarkers: false
     };
 
     constructor(props) {
         super(props);
+		StatusBar.setHidden(true);
+
+        this.searchText = null;
+        this.displayedText = 'Fetching position...';
+
+        this.lastPosition = {
+            latitude: null,
+            longitude: null,
+            latitudeDelta: startingDeltas.latitude,
+            longitudeDelta: startingDeltas.longitude
+        };
+
         Auth.loadUserId();
-        this.currentMapCoordinates = null;
         this._requestAndGetLocationAsync();
     }
 
@@ -62,18 +72,17 @@ export default class App extends Component {
             if (location) {
                 this.setState({location});
 
-                if (!this.currentMapCoordinates) {
+                this.lastPosition.latitude = location.coords.latitude;
+                this.lastPosition.longitude = location.coords.longitude;
 
-
-                    let currentMapCoordinates = {
-                        top: location.coords.longitude + startingDeltas.longitude,
-                        bottom: location.coords.longitude - startingDeltas.longitude,
-                        right: location.coords.latitude + startingDeltas.latitude,
-                        left: location.coords.latitude - startingDeltas.latitude,
+                if (!this.mapBounds) {
+                    this.mapBounds = {
+                        top: location.coords.longitude + (startingDeltas.longitude / 2),
+                        bottom: location.coords.longitude - (startingDeltas.longitude / 2),
+                        right: location.coords.latitude + (startingDeltas.latitude / 2),
+                        left: location.coords.latitude - (startingDeltas.latitude / 2),
                         delta: startingDeltas.longitude * 500
                     };
-
-                    this.currentMapCoordinates = currentMapCoordinates;
                 }
             } else {
                 this.setState({
@@ -84,38 +93,82 @@ export default class App extends Component {
     };
 
     _getDisplayData = async () => {
-        if (this.currentMapCoordinates) {
-            let markers = await NetLib.getLandRegistryData(this.currentMapCoordinates);
+        this.setState({loadingMarkers: true});
+
+        if (this.mapBounds) {
+            let markers = await NetLib.getLandRegistryData(this.mapBounds);
 
             if (markers) {
-                let circleSize = heatmapScaleFactor * (this.currentMapCoordinates.delta / 30);
-
-                log('Set state for new markers and new circleSize');
-                this.setState({markers, circleSize});
+                this.setState({
+                        markers,
+                        circleSize: heatMapScaleFactor * (this.mapBounds.delta / 30),
+                        //Location must be updated in state here to avoid position reverted to last searched position, alternate solution leads to scrolling on the map
+                        location: {
+                            coords: this.lastPosition
+                        },
+                        loadingMarkers: false
+                    }
+                );
             }
         }
     };
 
-    handleMapRegionChange = mapRegion => {
-        let currentMapCoordinates = {
-            top: mapRegion.longitude + (mapRegion.longitudeDelta / 2),
-            bottom: mapRegion.longitude - (mapRegion.longitudeDelta / 2),
-            right: mapRegion.latitude + (mapRegion.latitudeDelta / 2),
-            left: mapRegion.latitude - (mapRegion.latitudeDelta / 2),
-            delta: mapRegion.longitudeDelta * 500
-        };
-        this.currentMapCoordinates = currentMapCoordinates;
+    _handleStreetViewButtonPress = async (streetLatitude, streetLongitude) => {
+        let streetViewBrowserData = await WebBrowser.openBrowserAsync('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + streetLatitude + ',' + streetLongitude);
+        this.setState({streetViewBrowserData});
+    };
 
+    handleMapRegionChange = mapRegion => {
+        //If zoom level does not change mapRegion does not contain these, latitude and longitude always change.
+        if (mapRegion.longitudeDelta && mapRegion.latitudeDelta) {
+            this.lastPosition.longitudeDelta = mapRegion.longitudeDelta;
+            this.lastPosition.latitudeDelta = mapRegion.latitudeDelta;
+        }
+
+        this.lastPosition.latitude = mapRegion.latitude;
+        this.lastPosition.longitude = mapRegion.longitude;
+
+        this.mapBounds = {
+            top: mapRegion.longitude + (this.lastPosition.longitudeDelta / 2),
+            bottom: mapRegion.longitude - (this.lastPosition.longitudeDelta / 2),
+            right: mapRegion.latitude + (this.lastPosition.latitudeDelta / 2),
+            left: mapRegion.latitude - (this.lastPosition.latitudeDelta / 2),
+            delta: this.lastPosition.longitudeDelta * 500
+        };
+    };
+
+    goToLocation = async () => {
+        NetLib.getWithPathVariable('location/get-address-coordinates', this.searchText)
+            .then(response => {
+                let parsedResponse = JSON.parse(response);
+
+                let searchedLocation = {
+                    coords: {
+                        latitude: parsedResponse.lat,
+                        longitude: parsedResponse.lng
+                    }
+                };
+
+                this.handleMapRegionChange(searchedLocation.coords);
+
+                this.setState({location: searchedLocation});
+            }, error => {
+                if (logging) log(error);
+            });
+    };
+
+    updateSearchText = newSearchText => {
+        this.searchText = newSearchText;
     };
 
     render() {
-        let displayedText = 'Fetching position...';
-
         let latitude = null;
         let longitude = null;
 
+        if (logging) log(JSON.stringify(this.state.location));
+
         if (this.state.errorMessage) {
-            displayedText = this.state.errorMessage;
+            this.displayedText = this.state.errorMessage;
         } else if (this.state.location) {
             latitude = this.state.location.coords.latitude;
             longitude = this.state.location.coords.longitude;
@@ -125,14 +178,34 @@ export default class App extends Component {
             (latitude && longitude) ?
                 this.drawMapWithData(longitude, latitude)
                 :
-                <Text style={styles.centerText}>{displayedText}</Text>
+                <View>
+                    <View style={styles.background}/>
+                    <Text style={styles.centerText}>{this.displayedText}</Text>
+                    {(Platform.OS === 'ios') ?
+                        <ProgressViewIOS style={styles.coordinatesLoadStyle}/> :
+                        <ProgressBarAndroid style={styles.coordinatesLoadStyle}/>}
+                    <View style={styles.background}/>
+                </View>
         );
     }
 
     drawMapWithData(longitude, latitude) {
-        return <View style={{marginTop: 0, flex: 1, backgroundColor: '#242f3e'}}>
+        return <View style={{flex: 1, backgroundColor: '#242f3e', flexDirection: 'column'}}>
+            <View style={{flexDirection: 'row', height:46}}>
+                <View style={{flex: 4, top:-1}}>
+                    <SearchBar
+                        darkTheme
+                        round
+                        onChangeText={this.updateSearchText}
+                    />
+                </View>
+                <TouchableOpacity style={{flex: 1, backgroundColor: '#841584'}} onPress={this.goToLocation}>
+					<Text style={{flex:1, color: '#ffffff', fontSize:27, textAlign: 'center'}}>→</Text>
+                </TouchableOpacity>
+            </View>
+
             <MapView
-                style={{flex: 1}}
+                style={{flex: 22}}
                 showsMyLocationButton={true}
                 showsUserLocation={true}
                 provider={MapView.PROVIDER_GOOGLE}
@@ -143,12 +216,17 @@ export default class App extends Component {
                     latitudeDelta: startingDeltas.latitude,
                     longitudeDelta: startingDeltas.longitude
                 }}
+                region={{
+                    longitude: longitude,
+                    latitude: latitude,
+                    latitudeDelta: this.lastPosition.latitudeDelta,
+                    longitudeDelta: this.lastPosition.longitudeDelta
+                }}
                 onRegionChange={this.handleMapRegionChange}
             >
-
                 {
-                    this.state.markers.length > AGGREGATION_LEVELS.heatmap ? (
-                        this.drawHeatmap()
+                    this.state.markers.length > AGGREGATION_LEVELS.heatMap ? (
+                        this.drawHeatMap()
                     ) : (
                         this.drawMarkers()
                     )}
@@ -159,11 +237,21 @@ export default class App extends Component {
                 title="Load elements"
                 color="#841584"
             />
+            <Overlay
+                overlayBackgroundColor='#242f3e'
+                height={'18.5%'}
+                width={'35%'}
+                isVisible={this.state.loadingMarkers}>
+                <Text style={styles.loadingText}>Loading elements...</Text>
+                {(Platform.OS === 'ios') ?
+                    <ProgressViewIOS style={styles.dataLoadStyle}/> :
+                    <ProgressBarAndroid style={styles.dataLoadStyle}/>}
+            </Overlay>
         </View>
     }
 
-    drawHeatmap() {
-        if (logging) log("Rendering " + this.state.markers.length + " heatmap data points");
+    drawHeatMap() {
+        if (logging) log("Rendering " + this.state.markers.length + " heatMap data points");
 
         return this.state.markers.map(marker => (
             <MapView.Circle
@@ -194,7 +282,21 @@ export default class App extends Component {
                     marker.mappings.postcode :
                     marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
                 pinColor={marker.colour.hex}
-            />
+            >
+                <MapView.Callout onPress={() => this._handleStreetViewButtonPress((marker.mappings.latitude), (marker.mappings.longitude))}>
+                    <Text style={{fontWeight: 'bold', textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            "Average Price: £" + marker.mappings.pricePaid :
+                            "£" + marker.mappings.pricePaid + " on " + marker.mappings.transactionDate}
+                     </Text>
+                     <Text style={{textAlign: 'center'}}>
+                        {(!marker.mappings.street) ?
+                            marker.mappings.postcode :
+                            marker.mappings.paon + " " + marker.mappings.street + " " + marker.mappings.town}
+                     </Text>
+                    <Text style={{textAlign: 'center', color: '#0000ff', textDecorationLine: 'underline'}}>Take me to the Street</Text>
+                </MapView.Callout>
+            </MapView.Marker>
         ))
     }
 }
@@ -205,17 +307,29 @@ function log(message) {
 
 const styles = StyleSheet.create({
     centerText: {
-        marginTop: 300,
-        marginLeft: 120,
+        textAlign: 'center',
         fontSize: 40,
+        height: 100,
+        color: '#ffffff',
+        backgroundColor: '#242f3e',
     },
-    coordinatesText: {
-        flex: 5,
-        margin: 5,
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: 'white',
-        textAlign: 'center'
+    loadingText: {
+        textAlign: 'center',
+        color: '#ffffff'
+    },
+    background: {
+        backgroundColor: '#242f3e',
+        height: 275
+    },
+    dataLoadStyle: {
+        backgroundColor: '#242f3e',
+        height: '90%'
+    },
+    coordinatesLoadStyle: {
+        height: '15%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#242f3e'
     }
 });
 

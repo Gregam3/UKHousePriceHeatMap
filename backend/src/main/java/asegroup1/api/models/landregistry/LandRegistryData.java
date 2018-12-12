@@ -1,26 +1,26 @@
 package asegroup1.api.models.landregistry;
 
-import java.security.InvalidParameterException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
+import asegroup1.api.controllers.LandRegistryController;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.security.InvalidParameterException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class LandRegistryData implements Comparable{
+    private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
+
     private HashMap<Selectable, EqualityConstraint> constraints;
 
     private Double latitude, longitude;
@@ -69,7 +69,11 @@ public class LandRegistryData implements Comparable{
     }
 
     private void addAddrConstraint(Selectable selectable, String value, boolean isString) {
-        constraints.put(selectable, new AddrConstraint(selectable.toString(), value.toUpperCase(), isString));
+		addAddrConstraint(selectable, value, isString, true);
+	}
+
+	private void addAddrConstraint(Selectable selectable, String value, boolean isString, boolean isUpperCase) {
+		constraints.put(selectable, new AddrConstraint(selectable.toString(), isUpperCase ? value.toUpperCase() : value, isString));
     }
 
     private void addAddrConstraint(Selectable selectable, String value) {
@@ -141,17 +145,16 @@ public class LandRegistryData implements Comparable{
     }
 
     /**
-     * Set the postCode. The post code must be in the form "AAA AAA(A)", where A is
-     * an alpha-numeric character, and (A) denotes an optional character.
-     *
-     * @param postCode to set
-     * @throws InvalidParameterException if the post code is invalid
-     */
+	 * Set the postCode. The post code must be in the form "A(A)9(A|9) 9AA" where A
+	 * is a letter, and 9 is a digit, and (A) denotes an optional character.
+	 *
+	 * @param postCode to set
+	 * @throws InvalidParameterException if the post code is invalid
+	 */
     public void setPostCode(String postCode) throws InvalidParameterException {
-		if (postCode == null || postCode.length() < 3 ||
-			!postCode.matches("[0-9A-Za-z\\s]+")) {
-			throw new InvalidParameterException("Invalid ParaException");
-		}
+        if (postCode == null || postCode.length() < 3) {
+            throw new InvalidParameterException("Invalid ParaException");
+        }
 		addAddrConstraint(Selectable.postcode, postCode);
     }
 
@@ -163,6 +166,29 @@ public class LandRegistryData implements Comparable{
         addTransConstraint(selectable, name, value, false);
     }
 
+    /**
+     * Get a map storing a string representation of the mappings stored in in this
+     * instance.
+     *
+     * @return a map storing a string representation of the mappings stored in in
+     * this instance
+     */
+
+    public HashMap<String, String> getMappings() {
+        HashMap<String, String> retMap = new HashMap<>();
+        constraints.forEach((k, v) -> retMap.put(k.toString(), v.getValue()));
+        if (longitude != null) {
+            retMap.put("longitude", longitude + "");
+        }
+        if (latitude != null) {
+            retMap.put("latitude", latitude + "");
+        }
+        if (radius != null) {
+            retMap.put("radius", radius + "");
+        }
+
+        return retMap;
+    }
 
     /**
      * Set the propertyType
@@ -239,7 +265,7 @@ public class LandRegistryData implements Comparable{
      */
     public String getConstraint(Selectable selectable) {
         if (hasConstraint(selectable)) {
-            return constraints.get(selectable).getvalue();
+            return constraints.get(selectable).getValue();
         } else {
             return null;
         }
@@ -270,7 +296,6 @@ public class LandRegistryData implements Comparable{
         } else {
             return false;
         }
-
     }
 
     private String parseEnumAsString(String namespace, String enumStr) {
@@ -295,6 +320,7 @@ public class LandRegistryData implements Comparable{
             }
             selectable = Selectable.valueOf(name.substring(0, 1).toLowerCase() + name.substring(1));
         } catch (IllegalArgumentException e) {
+            logger.error("Unable to set constraint value", e);
             throw new IllegalArgumentException("Constraint Name is Invalid");
         }
         if (value.length() == 0) {
@@ -377,42 +403,46 @@ public class LandRegistryData implements Comparable{
                     return false;
                 }
             default:
-                return false;
+				throw new IllegalArgumentException("Unknown selectable \"" + name + "\"");
         }
     }
 
-    void setConstraintVar(Selectable constraint, String variableReference) {
-        variableReference = "?" + variableReference;
+	EqualityConstraint getEqualityConstraint(Selectable s) {
+		return constraints.get(s);
+	}
 
-        switch (constraint) {
-            case paon:
-            case saon:
-            case street:
-            case locality:
-            case town:
-            case district:
-            case county:
-            case postcode:
-            case transactionDate:
-                addAddrConstraint(constraint, variableReference, false);
-                break;
-            case propertyType:
-            case estateType:
-                addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrcommon:" + variableReference);
-                break;
-            case transactionCategory:
-                addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrppi:" + variableReference);
-                break;
-            case newBuild:
-            case pricePaid:
-                addTransConstraint(constraint, constraint.toString(), variableReference);
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected enum");
-        }
-    }
+	void setConstraintVar(Selectable constraint, String variableReference) {
+		variableReference = "?" + variableReference;
 
-    static List<String> processConstraintList(Selectable type, String... constraints) {
+		switch (constraint) {
+			case paon:
+			case saon:
+			case street:
+			case locality:
+			case town:
+			case district:
+			case county:
+			case postcode:
+			case transactionDate:
+				addAddrConstraint(constraint, variableReference, false, false);
+				break;
+			case propertyType:
+			case estateType:
+				addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrcommon:" + variableReference);
+				break;
+			case transactionCategory:
+				addTransConstraint(constraint, constraint.toString() + "/skos:prefLabel", "lrppi:" + variableReference);
+				break;
+			case newBuild:
+			case pricePaid:
+				addTransConstraint(constraint, constraint.toString(), variableReference);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected enum");
+		}
+	}
+
+	static List<String> processConstraintList(Selectable type, String... constraints) {
         switch (type) {
             case paon:
             case saon:
@@ -423,7 +453,7 @@ public class LandRegistryData implements Comparable{
             case county:
             case postcode:
             case transactionDate:
-                return Arrays.asList(constraints).stream().map(v -> "\"" + v.toUpperCase() + "\"").collect(Collectors.toList());
+				return Arrays.asList(constraints).stream().map(v -> "\"" + v.toUpperCase() + "\"").collect(Collectors.toList());
             case propertyType:
             case estateType:
                 return Arrays.asList(constraints).stream().map(v -> "lrcommon:" + v).collect(Collectors.toList());
@@ -466,29 +496,6 @@ public class LandRegistryData implements Comparable{
     @JsonIgnore
     public HashMap<Selectable, EqualityConstraint> getAllConstraints() {
         return constraints;
-    }
-
-    /**
-     * Get a map storing a string representation of the mappings stored in in this
-     * instance.
-     *
-     * @return a map storing a string representation of the mappings stored in in
-     * this instance
-     */
-    public HashMap<String, String> getMappings() {
-        HashMap<String, String> retMap = new HashMap<>();
-        constraints.forEach((k, v) -> retMap.put(k.toString(), v.getvalue()));
-        if (longitude != null) {
-            retMap.put("longitude", longitude + "");
-        }
-        if (latitude != null) {
-            retMap.put("latitude", latitude + "");
-        }
-		if (radius != null) {
-			retMap.put("radius", radius + "");
-		}
-
-        return retMap;
     }
 
     /*
@@ -549,13 +556,17 @@ public class LandRegistryData implements Comparable{
         this.longitude = longitude;
     }
 
-    @Override
-    public int compareTo(Object that) {
-        long thisPricePaid = Long.valueOf(this.getConstraint(Selectable.pricePaid));
-        long thatPricePaid = Long.valueOf(((LandRegistryData) that).getConstraint(Selectable.pricePaid));
+	@Override
+	public int compareTo(Object obj) {
+		if (obj instanceof LandRegistryData) {
+			long thisPricePaid = Long.valueOf(this.getConstraint(Selectable.pricePaid));
+			long thatPricePaid = Long.valueOf(((LandRegistryData) obj).getConstraint(Selectable.pricePaid));
 
-        return Long.compare(thisPricePaid, thatPricePaid);
-    }
+			return Long.compare(thisPricePaid, thatPricePaid);
+		} else {
+			return -1;
+		}
+	}
 
 	@JsonIgnore
 	public Double getRadius() {
@@ -590,7 +601,7 @@ public class LandRegistryData implements Comparable{
             return type + ":" + name;
         }
 
-        public String getvalue() {
+        public String getValue() {
             return value;
         }
 
@@ -612,7 +623,7 @@ public class LandRegistryData implements Comparable{
 
         @Override
         public int compareTo(EqualityConstraint o) {
-            return o instanceof AddrConstraint ? 0 : -1;
+			return o instanceof AddrConstraint ? (equals(o) ? 0 : 1) : -1;
         }
     }
 
@@ -624,11 +635,11 @@ public class LandRegistryData implements Comparable{
 
         @Override
         public int compareTo(EqualityConstraint o) {
-            return o instanceof TransConstraint ? 0 : 1;
+			return o instanceof TransConstraint ? (equals(o) ? 0 : -1) : 1;
         }
 
         @Override
-        public String getvalue() {
+        public String getValue() {
             if (value.contains(":")) {
                 return value.substring(value.indexOf(':') + 1).replace('-', '_');
             } else {

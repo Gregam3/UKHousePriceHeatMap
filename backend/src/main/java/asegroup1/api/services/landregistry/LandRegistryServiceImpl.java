@@ -1,8 +1,12 @@
 package asegroup1.api.services.landregistry;
 
+import asegroup1.api.controllers.LandRegistryController;
+import asegroup1.api.models.landregistry.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,19 +24,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import asegroup1.api.daos.landregistry.LandRegistryDaoImpl;
 import asegroup1.api.models.heatmap.Colour;
 import asegroup1.api.models.heatmap.HeatMapDataPoint;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import asegroup1.api.models.landregistry.LandRegistryQuery;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQueryConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQueryGroup;
-import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
-
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -40,36 +37,37 @@ import asegroup1.api.models.landregistry.LandRegistryQuerySelect;
  */
 
 //Does not need to extend ServiceImpl as does not use a Dao
-
 @Service
 public class LandRegistryServiceImpl {
 
-    private LandRegistryDaoImpl postCodeCoordinatesDao;
+	private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
+	private LandRegistryDaoImpl landRegistryDao;
 
-    @Autowired
+
+	@Autowired
     public LandRegistryServiceImpl(LandRegistryDaoImpl postCodeCoordinatesDao) {
-        this.postCodeCoordinatesDao = postCodeCoordinatesDao;
-    }
+		this.landRegistryDao = postCodeCoordinatesDao;
+	}
 
     //API CONSTANTS
-    private static final String LAND_REGISTRY_ROOT_URL = "http://landregistry.data.gov.uk/data/ppi/";
-    private static final String LAND_REGISTRY_SPARQL_ENDPOINT = "http://landregistry.data.gov.uk/app/root/qonsole/query";
     private static final String GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/geocode/json?address=";
     private static final String GOOGLE_MAPS_API_KEY = "AIzaSyBGmy-uAlzvXRLcQ_krAaY0idR1KUTJRmA";
-    private static final String LR_SPACE = "%20";
 
     //OTHER CONSTANTS
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final int[] AGGREGATION_LEVELS = new int[]{0, 15, 500};
+	static final int[] AGGREGATION_LEVELS = new int[] {1, 15, 500};
 
-
-    public List<LandRegistryData> getTransactions(LandRegistryQuery query)
+	public List<LandRegistryData> getTransactions(LandRegistryQuery query)
             throws IOException, UnirestException {
         List<LandRegistryData> transactionsList = new LinkedList<>();
 
         String queryStr = query.buildQuery();
+		System.out.println("------------------------------------------------------------------------------------------------\nQuery:\n" + queryStr);
 
-        JSONObject queryResponse = executeSPARQLQuery(queryStr);
+		JSONObject queryResponse = landRegistryDao.executeSPARQLQuery(queryStr);
+
+		System.out.println("\nResponce: " + queryResponse.toString()
+				+ "\n-----------------------------------------------------------------------------------------------------");
 
         ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
 
@@ -93,15 +91,18 @@ public class LandRegistryServiceImpl {
         return getTransactions(LandRegistryQuery.buildQueryLatestSalesOnly(constraint, values));
     }
 
-    public List<LandRegistryData> getLatestTransactions(LandRegistryQueryConstraint constraint) throws IOException, UnirestException, ParseException {
-        return getLatestTransactions(new ArrayList<>(), constraint);
+	public List<LandRegistryData>
+	getLatestTransactions(LandRegistryQueryConstraint constraint)
+		throws IOException, UnirestException {
+		return getLatestTransactions(new ArrayList<>(), constraint);
     }
 
     private List<LandRegistryData> fetchPostCodesInsideCoordinateBox(double top, double right, double bottom, double left) {
-        return postCodeCoordinatesDao.searchForLandRegistryDataInBoundaries(top, right, bottom, left, true);
-    }
+		return landRegistryDao.searchForLandRegistryDataInBoundaries(
+			top, right, bottom, left, true);
+	}
 
-    public List<?> getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
+	public List getPositionInsideBounds(JSONObject mapPosition) throws UnirestException, IOException {
 
         List<LandRegistryData> landRegistryDataForPostcodes = fetchPostCodesInsideCoordinateBox(
                 mapPosition.getDouble("top"),
@@ -112,12 +113,12 @@ public class LandRegistryServiceImpl {
 
         int postcodesContained = landRegistryDataForPostcodes.size();
 
-        if (postcodesContained > AGGREGATION_LEVELS[2]) {
-            return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
-        } else if (postcodesContained > AGGREGATION_LEVELS[1]) {
-            return addColoursToLandRegistryData(landRegistryDataForPostcodes);
-        } else if (postcodesContained > AGGREGATION_LEVELS[0]) {
-            LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
+		if (postcodesContained >= AGGREGATION_LEVELS[2]) {
+			return convertLandRegistryDataListToHeatMapList(landRegistryDataForPostcodes);
+		} else if (postcodesContained >= AGGREGATION_LEVELS[1]) {
+			return addColoursToLandRegistryData(landRegistryDataForPostcodes);
+		} else if (postcodesContained >= AGGREGATION_LEVELS[0]) {
+			LandRegistryQueryConstraint constraint = new LandRegistryQueryConstraint();
             constraint.setMinDate(LocalDate.now().minusYears(LandRegistryData.YEARS_TO_FETCH));
 
             List<String> postcodes = new ArrayList<>();
@@ -160,10 +161,13 @@ public class LandRegistryServiceImpl {
         return landRegistryDataForPostcodes;
     }
 
-    public List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
-        if (addresses.size() >= 100) {
-            throw new InvalidParameterException("This method should never be passed more than 100 addresses");
-        }
+	private List<LandRegistryData> getPositionForAddresses(List<LandRegistryData> addresses) {
+		if (addresses.size() >= 100) {
+			logger.warn(
+				LandRegistryServiceImpl.class.getEnclosingMethod().getName() + "Called with more than 100 addresses"
+			);
+			throw new InvalidParameterException("This method should never be passed more than 100 addresses");
+		}
 
         StringBuilder addressUriBuilder = new StringBuilder();
 
@@ -173,32 +177,21 @@ public class LandRegistryServiceImpl {
                     .append("&key=").append(GOOGLE_MAPS_API_KEY);
 
             try {
-                JSONObject response = postCodeCoordinatesDao.getGeoLocationData(addressUriBuilder.toString());
+				JSONObject response = landRegistryDao.getGeoLocationData(
+					addressUriBuilder.toString());
 
-                address.setLatitude(response.getDouble("lat"));
-                address.setLongitude(response.getDouble("lng"));
+				address.setLatitude(response.getDouble("lat"));
+				address.setLongitude(response.getDouble("lng"));
+			} catch (UnirestException | JSONException e) {
+				logger.error("Could not retrieve address for " + addressUriBuilder.toString(), e);
+			}
 
-            } catch (UnirestException | JSONException e) {
-                e.printStackTrace();
-                System.err.println("Could not retrieve address for " + addressUriBuilder.toString());
-            }
 
             // Clear the StringBuilder buffer
             addressUriBuilder.delete(0, addressUriBuilder.length());
         }
 
         return addresses;
-    }
-
-    private JSONObject executeSPARQLQuery(String query) throws UnirestException {
-        //Navigates through JSON and returns list of addresses based on post code
-        return Unirest.post(LAND_REGISTRY_SPARQL_ENDPOINT)
-                .field("output", "json")
-                .field("q", query)
-                .field("url", "/landregistry/query")
-                .asJson()
-                .getBody()
-                .getObject();
     }
 
     public List<HeatMapDataPoint> convertLandRegistryDataListToHeatMapList(List<LandRegistryData> landRegistryDataList) {
@@ -235,7 +228,7 @@ public class LandRegistryServiceImpl {
         return new Colour((55 + (int) (normalisedValue * 200)));
     }
 
-    private HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
+	HashMap<String, Long> getAllPostcodePrices(String... postcodes) throws IOException, UnirestException {
         List<LandRegistryData> transactions = getTransactions(LandRegistryQuery.buildQueryAveragePricePostcode(postcodes));
         HashMap<String, Long> postcodePrices = new HashMap<>();
 
@@ -243,15 +236,15 @@ public class LandRegistryServiceImpl {
             String postcode = data.getConstraint(Selectable.postcode);
             String priceStr = data.getConstraint(Selectable.pricePaid);
 
-            if (postcode != null && priceStr != null) {
-                try {
-                    Long pricePaid = Long.parseLong(priceStr);
-                    postcodePrices.put(postcode, pricePaid);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+			if (postcode != null && priceStr != null) {
+				try {
+					Long pricePaid = Long.parseLong(priceStr);
+					postcodePrices.put(postcode, pricePaid);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
         // Map all postcodes without a average price to null
         List<String> unmatchedPostcodes = new ArrayList<>(Arrays.asList(postcodes));
@@ -268,23 +261,32 @@ public class LandRegistryServiceImpl {
         long startTime = System.currentTimeMillis();
         int updatedRecords = 0;
 
-		HashMap<String, List<String>> postcodeAreas = postCodeCoordinatesDao
-				.getMatchingPostcodes(postcodePrefix, false, 1);
-        double numAreas = postcodeAreas.size();
+		HashMap<String, List<String>> postcodeAreas =
+			landRegistryDao.getMatchingPostcodes(postcodePrefix, false, 1);
+		double numAreas = postcodeAreas.size();
         double numDone = 0;
 
-        for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
-            long estTimeLeft = Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
-            System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n", "\"" + postcodeArea.getKey() + "\"", (numDone / numAreas) * 100,
-                    estTimeLeft / 3600, (estTimeLeft % 3600) / 60, (estTimeLeft % 60));
-            List<String> postcodes = postcodeArea.getValue();
-            HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
-            updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
-            numDone++;
+		for (Entry<String, List<String>> postcodeArea : postcodeAreas.entrySet()) {
+			long estTimeLeft = numDone == 0 // This accounts for if number done is 0 otherwise 0 division is possible
+				? Long.MAX_VALUE
+				: Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
+
+			logger.info(
+				String.format("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
+					"\"" + postcodeArea.getKey() + "\"",
+					(numDone / numAreas) * 100,
+					estTimeLeft / 3600,
+					(estTimeLeft % 3600) / 60,
+					(estTimeLeft % 60)
+				)
+			);
+			List<String> postcodes = postcodeArea.getValue();
+			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
+			updatedRecords += landRegistryDao.updateAveragePrice(newPrices);
+			numDone++;
         }
 
-        System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
-        System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
-    }
-
+		System.out.println("Updated " + updatedRecords + " records in " + (System.currentTimeMillis() - startTime) + "ms");
+		System.out.println("Done in " + (System.currentTimeMillis() - startTime) + "ms.");
+	}
 }

@@ -1,6 +1,25 @@
 sudo: required
 matrix:
   include:
+    - language: java
+      services:
+        - docker
+      before_script:
+        - cd backend/
+      script:
+        - mvn package
+        - mvn sonar:sonar   -Dsonar.projectKey=$Sonar_ProjectKey   -Dsonar.organization=$Sonar_Org   -Dsonar.host.url=https://sonarcloud.io/   -Dsonar.login=$Sonar_Login
+      after_success:
+        - docker login -u $DOCKER_USER -p $DOCKER_PASS
+        - |
+          if [ $TRAVIS_BRANCH == "master" ];
+          then export DOCKER_BRANCH=master;
+          elif [ $TRAVIS_BRANCH == "development" ];
+          then export DOCKER_BRANCH=development;
+          else export DOCKER_BRANCH=branch;
+          fi
+        - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
+        - docker push asegroup1/backend-$DOCKER_BRANCH:latest
     - language: node_js
       node_js:
         - node
@@ -17,23 +36,4 @@ matrix:
         - npx expo login -u $Expo_User -p $Expo_password
         - npx expo publish --non-interactive
         - expo build:android
-    - language: java
-      services:
-        - docker
-      before_script:
-        - cd backend/
-      script:
-        - mvn package
-        - mvn sonar:sonar   -Dsonar.projectKey=$Sonar_ProjectKey   -Dsonar.organization=$Sonar_Org   -Dsonar.host.url=https://sonarcloud.io/   -Dsonar.login=$Sonar_Login
-      after_success:
-        - docker login -u $DOCKER_USER -p $DOCKER_PASS
-        - |
-          if [ $TRAVIS_BRANCH == "master" ];
-          then export DOCKER_BRANCH = master;
-          elif [ $TRAVIS_BRANCH == "development" ];
-          then export DOCKER_BRANCH=development;
-          else export DOCKER_BRANCH=branch;
-          fi
-        - docker build -t asegroup1/backend-$DOCKER_BRANCH:latest .
-        - docker push asegroup1/backend-$DOCKER_BRANCH:latest
 
