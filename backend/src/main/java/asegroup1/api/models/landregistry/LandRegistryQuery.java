@@ -55,10 +55,10 @@ public class LandRegistryQuery implements LandRegistryQueryBody {
 		this.select = select;
 	}
 
-	public void addVarToGroup(String varname, boolean addToSelect) {
-		getGroupConstraint().select(varname);
+	public void addVarToGroup(String varName, boolean addToSelect) {
+		getGroupConstraint().select(varName);
 		if (addToSelect) {
-			getSelect().addSelectValue(varname);
+			getSelect().addSelectValue(varName);
 		}
 	}
 

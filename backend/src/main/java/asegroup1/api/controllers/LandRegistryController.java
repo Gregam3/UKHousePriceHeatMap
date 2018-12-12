@@ -1,5 +1,18 @@
 package asegroup1.api.controllers;
 
+import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,22 +21,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.mashape.unirest.http.exceptions.UnirestException;
-
-import asegroup1.api.services.landregistry.LandRegistryServiceImpl;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * @author Greg Mitten gregoryamitten@gmail.com
@@ -35,6 +32,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "Land registry data", description = "Operations pertaining to Land Registry data")
 public class LandRegistryController {
 
+    private final static Logger logger = LogManager.getLogger(LandRegistryController.class);
     private Properties mockResponses;
     private LandRegistryServiceImpl landRegistryService;
 
@@ -45,7 +43,7 @@ public class LandRegistryController {
             mockResponses = new Properties();
             mockResponses.load(fakeResponsesInputStream);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("Unable to setup fake responses", e);
         }
         this.landRegistryService = landRegistryService;
     }
@@ -58,12 +56,12 @@ public class LandRegistryController {
         try {
             for (String jsonKey : new String[]{"top", "bottom", "left", "right"}) {
                 if (mapPosition.isNull(jsonKey))
-                    throw new InvalidParameterException("Value \"" + jsonKey + "\" could not be found, please ensure requestbody contains this value as a top level node");
+                    throw new InvalidParameterException("Value \"" + jsonKey + "\" could not be found, please ensure the request body contains this value as a top level node");
             }
 
             List<?> positionsInsideBounds = landRegistryService.getPositionInsideBounds(mapPosition);
 
-            System.out.println(
+            logger.info(
                     "\n-----------------------------------------------------------------------------------------------------\n" +
                             "\t\t\t\t\t\t\tRequest took " + (System.currentTimeMillis() - timer) + "ms to fetch " + positionsInsideBounds.size() + " elements \n " +
                             "-----------------------------------------------------------------------------------------------------"
@@ -71,7 +69,7 @@ public class LandRegistryController {
 
             return new ResponseEntity<>(positionsInsideBounds, HttpStatus.OK);
         } catch (Exception e) {
-			e.printStackTrace();
+            logger.error("Error Getting Land Registry Data", e);
             return new ResponseEntity<>("An error occurred whilst handling this request: " + e, HttpStatus.BAD_REQUEST);
         }
     }
@@ -84,7 +82,7 @@ public class LandRegistryController {
 
     @ApiOperation(value = "Updates average price for each postcode with defined prefix")
     @GetMapping("update-postcode/{prefix}")
-    public ResponseEntity<?> updateTransactionData(String prefix) {
+    public ResponseEntity<?> updateTransactionData(@PathVariable String prefix) {
         if (prefix == null) {
             prefix = "";
 		} else {
@@ -98,7 +96,7 @@ public class LandRegistryController {
             landRegistryService.updatePostcodeDatabase(prefix);
             return new ResponseEntity<>("Update triggered", HttpStatus.OK);
         } catch (IOException | UnirestException e) {
-            e.printStackTrace();
+            logger.error( "Failure to Update Database", e);
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }

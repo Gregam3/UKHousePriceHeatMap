@@ -1,14 +1,10 @@
 package asegroup1.api.models.landregistry;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import asegroup1.api.models.landregistry.LandRegistryData.EqualityConstraint;
 import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * Contains the constraints to be passed
@@ -187,7 +183,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 
 		StringBuilder whereStringBuilder = new StringBuilder();
 		for (EqualityConstraint constraint : constraintList) {
-			whereStringBuilder.append(constraint.toString() + " \n");
+			whereStringBuilder.append(constraint.toString()).append(" \n");
 		}
 		return whereStringBuilder.toString().trim();
 	}
@@ -210,7 +206,7 @@ public class LandRegistryQueryConstraint implements LandRegistryQueryBody {
 			if (hasPoscodes) {
 				filterStringBuilder.append("REGEX(?postcode, \"");
 				for (i = 0; i < postcodes.size(); i++) {
-					filterStringBuilder.append("(" + postcodes.get(i).toUpperCase() + ")");
+					filterStringBuilder.append("(").append(postcodes.get(i).toUpperCase()).append(")");
 					if (i != postcodes.size() - 1) {
 						filterStringBuilder.append("|");
 					}
