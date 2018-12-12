@@ -166,6 +166,29 @@ public class LandRegistryData implements Comparable{
         addTransConstraint(selectable, name, value, false);
     }
 
+    /**
+     * Get a map storing a string representation of the mappings stored in in this
+     * instance.
+     *
+     * @return a map storing a string representation of the mappings stored in in
+     * this instance
+     */
+
+    public HashMap<String, String> getMappings() {
+        HashMap<String, String> retMap = new HashMap<>();
+        constraints.forEach((k, v) -> retMap.put(k.toString(), v.getValue()));
+        if (longitude != null) {
+            retMap.put("longitude", longitude + "");
+        }
+        if (latitude != null) {
+            retMap.put("latitude", latitude + "");
+        }
+        if (radius != null) {
+            retMap.put("radius", radius + "");
+        }
+
+        return retMap;
+    }
 
     /**
      * Set the propertyType
