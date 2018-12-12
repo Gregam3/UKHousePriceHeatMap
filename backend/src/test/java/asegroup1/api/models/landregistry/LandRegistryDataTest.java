@@ -3,14 +3,15 @@
  */
 package asegroup1.api.models.landregistry;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import asegroup1.api.models.heatmap.Colour;
+import asegroup1.api.models.landregistry.LandRegistryData.AddrConstraint;
+import asegroup1.api.models.landregistry.LandRegistryData.TransConstraint;
+import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
+import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
+import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDate;
@@ -19,16 +20,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import asegroup1.api.models.heatmap.Colour;
-import asegroup1.api.models.landregistry.LandRegistryData.AddrConstraint;
-import asegroup1.api.models.landregistry.LandRegistryData.TransConstraint;
-import asegroup1.api.models.landregistry.LandRegistryQuery.EstateType;
-import asegroup1.api.models.landregistry.LandRegistryQuery.PropertyType;
-import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
-import asegroup1.api.models.landregistry.LandRegistryQuery.TransactionCategory;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Richousrick
@@ -212,21 +204,6 @@ class LandRegistryDataTest {
 		countyNameStr = LandRegistryQueryTestUtils.generateRandomString();
 		lRData.setCounty(countyNameStr);
 		assertStoredStringEqual(Selectable.county, countyNameStr);
-	}
-
-
-	/**
-	 * Test method for
-	 * {@link asegroup1.api.models.landregistry.LandRegistryData#setPostCode(java.lang.String)}.
-	 */
-	@Test
-	public void testSetPostCode() {
-		testSetValidPostCode("bn21 4nv");
-		testSetValidPostCode("b21 4nv");
-		
-		for (String str : new String[] { null, "", "1234", "bn215nv", "bn21 nv", "bn 4nv" }) {
-			testSetInvalidPostCode(str);
-		}
 	}
 
 	/**
