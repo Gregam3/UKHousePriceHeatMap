@@ -9,7 +9,6 @@ import asegroup1.api.models.landregistry.LandRegistryQuery.Selectable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -267,7 +266,7 @@ public class LandRegistryServiceImpl {
 			);
 			List<String> postcodes = postcodeArea.getValue();
 			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));
-			updatedRecords += postCodeCoordinatesDao.updateAveragePrice(newPrices);
+			updatedRecords += landRegistryDao.updateAveragePrice(newPrices);
 			numDone++;
         }
 

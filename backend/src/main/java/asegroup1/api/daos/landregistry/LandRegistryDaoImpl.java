@@ -1,16 +1,5 @@
 package asegroup1.api.daos.landregistry;
 
-import asegroup1.api.daos.DaoImpl;
-import asegroup1.api.models.PostCodeCoordinates;
-import asegroup1.api.models.landregistry.LandRegistryData;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 import asegroup1.api.controllers.LandRegistryController;
 import asegroup1.api.daos.DaoImpl;
 import asegroup1.api.models.PostCodeCoordinates;
@@ -20,8 +9,10 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
