@@ -143,6 +143,7 @@ public class LandRegistryDaoImpl extends DaoImpl<PostCodeCoordinates> {
 
 				if (!coordsToUpdate.getAverageprice()
 						.equals(averagePrice.getValue())) {
+					logger.info("Updating Average price value for postcode " + coordsToUpdate.getPostcode() + " to " +averagePrice.getValue());
 					coordsToUpdate.setAverageprice(averagePrice.getValue());
 					em.merge(coordsToUpdate);
 					updatedRecords++;

@@ -46,6 +46,7 @@ public class LocationController {
 		if (userService.get(location.getUserId()) != null) {
 			try {
 				locationService.create(location);
+				logger.debug("Successfully added location to database", location);
 				return new ResponseEntity<>("Successfully added to database", HttpStatus.OK);
 			} catch (InvalidParameterException e) {
 				logger.error( "Unable to add location to database", e);

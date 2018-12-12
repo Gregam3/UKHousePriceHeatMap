@@ -42,15 +42,24 @@ public class UserController {
 	@GetMapping(value = { "add-user-data/{key}" })
 	public ResponseEntity<String> addUserData(@PathVariable String key) {
 		logger.info("Key: "+key);
+		String message;
 		switch (userService.add(key)) {
 			case 0:
-				return new ResponseEntity<>("User Added", HttpStatus.OK);
+				message = "User Added";
+				logger.info(message);
+				return new ResponseEntity<>(message, HttpStatus.OK);
 			case -1:
-				return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
+				message = "User already exists";
+				logger.info(message);
+				return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
 			case 1:
-				return new ResponseEntity<>("User was not Added", HttpStatus.BAD_REQUEST);
+				message = "User was not Added";
+				logger.info(message);
+				return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
 			default:
-				return new ResponseEntity<>("An unexpected error occured", HttpStatus.BAD_REQUEST);
+				message = "An unexpected error occurred";
+				logger.info(message);
+				return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
 		}
 	}
 

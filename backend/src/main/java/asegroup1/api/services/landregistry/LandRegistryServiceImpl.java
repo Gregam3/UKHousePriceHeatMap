@@ -257,12 +257,14 @@ public class LandRegistryServiceImpl {
 				? Long.MAX_VALUE
 				: Math.round(((System.currentTimeMillis() - startTime) / numDone) * (numAreas - numDone)) / 1000;
 
-			System.out.printf("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
-				"\"" + postcodeArea.getKey() + "\"",
-				(numDone / numAreas) * 100,
-				estTimeLeft / 3600,
-				(estTimeLeft % 3600) / 60,
-				(estTimeLeft % 60)
+			logger.info(
+				String.format("Updating records in %-9s %.3f %% done, %01dH %02dM %02dS remaining\n",
+					"\"" + postcodeArea.getKey() + "\"",
+					(numDone / numAreas) * 100,
+					estTimeLeft / 3600,
+					(estTimeLeft % 3600) / 60,
+					(estTimeLeft % 60)
+				)
 			);
 			List<String> postcodes = postcodeArea.getValue();
 			HashMap<String, Long> newPrices = getAllPostcodePrices(postcodes.toArray(new String[0]));

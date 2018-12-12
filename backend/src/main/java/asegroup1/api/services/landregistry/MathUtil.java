@@ -37,7 +37,7 @@ public class MathUtil {
 			return numbers.stream().map(num -> 0.5)
 					.collect(Collectors.toList());
 		} else {
-			logger.info("Start");
+			logger.debug("Start");
 			List<Double> retNum = rescaleList(standardiseList(numbers));
 
 			retNum = makePositive(retNum);
@@ -62,10 +62,10 @@ public class MathUtil {
 
 		avg /= retNum.size();
 
-		logger.info(name + ":");
-		logger.info("\tMin: " + min);
-		logger.info("\tMax: " + max);
-		logger.info("\tAVG: " + avg);
+		logger.debug(name + ":");
+		logger.debug("\tMin: " + min);
+		logger.debug("\tMax: " + max);
+		logger.debug("\tAVG: " + avg);
 	}
 
 	public static List<Double> standardiseList(List<Double> numbers) {
