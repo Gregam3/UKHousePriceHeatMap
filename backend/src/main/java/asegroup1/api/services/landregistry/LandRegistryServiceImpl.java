@@ -66,7 +66,7 @@ public class LandRegistryServiceImpl {
 
 		JSONObject queryResponse = landRegistryDao.executeSPARQLQuery(queryStr);
 
-		System.out.println("\nResponce: " + queryResponse.toString()
+		System.out.println("\nResponse: " + queryResponse.toString()
 				+ "\n-----------------------------------------------------------------------------------------------------");
 
         ArrayNode transactionListResponse = (ArrayNode) OBJECT_MAPPER.readTree(queryResponse.get("result").toString()).get("results").get("bindings");
