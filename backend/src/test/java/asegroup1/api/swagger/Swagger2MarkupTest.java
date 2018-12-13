@@ -2,7 +2,6 @@ package asegroup1.api.swagger;
 
 import asegroup1.api.Application;
 import asegroup1.api.configs.SwaggerConfig;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,7 +36,7 @@ public class Swagger2MarkupTest {
    *
    * @throws Exception
    */
-  @Test
+//  @Test
   public void generateSwaggerJson() throws Exception {
     String outputDir = "target/swagger/";
     MvcResult mvcResult =
