@@ -1,4 +1,4 @@
-# ASEGroup1
+# Displaying House Price data display for the UK
 The repository for group 1 for the module Advanced Software Engineering/ESRS Project. 
 
 The Goal of the project was to display house price data for the UK.
