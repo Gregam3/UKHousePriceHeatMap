@@ -3,6 +3,9 @@ The repository for group 1 for the module Advanced Software Engineering/ESRS Pro
 
 The Goal of the project was to display house price data for the UK.
 
+Due to tight deadlines the quality of the code still leaves much to be desired
+
+
 We completed this for addresses:
 
 ![alt text](https://user-images.githubusercontent.com/14945621/50002223-49e9be00-ff97-11e8-98a3-4382e9bc37a6.png)
