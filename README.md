@@ -14,7 +14,7 @@ We completed this for addresses:
 
 ![alt text](https://user-images.githubusercontent.com/14945621/50002233-5241f900-ff97-11e8-853a-3432b8766931.png)
 
-When there is sufficient data we display it with a heat map that we built ourself:
+When there is sufficient data we display it with a heat map that we built ourselves:
 
 ### Town: 
 
