@@ -2,7 +2,7 @@
 
 When there is sufficient data it is displayed with a custom built heat map, no libraries used:
 
-### Whole UK:
+### Whole of England:
 
 ![alt text](https://user-images.githubusercontent.com/14945621/50002228-4e15db80-ff97-11e8-9519-be818bbf5d65.png)
 
