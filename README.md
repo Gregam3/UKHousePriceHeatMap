@@ -29,14 +29,6 @@ Search bar that can search by place, location or address:
 ![alt text](https://user-images.githubusercontent.com/14945621/50002242-55d58000-ff97-11e8-9419-b215040af7bd.png)
 
 
-Brief technical details can be found under the Wiki items:
-
-* https://github.com/Gregam3/ASEGroup1/wiki/4.2-Deliverable-Summary
-* https://github.com/Gregam3/ASEGroup1/wiki/5.0-Deliverable-summary
-
-
-
-
 
 
 
