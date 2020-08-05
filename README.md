@@ -1,5 +1,7 @@
 # Displaying House Price data display for the UK
 
+When there is sufficient data it is displayed with a custom built heat map, no libraries used:
+
 ### Whole UK:
 
 ![alt text](https://user-images.githubusercontent.com/14945621/50002228-4e15db80-ff97-11e8-9519-be818bbf5d65.png)
@@ -20,8 +22,6 @@
 ### Aggregating addresses for postcodes:
 
 ![alt text](https://user-images.githubusercontent.com/14945621/50002233-5241f900-ff97-11e8-853a-3432b8766931.png)
-
-When there is sufficient data it is displayed with a custom built heat map, no libraries used:
 
 
 Search bar that can search by place, location or address:
